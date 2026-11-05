@@ -1,10 +1,15 @@
 # NEXT_STEPS
 
 ## Tamamlananlar
-- (henüz yok)
+- 2026-11-05: İlk görev (mimari, entity modeli, roller/görünürlük, mobil yaklaşım, MVP, görev listesi, ilk ekran kabul kriterleri) hazırlandı ve onaylandı → `docs/MIMARI_PLAN.md`
+- 2026-11-05: Görev 1 `altyapi: solution ve katman projeleri` – EntityLayer, DataAccessLayer, BusinessLayer, WebUI (MVC) ve Tests (xUnit) projeleri, net9.0. Referanslar WebUI → BL → DAL → Entity, Tests → BL + DAL. Build ve test yeşil (1 iskelet testi).
 
 ## Sıradaki küçük görev
-- docs/PROJE_TANIMI.md bölüm 7'deki ilk görev: mimari, entity modeli, roller/görünürlük, mobil yaklaşım, MVP kapsamı, görev listesi, ilk ekran kabul kriterleri. **Kod yok, onay beklenecek.**
+- Görev 2 `entity: identity ve temel entityler` – AppUser/AppRole, Enums klasörü, Contact, Property, PropertyPhoto, CustomerRequest, Appointment, Activity, Transaction (alanlar `docs/MIMARI_PLAN.md` bölüm 2'de). EntityLayer'a `Microsoft.AspNetCore.Identity.EntityFrameworkCore` paketi (9.x) eklenecek.
 
 ## Açık kararlar / notlar
-- 
+- Mimari, InstrumentTrade projesindeki 4 katmanlı yapıya göre kuruluyor (Generic Dal/Service, EfXDal, XManager). Farkları `docs/MIMARI_PLAN.md` bölüm 0'da anlatılıyor.
+- .NET 9 ile başlandı. **Görev 6b'de .NET 10 LTS'ye yükseltilecek** (.NET 9'un desteği 10 Kasım 2026'da bitiyor), o zamana kadar .NET 10 SDK kurulmalı.
+- UI: Tabler UI (görev 5'te `wwwroot/lib/tabler` altına eklenecek, şablonun getirdiği varsayılan Bootstrap/Home sayfaları o zaman temizlenecek).
+- `AssemblyMarker.cs` (DAL ve BL) geçici; görev 3'te gerçek sınıflar gelince silinecek.
+- `.gitignore`: fotoğraflar `App_Data/uploads` altında saklanacak, görev 13'te bu klasör eklenecek.
