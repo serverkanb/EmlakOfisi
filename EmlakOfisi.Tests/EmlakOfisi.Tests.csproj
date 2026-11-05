@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\EmlakOfisi.BusinessLayer\EmlakOfisi.BusinessLayer.csproj" />
     <ProjectReference Include="..\EmlakOfisi.DataAccessLayer\EmlakOfisi.DataAccessLayer.csproj" />
+    <ProjectReference Include="..\EmlakOfisi.WebUI\EmlakOfisi.WebUI.csproj" />
   </ItemGroup>
 
 </Project>

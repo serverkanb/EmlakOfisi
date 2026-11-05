@@ -27,6 +27,13 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <form method="post" asp-controller="Login" asp-action="Logout" class="d-flex align-items-center gap-2">
+                            <span class="text-muted small">@User.Identity.Name</span>
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">Çıkış</button>
+                        </form>
+                    }
                 </div>
             </div>
         </nav>

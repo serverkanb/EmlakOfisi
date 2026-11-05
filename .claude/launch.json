@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "webui",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "EmlakOfisi.WebUI", "--launch-profile", "http"],
+      "port": 5197
+    }
+  ]
+}
