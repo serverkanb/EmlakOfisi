@@ -10,8 +10,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <InternalsVisibleTo Include="EmlakOfisi.Tests" />
-  </ItemGroup>
-
 </Project>

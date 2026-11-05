@@ -1,6 +1,19 @@
+using EmlakOfisi.DataAccessLayer.Context;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ---------------------------
+//  DB Context
+// ---------------------------
+// Connection string kodda değil: geliştirmede `dotnet user-secrets`, sunucuda ortam değişkeni
+// (ConnectionStrings__DefaultConnection) ile verilir.
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "ConnectionStrings:DefaultConnection bulunamadı. Geliştirmede: dotnet user-secrets set \"ConnectionStrings:DefaultConnection\" \"...\" --project EmlakOfisi.WebUI");
+
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
