@@ -1,0 +1,71 @@
+@using EmlakOfisi.EntityLayer.Constants
+@model List<AdminUserListItemViewModel>
+@{
+    ViewData["Title"] = "Kullanıcılar";
+}
+
+<div class="d-flex justify-content-end mb-3">
+    <a class="btn btn-primary" asp-action="Create">
+        <i class="ti ti-user-plus me-1"></i> Yeni kullanıcı
+    </a>
+</div>
+
+@* Liste kart içinde satır satır: telefonda da masaüstünde de yatay kaydırma olmadan okunur *@
+<div class="card">
+    <div class="list-group list-group-flush">
+        @foreach (var user in Model)
+        {
+            <div class="list-group-item">
+                <div class="row align-items-center g-2">
+                    <div class="col-12 col-md">
+                        <div class="fw-bold">
+                            @user.FullName
+                            @if (user.IsCurrentUser)
+                            {
+                                <span class="badge bg-blue-lt ms-1">Siz</span>
+                            }
+                        </div>
+                        <div class="text-secondary small">@user.UserName · @user.Email</div>
+                        <div class="mt-1">
+                            @foreach (var role in user.Roles)
+                            {
+                                <span class="badge bg-secondary-lt me-1">@RoleNames.Label(role)</span>
+                            }
+                            @if (user.Roles.Count == 0)
+                            {
+                                <span class="badge bg-warning-lt">Rol yok</span>
+                            }
+                            @if (user.IsActive)
+                            {
+                                <span class="badge bg-green-lt">Aktif</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-red-lt">Pasif</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-auto d-flex gap-2">
+                        <a class="btn btn-outline-secondary" asp-controller="RoleAssign" asp-action="AssignRole" asp-route-id="@user.Id">
+                            <i class="ti ti-key me-1"></i> Roller
+                        </a>
+                        @if (!user.IsCurrentUser)
+                        {
+                            <form method="post" asp-action="ToggleActive" asp-route-id="@user.Id"
+                                  onsubmit="return confirm('@(user.IsActive ? "Kullanıcı pasif yapılsın mı? Giriş yapamayacak." : "Kullanıcı aktif yapılsın mı?")');">
+                                @if (user.IsActive)
+                                {
+                                    <button type="submit" class="btn btn-outline-danger"><i class="ti ti-user-off me-1"></i> Pasif yap</button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="btn btn-outline-success"><i class="ti ti-user-check me-1"></i> Aktif yap</button>
+                                }
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -33,12 +33,11 @@ namespace EmlakOfisi.WebUI.ViewComponents.Layout
             return View(model);
         }
 
+        // Birden çok rolü varsa en yetkilisi gösterilir (RoleNames.All yetki sırasına göre)
         private string GetRoleLabel()
         {
-            if (UserClaimsPrincipal.IsInRole(RoleNames.Admin)) return "Sistem yöneticisi";
-            if (UserClaimsPrincipal.IsInRole(RoleNames.Manager)) return "Ofis yöneticisi";
-            if (UserClaimsPrincipal.IsInRole(RoleNames.Agent)) return "Danışman";
-            return "";
+            var role = RoleNames.All.FirstOrDefault(r => UserClaimsPrincipal.IsInRole(r));
+            return role == null ? "" : RoleNames.Label(role);
         }
 
         private static string FirstChar(string value)

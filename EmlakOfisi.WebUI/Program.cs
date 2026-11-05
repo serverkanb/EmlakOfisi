@@ -1,5 +1,6 @@
 using EmlakOfisi.DataAccessLayer.Context;
 using EmlakOfisi.EntityLayer.Entities;
+using EmlakOfisi.WebUI.Extensions;
 using EmlakOfisi.WebUI.SeedData;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -39,10 +40,11 @@ builder.Services.AddIdentity<AppUser, AppRole>(options =>
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
 })
 .AddEntityFrameworkStores<AppDbContext>()
-.AddDefaultTokenProviders();
+.AddDefaultTokenProviders()
+.AddErrorDescriber<TurkishIdentityErrorDescriber>();
 
-// Pasif yapılan kullanıcının açık oturumu en geç 5 dakikada düşer
-// (pasif yaparken security stamp yenilenecek: görev 6).
+// Pasif yapılan ya da rolü değişen kullanıcının açık oturumu en geç 5 dakikada yenilenir/düşer
+// (AdminUserController ve RoleAssignController security stamp'i yeniliyor).
 builder.Services.Configure<SecurityStampValidatorOptions>(options =>
 {
     options.ValidationInterval = TimeSpan.FromMinutes(5);

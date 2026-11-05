@@ -9,5 +9,14 @@ namespace EmlakOfisi.EntityLayer.Constants
         public const string Agent = "Agent";       // Danışman
 
         public static readonly string[] All = { Admin, Manager, Agent };
+
+        // Ekranda gösterilecek Türkçe ad
+        public static string Label(string role) => role switch
+        {
+            Admin => "Sistem yöneticisi",
+            Manager => "Ofis yöneticisi",
+            Agent => "Danışman",
+            _ => role
+        };
     }
 }

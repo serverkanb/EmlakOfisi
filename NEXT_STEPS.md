@@ -43,12 +43,30 @@
   - Not: Tabler LICENSE dosyaları indirilmedi; MIT lisans notu CSS/JS dosyalarının başında duruyor. İkon CSS'i `.woff`/`.ttf` de istiyor ama sadece `.woff2` indirildi; güncel tarayıcılarda sorun yok.
   - Geliştirme veritabanındaki admin, user-secrets'taki yeni şifreyle yeniden oluşturuldu (kullanıcı onayıyla eski admin satırı silindi).
 
+- 2026-11-06: Görev 6 `yonetim: kullanici ve rol atama`
+  - `AdminUserController` (sadece Admin): kullanıcı listesi, yeni kullanıcı (ViewModel, rol seçimi), aktif/pasif (POST). Pasif yapınca security stamp yenileniyor. Admin kendini pasif yapamıyor.
+  - `RoleAssignController` (sadece Admin): kullanıcı id'si adresten geliyor (TempData yok). Sadece tanımlı 3 rol atanabiliyor. Admin kendi Admin rolünü kaldıramıyor. Rol değişince stamp yenileniyor; kişi kendi rolünü değiştirdiyse oturumu hemen yenileniyor. InstrumentTrade'deki rol ekleme/silme ekranı (RoleController) bilinçli olarak yok, çünkü roller sabit.
+  - `ProfileController.ChangePassword`: herkes kendi şifresini değiştirebiliyor (kullanıcı menüsünde "Şifre değiştir").
+  - Identity hata mesajları Türkçe (`TurkishIdentityErrorDescriber`). İşlem sonrası mesajlar `_Alerts` partial'ı ile gösteriliyor.
+  - Menü: "Kullanıcılar ve roller" aktif. Rol atamaya kullanıcı listesindeki "Roller" butonuyla gidiliyor.
+  - Testler: Tests projesine `Microsoft.EntityFrameworkCore.InMemory 9.0.22` eklendi (planda onaylı). `TestIdentity` yardımcısı, gerçek UserManager/SignInManager'ı bellekteki veritabanıyla çalıştırıyor. Controller, şifre değiştirme ve yetki kuralı testleriyle 36/36 yeşil.
+  - İnceleme düzeltmeleri:
+    - Rol atama ve kaydetme sonuçları kontrol ediliyor, başarısızsa hata mesajı gösteriliyor.
+    - Kullanıcıya en az bir rol seçilmesi zorunlu.
+    - DefaultError ve ConcurrencyFailure mesajları da Türkçe.
+    - Mobilde içerik butonları en az 44px.
+    - Bilerek bırakılan: kullanıcı listesinde her kullanıcı için ayrı rol sorgusu atılıyor (N+1). Kullanıcı sayısı az olduğu için sorun değil.
+  - Uçtan uca (curl, LocalDB) denendi:
+    - Danışman `/AdminUser`, `/RoleAssign` ve POST ToggleActive'e giremiyor (AccessDenied); menüde Yönetim bölümünü görmüyor.
+    - Zayıf şifre Türkçe hata mesajıyla reddediliyor. Yanlış mevcut şifreyle şifre değiştirilemiyor; şifre değişince oturum açık kalıyor, eski şifre geçmiyor, yeni şifre geçiyor.
+    - Rol değiştirme ve geri alma çalışıyor. Admin kendini pasif yapamıyor, kendi Admin rolünü kaldıramıyor. Danışman pasif yapılabiliyor.
+    - Türkçe karakterler doğru kaydediliyor.
+  - Geliştirme veritabanında iki test kullanıcısı kaldı (`deneme.danisman20513`, `deneme.utf8…`), ikisi de **pasif**. Şifreleri kaydedilmedi. Biri betik hatası yüzünden soyadı bozuk ("Dan%FD%FEman"); bu uygulama hatası değil.
+  - Deneme sırasında betik hatası yüzünden admin'e yanlışlıkla Manager rolü eklendi; uygulamanın kendi ekranından geri alındı. Admin'de şu an sadece Admin rolü var.
+
 ## Sıradaki küçük görev
-- Görev 6 `yonetim: kullanici ve rol atama`
-  - `AdminUserController` (`[Authorize(Roles = RoleNames.Admin)]`): kullanıcı listesi, yeni kullanıcı ekleme, aktif/pasif yapma. Pasif yaparken `UpdateSecurityStampAsync` çağrılacak.
-  - `RoleAssignController`: InstrumentTrade'deki gibi, ama TempData yerine userId parametresi kullanılacak.
-  - Menüdeki "Kullanıcılar" ve "Rol atama" satırları aktif edilecek.
-  - Admin'in kendi şifresini değiştirebileceği bir ekran da eklenebilir; seed şifre değişikliği sorunu buradan çıktı.
+- Görev 6b `altyapi: net10 yukseltme`. Önce .NET 10 SDK kurulmalı (kullanıcı kuracak). Kurulmadıysa görev 7'ye geçilir, yükseltme sonraya kalır.
+- Görev 7 `musteri: gorunurluk sorgulari ve testleri`.
 
 ## Açık kararlar / notlar
 - Mimari, InstrumentTrade projesindeki 4 katmanlı yapıya göre kuruluyor (Generic Dal/Service, EfXDal, XManager). Farkları `docs/MIMARI_PLAN.md` bölüm 0'da anlatılıyor.
@@ -64,4 +82,6 @@
 - Giriş akışının otomatik testi yok, şimdilik elle denendi. Uçtan uca HTTP testleri gerekirse `Microsoft.AspNetCore.Mvc.Testing` paketi önerilecek; görünürlük testleri için görev 7'de değerlendirilecek.
 - Seed admin şifresini görmek için: `dotnet user-secrets list --project EmlakOfisi.WebUI`. Kullanıcı adı `admin`.
 - Dikkat: seed sadece kullanıcı **yoksa** oluşturur. user-secrets'taki şifreyi değiştirmek var olan admin'i etkilemez. Yeni şifrenin geçerli olması için ya geliştirme veritabanındaki admin silinir (sonraki açılışta yeniden oluşur) ya da şifre değiştirme ekranı kullanılır (görev 6).
+- Bu bilgisayarda sanal bellek çok dolu (2026-11-06: 17,9 GB'ın 0,4 GB'ı boştu). Derleme "Out of memory" verebiliyor. Önce `dotnet build-server shutdown` denenir. Gerekirse Windows sayfa dosyası büyütülür ya da Visual Studio/Chrome kapatılır (bu kararı kullanıcı verir).
+- LocalDB bazen kendiliğinden duruyor. Uygulama "SQL Server process failed to start" hatasıyla açılmazsa önce `sqllocaldb start MSSQLLocalDB` çalıştırılır.
 - `.gitignore`: fotoğraflar `App_Data/uploads` altında saklanacak, görev 13'te bu klasör eklenecek.

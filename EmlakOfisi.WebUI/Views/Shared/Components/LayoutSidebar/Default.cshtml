@@ -39,18 +39,11 @@
         <li class="nav-item mt-lg-3">
             <span class="nav-link text-uppercase small text-secondary pe-none">Yönetim</span>
         </li>
-        <li class="nav-item">
-            <a class="nav-link disabled" aria-disabled="true" tabindex="-1">
+        @* Rol atama, kullanıcı listesindeki "Roller" butonundan açılır *@
+        <li class="nav-item @Active("AdminUser") @Active("RoleAssign")">
+            <a class="nav-link" asp-controller="AdminUser" asp-action="Index">
                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-user-cog fs-2"></i></span>
-                <span class="nav-link-title">Kullanıcılar</span>
-                <span class="badge badge-sm bg-secondary-lt ms-auto">Yakında</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link disabled" aria-disabled="true" tabindex="-1">
-                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-key fs-2"></i></span>
-                <span class="nav-link-title">Rol atama</span>
-                <span class="badge badge-sm bg-secondary-lt ms-auto">Yakında</span>
+                <span class="nav-link-title">Kullanıcılar ve roller</span>
             </a>
         </li>
     }

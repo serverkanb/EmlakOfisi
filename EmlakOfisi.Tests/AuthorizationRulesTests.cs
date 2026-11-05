@@ -42,6 +42,35 @@ public class AuthorizationRulesTests
         Assert.True(unexpected.Count == 0, "Beklenmeyen [AllowAnonymous]: " + string.Join(", ", unexpected));
     }
 
+    [Theory]
+    [InlineData(typeof(AdminUserController))]
+    [InlineData(typeof(RoleAssignController))]
+    public void AdminControllers_RequireAdminRole(Type controller)
+    {
+        var attribute = controller.GetCustomAttribute<AuthorizeAttribute>();
+
+        Assert.NotNull(attribute);
+        Assert.Equal(RoleNames.Admin, attribute!.Roles);
+    }
+
+    [Fact]
+    public void StateChangingActions_ArePostOnly()
+    {
+        // Durum değiştiren işlemler GET ile çağrılamamalı (link ile tetiklenemesin)
+        var actions = new[]
+        {
+            typeof(AdminUserController).GetMethod(nameof(AdminUserController.ToggleActive))!,
+            typeof(AdminUserController).GetMethods().Single(m => m.Name == nameof(AdminUserController.Create) && m.GetParameters().Length == 1),
+            typeof(RoleAssignController).GetMethods().Single(m => m.Name == nameof(RoleAssignController.AssignRole) && m.GetParameters().Length == 2),
+            typeof(ProfileController).GetMethods().Single(m => m.Name == nameof(ProfileController.ChangePassword) && m.GetParameters().Length == 1),
+        };
+
+        foreach (var action in actions)
+        {
+            Assert.True(action.GetCustomAttribute<HttpPostAttribute>() != null, $"{action.DeclaringType!.Name}.{action.Name} POST olmalı");
+        }
+    }
+
     [Fact]
     public void Logout_IsPostOnly()
     {
