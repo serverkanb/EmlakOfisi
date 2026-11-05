@@ -64,9 +64,30 @@
   - Geliştirme veritabanında iki test kullanıcısı kaldı (`deneme.danisman20513`, `deneme.utf8…`), ikisi de **pasif**. Şifreleri kaydedilmedi. Biri betik hatası yüzünden soyadı bozuk ("Dan%FD%FEman"); bu uygulama hatası değil.
   - Deneme sırasında betik hatası yüzünden admin'e yanlışlıkla Manager rolü eklendi; uygulamanın kendi ekranından geri alındı. Admin'de şu an sadece Admin rolü var.
 
+- 2026-11-06: Görev 7 `musteri: gorunurluk sorgulari ve testleri` (ekran yok, görev 8–9'un temeli)
+  - `EfContactDal`: görünürlük kuralı tek yerde (`Visible()`): `!IsDeleted && (canSeeAll || Public || CreatedByUserId == userId)`. Arama (ad/soyad, "soyad ad", telefon), rol filtresi, sayfalama ve sayım aynı sorguda.
+  - **InstrumentTrade'den fark:** `IContactDal`/`EfContactDal` generic yapıdan türemiyor. Filtresiz `GetList`/`GetById` ve gerçek `Delete` yok. Detay okuması salt okunur (`AsNoTracking`); EF'in takip ettiği okuma sadece servisin güncelleme/silme akışında.
+  - `ContactManager` (`IContactService`, `IGenericService`'ten türemiyor):
+    - `TGetVisibleList` (sayfa boyutu en fazla 100) ve `TGetVisibleById`.
+    - `TCanEdit`/`TCanDelete` ayrı metotlar.
+    - `TCreate`: sahip, tarih ve silinme durumu serviste atanıyor; geçersiz görünürlük değeri "Sadece Ben"e düşüyor.
+    - `TUpdate`/`TSoftDelete`: yetkiyi kendisi kontrol ediyor (NotFound/Forbidden/Success) ve sadece izinli alanları kopyalıyor.
+    - `TCheckDuplicatePhone`: gizli kaydın id'sini vermiyor.
+  - `PhoneNormalizer` (BusinessLayer/Helpers): son 10 hane, 0/90 öneki atılıyor; WhatsApp numarası üretiyor.
+  - `UserAccessExtensions`: `User.GetUserId()`, `User.CanSeeAll()` (Admin veya Manager). `RoleNames.Staff` = "Admin,Manager,Agent".
+  - Testler 112/112 yeşil:
+    - Rol × görünürlük matrisi, id ile erişim (IDOR) ve aramada gizli kayıt sızıntısı.
+    - Rol filtresi, sayfalama, güncelleme/silme yetkisi, korunan alanlar, tekrar telefon kontrolü.
+    - Mimari test: hiçbir controller veya ViewComponent DAL'ı doğrudan almıyor.
+  - `kod-inceleyici` ve `yetki-denetcisi` bulguları kapatıldı. Yetki denetçisinin görev 8–9 için şartları aşağıda.
+
 ## Sıradaki küçük görev
-- Görev 6b `altyapi: net10 yukseltme`. Önce .NET 10 SDK kurulmalı (kullanıcı kuracak). Kurulmadıysa görev 7'ye geçilir, yükseltme sonraya kalır.
-- Görev 7 `musteri: gorunurluk sorgulari ve testleri`.
+- Görev 8 `musteri: liste ve hizli arama` (ilk ekran, kabul kriterleri `docs/MIMARI_PLAN.md` bölüm 7). Yetki denetçisinin şartları:
+  - `ContactController`'a `[Authorize(Roles = RoleNames.Staff)]` konacak. Bir de mimari test eklenecek: "iş modülü controller'larının hepsinde Staff rol şartı var".
+  - Liste ve detay sadece `TGetVisibleList` / `TGetVisibleById` kullanacak. Görünmeyen kayıt → `NotFound()`.
+  - Test verisi seed'i: Manager ve 2 Agent kullanıcısı (şifre user-secrets'tan, sadece Development) ve her biri için "Sadece Ben" ve "Herkese Açık" sahte kişiler.
+- Görev 9'da: tekrar telefon kontrolü sadece Create/Edit POST'ta yapılacak, ayrı bir AJAX/GET ucu açılmayacak. Kayıt görünmüyorsa genel mesaj gösterilecek (ad/sahip bilgisi yok). Formlar ViewModel kullanacak, görünürlüğün varsayılanı "Sadece Ben".
+- Görev 6b (.NET 10 yükseltme) .NET 10 SDK kurulunca yapılacak.
 
 ## Açık kararlar / notlar
 - Mimari, InstrumentTrade projesindeki 4 katmanlı yapıya göre kuruluyor (Generic Dal/Service, EfXDal, XManager). Farkları `docs/MIMARI_PLAN.md` bölüm 0'da anlatılıyor.
@@ -84,4 +105,6 @@
 - Dikkat: seed sadece kullanıcı **yoksa** oluşturur. user-secrets'taki şifreyi değiştirmek var olan admin'i etkilemez. Yeni şifrenin geçerli olması için ya geliştirme veritabanındaki admin silinir (sonraki açılışta yeniden oluşur) ya da şifre değiştirme ekranı kullanılır (görev 6).
 - Bu bilgisayarda sanal bellek çok dolu (2026-11-06: 17,9 GB'ın 0,4 GB'ı boştu). Derleme "Out of memory" verebiliyor. Önce `dotnet build-server shutdown` denenir. Gerekirse Windows sayfa dosyası büyütülür ya da Visual Studio/Chrome kapatılır (bu kararı kullanıcı verir).
 - LocalDB bazen kendiliğinden duruyor. Uygulama "SQL Server process failed to start" hatasıyla açılmazsa önce `sqllocaldb start MSSQLLocalDB` çalıştırılır.
+- **Açık karar: Türkçe arama.** İsim araması büyük/küçük harfe duyarsız, ama bu SQL Server'ın varsayılan (Latin) collation'ından geliyor. "ı/I" ve "i/İ" eşleşmesi bu yüzden Türkçe kurala uymayabilir; örneğin "IŞIK" araması "ışık"ı bulmayabilir. Çözüm: `Contacts.Name`/`Surname` kolonlarına `Turkish_CI_AS` collation vermek. Bu bir migration gerektirir; veri kaybı yok ama indeks yeniden kurulur, o yüzden kullanıcı onayıyla yapılacak. InMemory test veritabanı harfe duyarlı olduğu için bu davranış otomatik testle değil, elle LocalDB'de denenmeli.
+- Derleme bellek yetmezliği yaşarsa: `dotnet build -m:1 -nodeReuse:false -p:UseSharedCompilation=false` daha az bellekle çalışıyor.
 - `.gitignore`: fotoğraflar `App_Data/uploads` altında saklanacak, görev 13'te bu klasör eklenecek.

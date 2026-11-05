@@ -72,6 +72,30 @@ public class AuthorizationRulesTests
     }
 
     [Fact]
+    public void Controllers_DoNotUseDataAccessLayerDirectly()
+    {
+        // Controller'lar veriye sadece servisler (I...Service) üzerinden erişir; Dal'ı doğrudan alan
+        // bir controller görünürlük ve yetki kurallarını atlayabilir.
+        var dalAssembly = typeof(EmlakOfisi.DataAccessLayer.Context.AppDbContext).Assembly;
+
+        // Controller ve ViewComponent'lerin constructor'ları ile public metot (action/Invoke) parametreleri taranır
+        // ([FromServices] ile action'a enjekte edilen Dal da yakalanır).
+        var types = WebAssembly.GetTypes()
+            .Where(t => !t.IsAbstract &&
+                        (typeof(Controller).IsAssignableFrom(t) || typeof(ViewComponent).IsAssignableFrom(t)));
+
+        var offenders = types
+            .SelectMany(t => t.GetConstructors().SelectMany(c => c.GetParameters())
+                .Concat(t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                    .SelectMany(m => m.GetParameters()))
+                .Where(p => p.ParameterType.Assembly == dalAssembly)
+                .Select(p => $"{t.Name}({p.ParameterType.Name})"))
+            .ToList();
+
+        Assert.True(offenders.Count == 0, "Dal/DbContext alan controller/ViewComponent: " + string.Join(", ", offenders));
+    }
+
+    [Fact]
     public void Logout_IsPostOnly()
     {
         var logout = typeof(LoginController).GetMethod(nameof(LoginController.Logout))!;

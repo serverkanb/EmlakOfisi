@@ -10,6 +10,10 @@ namespace EmlakOfisi.EntityLayer.Constants
 
         public static readonly string[] All = { Admin, Manager, Agent };
 
+        // Ofis çalışanı (herhangi bir rolü olan). İş modülü controller'larında kullanılır:
+        // [Authorize(Roles = RoleNames.Staff)] -> rolü kaldırılmış kullanıcı müşteri/portföy göremez.
+        public const string Staff = Admin + "," + Manager + "," + Agent;
+
         // Ekranda gösterilecek Türkçe ad
         public static string Label(string role) => role switch
         {

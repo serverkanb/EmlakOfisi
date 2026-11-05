@@ -1,3 +1,7 @@
+using EmlakOfisi.BusinessLayer.Abstract;
+using EmlakOfisi.BusinessLayer.Concrete;
+using EmlakOfisi.DataAccessLayer.Abstract;
+using EmlakOfisi.DataAccessLayer.Concrete;
 using EmlakOfisi.DataAccessLayer.Context;
 using EmlakOfisi.EntityLayer.Entities;
 using EmlakOfisi.WebUI.Extensions;
@@ -20,6 +24,12 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
         "ConnectionStrings:DefaultConnection bulunamadı. Geliştirmede: dotnet user-secrets set \"ConnectionStrings:DefaultConnection\" \"...\" --project EmlakOfisi.WebUI");
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+
+// ---------------------------
+//  Katmanlı Servisler (InstrumentTrade'deki gibi: Dal + Service çiftleri)
+// ---------------------------
+builder.Services.AddScoped<IContactDal, EfContactDal>();
+builder.Services.AddScoped<IContactService, ContactManager>();
 
 // ---------------------------
 //  Identity Ayarları
