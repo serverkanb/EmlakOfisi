@@ -1,48 +1,65 @@
 @model LoginViewModel
 @{
     ViewData["Title"] = "Giriş";
-    Layout = null; // Giriş sayfası menüsüz, tek başına (Tabler görünümü görev 5'te)
+    Layout = null; // Giriş sayfası menüsüz, tek başına
 }
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1d273b" />
     <title>@ViewData["Title"] - Emlak Ofisi</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/tabler/css/tabler.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/tabler-icons/tabler-icons.min.css" asp-append-version="true" />
 </head>
-<body class="bg-light">
-    <main class="container py-5" style="max-width: 420px;">
-        <h1 class="h4 text-center mb-4">Emlak Ofisi</h1>
+<body class="d-flex flex-column">
+    <div class="page page-center">
+        <div class="container container-tight py-4">
+            <div class="text-center mb-4">
+                <span class="h2"><i class="ti ti-home-2 me-1"></i> Emlak Ofisi</span>
+            </div>
 
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
-                <h2 class="h5 mb-3">Giriş yap</h2>
+            <div class="card card-md">
+                <div class="card-body">
+                    <h2 class="h2 text-center mb-4">Giriş yap</h2>
 
-                <form method="post" asp-controller="Login" asp-action="Index" asp-route-returnUrl="@ViewBag.ReturnUrl">
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2" role="alert"></div>
+                    <form method="post" asp-controller="Login" asp-action="Index" asp-route-returnUrl="@ViewBag.ReturnUrl" autocomplete="on" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-                    <div class="mb-3">
-                        <label asp-for="UserName" class="form-label"></label>
-                        <input asp-for="UserName" class="form-control form-control-lg" autocomplete="username" autocapitalize="none" autofocus />
-                        <span asp-validation-for="UserName" class="text-danger small"></span>
-                    </div>
+                        <div class="mb-3">
+                            <label asp-for="UserName" class="form-label"></label>
+                            <input asp-for="UserName" class="form-control form-control-lg" autocomplete="username" autocapitalize="none" autofocus />
+                            <span asp-validation-for="UserName" class="text-danger small"></span>
+                        </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Password" class="form-label"></label>
-                        <input asp-for="Password" class="form-control form-control-lg" autocomplete="current-password" />
-                        <span asp-validation-for="Password" class="text-danger small"></span>
-                    </div>
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label"></label>
+                            <input asp-for="Password" class="form-control form-control-lg" autocomplete="current-password" />
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
 
-                    <div class="form-check mb-3">
-                        <input asp-for="RememberMe" class="form-check-input" />
-                        <label asp-for="RememberMe" class="form-check-label"></label>
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-check">
+                                <input asp-for="RememberMe" class="form-check-input" />
+                                <span class="form-check-label">Beni hatırla</span>
+                            </label>
+                        </div>
 
-                    <button type="submit" class="btn btn-primary btn-lg w-100">Giriş</button>
-                </form>
+                        <div class="form-footer">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="ti ti-login me-1"></i> Giriş
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center text-secondary mt-3 small">
+                Hesabınız yoksa ofis yöneticinize başvurun.
             </div>
         </div>
-    </main>
+    </div>
+    <script src="~/lib/tabler/js/tabler.min.js" asp-append-version="true"></script>
 </body>
 </html>

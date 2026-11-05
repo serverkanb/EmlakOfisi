@@ -1,0 +1,57 @@
+@using EmlakOfisi.EntityLayer.Constants
+@{
+    var current = ViewContext.RouteData.Values["controller"]?.ToString();
+    string Active(string controller) => current == controller ? "active" : "";
+}
+
+@* Henüz yapılmamış modüller "Yakında" olarak pasif görünür; her görev kendi satırını açar. *@
+<ul class="navbar-nav pt-lg-3">
+    <li class="nav-item @Active("Dashboard")">
+        <a class="nav-link" asp-controller="Dashboard" asp-action="Index">
+            <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-home fs-2"></i></span>
+            <span class="nav-link-title">Ana sayfa</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link disabled" aria-disabled="true" tabindex="-1">
+            <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-users fs-2"></i></span>
+            <span class="nav-link-title">Müşteriler</span>
+            <span class="badge badge-sm bg-secondary-lt ms-auto">Yakında</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link disabled" aria-disabled="true" tabindex="-1">
+            <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-building-community fs-2"></i></span>
+            <span class="nav-link-title">Portföyler</span>
+            <span class="badge badge-sm bg-secondary-lt ms-auto">Yakında</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link disabled" aria-disabled="true" tabindex="-1">
+            <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-calendar-event fs-2"></i></span>
+            <span class="nav-link-title">Randevular</span>
+            <span class="badge badge-sm bg-secondary-lt ms-auto">Yakında</span>
+        </a>
+    </li>
+
+    @if (User.IsInRole(RoleNames.Admin))
+    {
+        <li class="nav-item mt-lg-3">
+            <span class="nav-link text-uppercase small text-secondary pe-none">Yönetim</span>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link disabled" aria-disabled="true" tabindex="-1">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-user-cog fs-2"></i></span>
+                <span class="nav-link-title">Kullanıcılar</span>
+                <span class="badge badge-sm bg-secondary-lt ms-auto">Yakında</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link disabled" aria-disabled="true" tabindex="-1">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-key fs-2"></i></span>
+                <span class="nav-link-title">Rol atama</span>
+                <span class="badge badge-sm bg-secondary-lt ms-auto">Yakında</span>
+            </a>
+        </li>
+    }
+</ul>

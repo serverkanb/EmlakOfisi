@@ -16,7 +16,7 @@ public class AuthorizationRulesTests
     private static readonly HashSet<string> AllowedAnonymous = new()
     {
         "LoginController",              // giriş, çıkış, yetkisiz erişim sayfası
-        "HomeController.Error",         // hata sayfası
+        "ErrorController",              // hata sayfası
     };
 
     [Fact]

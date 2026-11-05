@@ -1,31 +1,60 @@
-html {
-  font-size: 14px;
+/* Emlak Ofisi - Tabler üzerine küçük eklemeler */
+
+/* Mobil alt menü (sadece lg altı) */
+.bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1030;
+    display: flex;
+    background: var(--tblr-bg-surface);
+    border-top: 1px solid var(--tblr-border-color);
+    padding-bottom: env(safe-area-inset-bottom); /* iPhone alt çizgisi */
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+.bottom-nav-item {
+    flex: 1 1 0;
+    min-height: 56px; /* dokunmatik hedef en az 44px */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    font-size: 0.75rem;
+    color: var(--tblr-secondary);
+    text-decoration: none;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.bottom-nav-item i {
+    font-size: 1.5rem;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+.bottom-nav-item.active {
+    color: var(--tblr-primary);
 }
 
-body {
-  margin-bottom: 60px;
+.bottom-nav-item.disabled {
+    opacity: 0.4;
+    pointer-events: none;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+/* Alt menü içeriği kapatmasın */
+@media (max-width: 991.98px) {
+    .page-wrapper {
+        padding-bottom: calc(56px + env(safe-area-inset-bottom));
+    }
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/* Mobilde dokunmatik hedefler */
+@media (max-width: 991.98px) {
+    .navbar-vertical .nav-link {
+        min-height: 44px;
+    }
+
+    .user-menu-toggle {
+        min-width: 44px;
+        min-height: 44px;
+        justify-content: center;
+    }
 }

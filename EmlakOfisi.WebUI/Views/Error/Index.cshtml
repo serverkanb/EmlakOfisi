@@ -1,0 +1,39 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Hata";
+    // Menüsüz sayfa: _Layout veritabanından kullanıcı bilgisi okur; hata veritabanı kaynaklıysa
+    // hata sayfası da patlamasın diye burada layout kullanılmıyor.
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>@ViewData["Title"] - Emlak Ofisi</title>
+    <link rel="stylesheet" href="~/lib/tabler/css/tabler.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/tabler-icons/tabler-icons.min.css" asp-append-version="true" />
+</head>
+<body class="d-flex flex-column">
+    <div class="page page-center">
+        <div class="container container-tight py-4">
+            <div class="empty">
+                <div class="empty-icon"><i class="ti ti-alert-triangle fs-1 text-danger"></i></div>
+                <p class="empty-title">Bir hata oluştu</p>
+                <p class="empty-subtitle text-secondary">
+                    İşleminiz tamamlanamadı. Lütfen tekrar deneyin; sorun devam ederse yöneticinize bildirin.
+                </p>
+                @if (Model.ShowRequestId)
+                {
+                    <p class="text-secondary small">Hata kodu: <code>@Model.RequestId</code></p>
+                }
+                <div class="empty-action">
+                    <a href="~/" class="btn btn-primary">
+                        <i class="ti ti-home me-1"></i> Ana sayfa
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

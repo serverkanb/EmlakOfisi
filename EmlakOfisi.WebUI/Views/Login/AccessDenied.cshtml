@@ -2,8 +2,13 @@
     ViewData["Title"] = "Yetkisiz erişim";
 }
 
-<div class="py-5 text-center">
-    <h1 class="h4">Bu sayfaya erişim yetkiniz yok</h1>
-    <p class="text-muted">Gerekli olduğunu düşünüyorsanız ofis yöneticinizle iletişime geçin.</p>
-    <a class="btn btn-outline-primary" asp-controller="Home" asp-action="Index">Ana sayfaya dön</a>
+<div class="empty">
+    <div class="empty-icon"><i class="ti ti-lock fs-1 text-warning"></i></div>
+    <p class="empty-title">Bu sayfaya erişim yetkiniz yok</p>
+    <p class="empty-subtitle text-secondary">Gerekli olduğunu düşünüyorsanız ofis yöneticinizle iletişime geçin.</p>
+    <div class="empty-action">
+        <a class="btn btn-primary" asp-controller="Dashboard" asp-action="Index">
+            <i class="ti ti-home me-1"></i> Ana sayfa
+        </a>
+    </div>
 </div>

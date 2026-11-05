@@ -32,12 +32,23 @@
     - Giriş ve çıkış çalışıyor.
     - Pasif hesap doğru şifreyle giremiyor ve oturum açılmıyor. Pasif hesapta yanlış şifre, hatalı deneme sayacını artırıyor.
 
+- 2026-11-05: Görev 5 `arayuz: tabler layout ve menuler`
+  - Kullanıcı onayıyla jsdelivr'dan indirildi: Tabler core 1.6.1 (`wwwroot/lib/tabler`, css/js) ve Tabler Icons 3.49.0 (`wwwroot/lib/tabler-icons`, css + woff2). Tabler JS Bootstrap 5'i içerdiği için `lib/bootstrap` silindi.
+  - `_Layout`: masaüstünde koyu sol menü ve üst çubuk; mobilde üstte menü butonu, altta 4 butonlu sabit menü.
+  - ViewComponent'ler: `LayoutSidebar`, `LayoutNavbar` (kullanıcı adı, rol, çıkış) ve `LayoutBottomNav`.
+  - Henüz yapılmamış modüller menüde "Yakında" etiketiyle pasif duruyor. Yönetim bölümü sadece Admin'e görünüyor (bu sadece görüntü; asıl kontrol görev 6'daki controller'larda olacak).
+  - `HomeController` kaldırıldı. Yerine `DashboardController` (varsayılan sayfa) ve `ErrorController` (`/Error`, girişsiz açılabilir) geldi. Login, AccessDenied ve Error sayfaları Tabler görünümünde.
+  - İnceleme düzeltmeleri: Error sayfası menüsüz, kendi başına açılıyor (veritabanına bağlı değil). Mobilde kullanıcı menüsü düğmesi en az 44px. Baş harfler tr-TR kültürüyle büyütülüyor.
+  - 16/16 test yeşil. 375px ve 1280px genişlikte görsel kontrol yapıldı, yatay kaydırma yok.
+  - Not: Tabler LICENSE dosyaları indirilmedi; MIT lisans notu CSS/JS dosyalarının başında duruyor. İkon CSS'i `.woff`/`.ttf` de istiyor ama sadece `.woff2` indirildi; güncel tarayıcılarda sorun yok.
+  - Geliştirme veritabanındaki admin, user-secrets'taki yeni şifreyle yeniden oluşturuldu (kullanıcı onayıyla eski admin satırı silindi).
+
 ## Sıradaki küçük görev
-- Görev 5 `arayuz: tabler layout ve menuler`
-  - Tabler UI statik dosyaları `wwwroot/lib/tabler` altına eklenecek.
-  - `_Layout` ile `LayoutSidebar` ve `LayoutNavbar` ViewComponent'leri, mobil alt menü.
-  - Boş Dashboard, Tabler görünümlü Login sayfası.
-  - Şablonun getirdiği Home/Privacy sayfaları ve kullanılmayan `wwwroot/lib` dosyaları temizlenecek.
+- Görev 6 `yonetim: kullanici ve rol atama`
+  - `AdminUserController` (`[Authorize(Roles = RoleNames.Admin)]`): kullanıcı listesi, yeni kullanıcı ekleme, aktif/pasif yapma. Pasif yaparken `UpdateSecurityStampAsync` çağrılacak.
+  - `RoleAssignController`: InstrumentTrade'deki gibi, ama TempData yerine userId parametresi kullanılacak.
+  - Menüdeki "Kullanıcılar" ve "Rol atama" satırları aktif edilecek.
+  - Admin'in kendi şifresini değiştirebileceği bir ekran da eklenebilir; seed şifre değişikliği sorunu buradan çıktı.
 
 ## Açık kararlar / notlar
 - Mimari, InstrumentTrade projesindeki 4 katmanlı yapıya göre kuruluyor (Generic Dal/Service, EfXDal, XManager). Farkları `docs/MIMARI_PLAN.md` bölüm 0'da anlatılıyor.
@@ -51,5 +62,6 @@
 - Cookie `Secure` olarak işaretli. Bu yüzden telefondan LAN IP'si üzerinden http ile girilirse giriş yapılamaz. Telefonda deneme için HTTPS gerekiyor.
 - Production'da ilk admin kullanıcı nasıl oluşturulacak, henüz kararı verilmedi (seed sadece Development'ta çalışıyor). Yayına almadan önce karar verilmeli.
 - Giriş akışının otomatik testi yok, şimdilik elle denendi. Uçtan uca HTTP testleri gerekirse `Microsoft.AspNetCore.Mvc.Testing` paketi önerilecek; görünürlük testleri için görev 7'de değerlendirilecek.
-- Seed admin şifresini görmek için: `dotnet user-secrets list --project EmlakOfisi.WebUI`. Kullanıcı adı `admin`. Şifre rastgele üretildi.
+- Seed admin şifresini görmek için: `dotnet user-secrets list --project EmlakOfisi.WebUI`. Kullanıcı adı `admin`.
+- Dikkat: seed sadece kullanıcı **yoksa** oluşturur. user-secrets'taki şifreyi değiştirmek var olan admin'i etkilemez. Yeni şifrenin geçerli olması için ya geliştirme veritabanındaki admin silinir (sonraki açılışta yeniden oluşur) ya da şifre değiştirme ekranı kullanılır (görev 6).
 - `.gitignore`: fotoğraflar `App_Data/uploads` altında saklanacak, görev 13'te bu klasör eklenecek.

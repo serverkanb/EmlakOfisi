@@ -1,56 +1,65 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - EmlakOfisi.WebUI</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1d273b" />
+    <title>@ViewData["Title"] - Emlak Ofisi</title>
+    <link rel="stylesheet" href="~/lib/tabler/css/tabler.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/tabler-icons/tabler-icons.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/EmlakOfisi.WebUI.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+    <div class="page">
+        <!-- Sol menü (mobilde üst çubuk + açılır menü) -->
+        <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">EmlakOfisi.WebUI</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu"
+                        aria-controls="sidebar-menu" aria-expanded="false" aria-label="Menüyü aç/kapat">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                    @if (User.Identity?.IsAuthenticated == true)
-                    {
-                        <form method="post" asp-controller="Login" asp-action="Logout" class="d-flex align-items-center gap-2">
-                            <span class="text-muted small">@User.Identity.Name</span>
-                            <button type="submit" class="btn btn-sm btn-outline-secondary">Çıkış</button>
-                        </form>
-                    }
+                <div class="navbar-brand navbar-brand-autodark">
+                    <a asp-controller="Dashboard" asp-action="Index" class="text-reset text-decoration-none">
+                        <i class="ti ti-home-2 me-1"></i> Emlak Ofisi
+                    </a>
+                </div>
+                <div class="navbar-nav flex-row d-lg-none">
+                    @await Component.InvokeAsync("LayoutNavbar")
+                </div>
+                <div class="collapse navbar-collapse" id="sidebar-menu">
+                    @await Component.InvokeAsync("LayoutSidebar")
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        </aside>
+
+        <div class="page-wrapper">
+            <!-- Masaüstü üst çubuk -->
+            <header class="navbar navbar-expand-md d-none d-lg-flex d-print-none">
+                <div class="container-xl">
+                    <div class="navbar-nav flex-row order-md-last ms-auto">
+                        @await Component.InvokeAsync("LayoutNavbar")
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-header d-print-none">
+                <div class="container-xl">
+                    <h2 class="page-title">@ViewData["Title"]</h2>
+                </div>
+            </div>
+
+            <div class="page-body">
+                <div class="container-xl">
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - EmlakOfisi.WebUI - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+    @await Component.InvokeAsync("LayoutBottomNav")
+
+    <script src="~/lib/tabler/js/tabler.min.js" asp-append-version="true"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

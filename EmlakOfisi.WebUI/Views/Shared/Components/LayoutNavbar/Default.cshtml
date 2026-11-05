@@ -1,0 +1,21 @@
+@model LayoutUserViewModel
+
+<div class="nav-item dropdown">
+    <a href="#" class="nav-link d-flex align-items-center lh-1 text-reset p-0 user-menu-toggle" data-bs-toggle="dropdown" aria-label="Kullanıcı menüsü">
+        <span class="avatar avatar-sm bg-primary-lt">@Model.Initials</span>
+        <div class="d-none d-xl-block ps-2">
+            <div>@Model.FullName</div>
+            <div class="mt-1 small text-secondary">@Model.RoleLabel</div>
+        </div>
+    </a>
+    <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+        <div class="dropdown-header d-xl-none">
+            @Model.FullName<br /><span class="text-secondary">@Model.RoleLabel</span>
+        </div>
+        <form method="post" asp-controller="Login" asp-action="Logout">
+            <button type="submit" class="dropdown-item">
+                <i class="ti ti-logout me-2"></i> Çıkış
+            </button>
+        </form>
+    </div>
+</div>
