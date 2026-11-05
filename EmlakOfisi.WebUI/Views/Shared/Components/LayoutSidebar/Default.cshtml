@@ -2,6 +2,8 @@
 @{
     var current = ViewContext.RouteData.Values["controller"]?.ToString();
     string Active(string controller) => current == controller ? "active" : "";
+    // İş modülleri sadece ofis çalışanlarına (rolü olanlara) gösterilir; asıl kontrol controller'larda
+    var isStaff = RoleNames.All.Any(r => User.IsInRole(r));
 }
 
 @* Henüz yapılmamış modüller "Yakında" olarak pasif görünür; her görev kendi satırını açar. *@
@@ -12,13 +14,15 @@
             <span class="nav-link-title">Ana sayfa</span>
         </a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link disabled" aria-disabled="true" tabindex="-1">
-            <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-users fs-2"></i></span>
-            <span class="nav-link-title">Müşteriler</span>
-            <span class="badge badge-sm bg-secondary-lt ms-auto">Yakında</span>
-        </a>
-    </li>
+    @if (isStaff)
+    {
+        <li class="nav-item @Active("Contact")">
+            <a class="nav-link" asp-controller="Contact" asp-action="Index">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-users fs-2"></i></span>
+                <span class="nav-link-title">Müşteriler</span>
+            </a>
+        </li>
+    }
     <li class="nav-item">
         <a class="nav-link disabled" aria-disabled="true" tabindex="-1">
             <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-building-community fs-2"></i></span>

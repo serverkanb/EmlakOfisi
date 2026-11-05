@@ -267,7 +267,8 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .UseCollation("Turkish_CI_AS");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(2000)
@@ -290,7 +291,8 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                     b.Property<string>("Surname")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .UseCollation("Turkish_CI_AS");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");

@@ -115,7 +115,7 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 // ---------------------------
-//  Rol ve admin seed
+//  Rol ve admin seed + (sadece Development) test verisi
 // ---------------------------
 using (var scope = app.Services.CreateScope())
 {
@@ -124,6 +124,9 @@ using (var scope = app.Services.CreateScope())
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
     await IdentityInitializer.SeedRolesAndUsersAsync(userManager, roleManager, app.Configuration, app.Environment, logger);
+
+    var contactService = scope.ServiceProvider.GetRequiredService<IContactService>();
+    await TestDataSeeder.SeedAsync(userManager, contactService, app.Configuration, app.Environment, logger);
 }
 
 app.Run();

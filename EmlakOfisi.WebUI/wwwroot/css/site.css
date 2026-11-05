@@ -39,6 +39,32 @@
     pointer-events: none;
 }
 
+/* Müşteri listesi: Ara / WhatsApp ve filtre butonları dokunmatik için büyük */
+.contact-action {
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Masaüstü için; mobilde aşağıdaki ".page-body .btn { min-height: 44px }" kuralı uygulanır */
+.contact-filter {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Mobilde arama kutusu kaydırırken üstte kalsın */
+@media (max-width: 767.98px) {
+    .contact-search {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: var(--tblr-body-bg);
+        padding: 0.5rem 0;
+    }
+}
+
 /* Alt menü içeriği kapatmasın */
 @media (max-width: 991.98px) {
     .page-wrapper {

@@ -81,12 +81,33 @@
     - Mimari test: hiçbir controller veya ViewComponent DAL'ı doğrudan almıyor.
   - `kod-inceleyici` ve `yetki-denetcisi` bulguları kapatıldı. Yetki denetçisinin görev 8–9 için şartları aşağıda.
 
+- 2026-11-06: Görev 8 `musteri: liste ve hizli arama` (ilk ekran, `docs/MIMARI_PLAN.md` bölüm 7'deki kabul kriterlerinin hepsi sağlandı)
+  - **Türkçe arama:** `Contacts.Name`/`Surname` kolonları `Turkish_CI_AS`. `ContactTurkishCollation` migration'ı kullanıcı onayıyla uygulandı (indeks kaldırılıp yeniden kuruldu, veri kaybı yok). "IŞIK"/"ışık" ve "İNCİ"/"inci" aynı sonucu veriyor.
+  - `ContactController` (`[Authorize(Roles = RoleNames.Staff)]`):
+    - `Index`: arama, rol filtresi, sayfa başına 20 kayıt. Olmayan bir sayfa istenirse son sayfaya yönlendiriyor; sayfa numarasına üst sınır var.
+    - `Detail`: salt okunur; görünmeyen kayıt → 404.
+  - Görünüm: mobilde kart (Ara/WhatsApp ≥44px, arama kutusu kaydırırken üstte kalıyor), md ve üstünde tablo. Rozetler `_ContactBadges` partial'ında. Ara/WhatsApp linkleri sadece geçerli 10 haneli numaradan kuruluyor, numara geçersizse buton gösterilmiyor.
+  - Menü: "Müşteriler" sol menüde ve alt menüde aktif, sadece rolü olan kullanıcılara görünüyor.
+  - `TestDataSeeder` (sadece Development, şifre `Seed:TestUserPassword` user-secrets'ta):
+    - Kullanıcılar: `mudur1` (Manager), `danisman1` ve `danisman2` (Agent).
+    - 25 sahte kişi. Numaralar atanmamış `0100` önekiyle; ilk sürümdeki gerçek operatör öneki `0555` geliştirme veritabanında da `0100`'e çevrildi.
+  - Testler 128/128 yeşil:
+    - Controller testleri: görünürlük, 404, arama sızıntısı, rol filtresi, telefon araması, sayfalama, taşma, geçersiz numara.
+    - Mimari testler: iş controller'larında Staff/Admin şartı var; `ControllerBase`'ten türeyenler de taranıyor.
+    - `xunit.runner.json` ile testler sırayla çalışıyor (bellek az).
+  - Uçtan uca (curl + tarayıcı) denendi:
+    - danisman1 18, danisman2 17, mudur1/admin 25 kayıt görüyor (seed'le birebir). Başka danışmanın gizli kaydı aramada 0 sonuç veriyor, Detail'de 404 dönüyor.
+    - 375px'te yatay kaydırma yok, 1280px'te tablo düzgün.
+  - `kod-inceleyici` ve `yetki-denetcisi` bulguları kapatıldı.
+
 ## Sıradaki küçük görev
-- Görev 8 `musteri: liste ve hizli arama` (ilk ekran, kabul kriterleri `docs/MIMARI_PLAN.md` bölüm 7). Yetki denetçisinin şartları:
-  - `ContactController`'a `[Authorize(Roles = RoleNames.Staff)]` konacak. Bir de mimari test eklenecek: "iş modülü controller'larının hepsinde Staff rol şartı var".
-  - Liste ve detay sadece `TGetVisibleList` / `TGetVisibleById` kullanacak. Görünmeyen kayıt → `NotFound()`.
-  - Test verisi seed'i: Manager ve 2 Agent kullanıcısı (şifre user-secrets'tan, sadece Development) ve her biri için "Sadece Ben" ve "Herkese Açık" sahte kişiler.
-- Görev 9'da: tekrar telefon kontrolü sadece Create/Edit POST'ta yapılacak, ayrı bir AJAX/GET ucu açılmayacak. Kayıt görünmüyorsa genel mesaj gösterilecek (ad/sahip bilgisi yok). Formlar ViewModel kullanacak, görünürlüğün varsayılanı "Sadece Ben".
+- Görev 9 `musteri: ekle, guncelle, detay, sil`. Yetki denetçisinin şartları:
+  - Edit/Delete POST'ları `TUpdate`/`TSoftDelete` sonucuna göre 404/403 dönecek. Butonu gizlemek tek başına yetmez; detayda `CanEdit`/`CanDelete` sadece butonları göstermek için kullanılacak.
+  - Formlar ViewModel kullanacak, `CreatedByUserId` bağlanmayacak, görünürlüğün varsayılanı "Sadece Ben" olacak.
+  - E-posta alanında `[EmailAddress]` doğrulaması olacak (`mailto:` linkine parametre eklenmesin).
+  - Tekrar telefon kontrolü sadece Create/Edit POST'ta yapılacak, ayrı bir AJAX/GET ucu açılmayacak. Kayıt görünmüyorsa genel mesaj gösterilecek (ad/sahip bilgisi yok).
+  - Silme onayı için SweetAlert2 (InstrumentTrade'deki gibi, CDN) kullanılabilir; form POST + antiforgery olacak.
+- Görev 15'te (Dashboard sayıları): `DashboardController`'a Staff şartı konacak ve sayılar sadece görünürlük filtreli sorgularla (`CountVisible`) alınacak.
 - Görev 6b (.NET 10 yükseltme) .NET 10 SDK kurulunca yapılacak.
 
 ## Açık kararlar / notlar
@@ -105,6 +126,9 @@
 - Dikkat: seed sadece kullanıcı **yoksa** oluşturur. user-secrets'taki şifreyi değiştirmek var olan admin'i etkilemez. Yeni şifrenin geçerli olması için ya geliştirme veritabanındaki admin silinir (sonraki açılışta yeniden oluşur) ya da şifre değiştirme ekranı kullanılır (görev 6).
 - Bu bilgisayarda sanal bellek çok dolu (2026-11-06: 17,9 GB'ın 0,4 GB'ı boştu). Derleme "Out of memory" verebiliyor. Önce `dotnet build-server shutdown` denenir. Gerekirse Windows sayfa dosyası büyütülür ya da Visual Studio/Chrome kapatılır (bu kararı kullanıcı verir).
 - LocalDB bazen kendiliğinden duruyor. Uygulama "SQL Server process failed to start" hatasıyla açılmazsa önce `sqllocaldb start MSSQLLocalDB` çalıştırılır.
-- **Açık karar: Türkçe arama.** İsim araması büyük/küçük harfe duyarsız, ama bu SQL Server'ın varsayılan (Latin) collation'ından geliyor. "ı/I" ve "i/İ" eşleşmesi bu yüzden Türkçe kurala uymayabilir; örneğin "IŞIK" araması "ışık"ı bulmayabilir. Çözüm: `Contacts.Name`/`Surname` kolonlarına `Turkish_CI_AS` collation vermek. Bu bir migration gerektirir; veri kaybı yok ama indeks yeniden kurulur, o yüzden kullanıcı onayıyla yapılacak. InMemory test veritabanı harfe duyarlı olduğu için bu davranış otomatik testle değil, elle LocalDB'de denenmeli.
+- Türkçe arama `Turkish_CI_AS` collation'ıyla çözüldü (görev 8). InMemory test veritabanı collation'ı yok saydığı için büyük/küçük harf davranışı otomatik testle değil, LocalDB'de elle doğrulanıyor.
+- Test kullanıcılarının şifresi (`mudur1`, `danisman1`, `danisman2`): `dotnet user-secrets list --project EmlakOfisi.WebUI` → `Seed:TestUserPassword`.
+- Sahte telefon numaraları için **gerçek operatör önekleri (05xx) kullanılmaz**. Seed `0100` önekini kullanıyor (`TestDataSeeder.FakePhone`).
+- Bellek açıldıktan sonra (2026-11-06, kullanıcı programları kapattı) sanal bellekte 7,8 GB boş yer vardı. Sayfa dosyası hâlâ 2 GB'a sabit; sorun tekrar ederse büyütülmesi önerilir.
 - Derleme bellek yetmezliği yaşarsa: `dotnet build -m:1 -nodeReuse:false -p:UseSharedCompilation=false` daha az bellekle çalışıyor.
 - `.gitignore`: fotoğraflar `App_Data/uploads` altında saklanacak, görev 13'te bu klasör eklenecek.

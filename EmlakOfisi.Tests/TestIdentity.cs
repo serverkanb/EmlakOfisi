@@ -22,6 +22,7 @@ public sealed class TestIdentity : IDisposable
 
     public UserManager<AppUser> UserManager { get; }
     public SignInManager<AppUser> SignInManager { get; }
+    public AppDbContext Db => _scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
     private TestIdentity()
     {

@@ -1,0 +1,123 @@
+@using EmlakOfisi.EntityLayer.Enums
+@model ContactListViewModel
+@{
+    ViewData["Title"] = "Müşteriler";
+
+    // Rol filtresi seçenekleri (null = tümü)
+    var roles = new (ContactRole? Value, string Label)[]
+    {
+        (null, "Tümü"),
+        (ContactRole.Buyer, "Alıcı"),
+        (ContactRole.Seller, "Satıcı"),
+        (ContactRole.Tenant, "Kiracı"),
+        (ContactRole.Landlord, "Mülk sahibi")
+    };
+}
+
+@* Hızlı arama: sunucuda, görünürlük kuralıyla aynı sorguda yapılır *@
+<form method="get" asp-action="Index" class="contact-search mb-3" role="search">
+    @if (Model.Role != null)
+    {
+        <input type="hidden" name="role" value="@Model.Role" />
+    }
+    <div class="input-group input-group-lg">
+        <span class="input-group-text"><i class="ti ti-search"></i></span>
+        <input type="search" name="q" value="@Model.Search" class="form-control"
+               placeholder="Ad, soyad veya telefon" aria-label="Müşteri ara" autocomplete="off" />
+        <button type="submit" class="btn btn-primary">Ara</button>
+    </div>
+</form>
+
+<div class="d-flex flex-wrap gap-2 mb-3" aria-label="Rol filtresi">
+    @foreach (var r in roles)
+    {
+        var active = Model.Role == r.Value;
+        <a asp-action="Index" asp-route-q="@Model.Search" asp-route-role="@r.Value"
+           class="btn btn-sm @(active ? "btn-primary" : "btn-outline-secondary") contact-filter">@r.Label</a>
+    }
+</div>
+
+<div class="text-secondary small mb-2">
+    @Model.TotalCount kayıt
+    @if (!string.IsNullOrWhiteSpace(Model.Search))
+    {
+        <span>· "@Model.Search" araması</span>
+    }
+</div>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="empty">
+        <div class="empty-icon"><i class="ti ti-users fs-1"></i></div>
+        <p class="empty-title">Müşteri bulunamadı</p>
+        <p class="empty-subtitle text-secondary">Aramayı veya filtreyi değiştirip tekrar deneyin.</p>
+    </div>
+}
+else
+{
+    @* Mobil: kartlar *@
+    <div class="d-md-none">
+        @foreach (var item in Model.Items)
+        {
+            <partial name="_ContactCard" model="item" />
+        }
+    </div>
+
+    @* Tablet/masaüstü: tablo *@
+    <div class="card d-none d-md-block">
+        <div class="table-responsive">
+            <table class="table table-vcenter card-table">
+                <thead>
+                    <tr>
+                        <th>Ad soyad</th>
+                        <th>Telefon</th>
+                        <th>Rol / görünürlük</th>
+                        <th class="w-1"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td><a asp-action="Detail" asp-route-id="@item.ContactId" class="fw-bold">@item.FullName</a></td>
+                            <td class="text-nowrap">@item.Phone</td>
+                            <td><div class="d-flex flex-wrap gap-1"><partial name="_ContactBadges" model="item" /></div></td>
+                            <td class="text-nowrap">
+                                @if (item.HasPhoneLinks)
+                                {
+                                    <a href="@item.TelLink" class="btn btn-outline-primary btn-icon" title="Ara" aria-label="Ara"><i class="ti ti-phone"></i></a>
+                                    <a href="@item.WhatsAppLink" target="_blank" rel="noopener" class="btn btn-outline-success btn-icon" title="WhatsApp" aria-label="WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Sayfalar">
+            @if (Model.Page > 1)
+            {
+                <a asp-action="Index" asp-route-q="@Model.Search" asp-route-role="@Model.Role" asp-route-page="@(Model.Page - 1)"
+                   class="btn btn-outline-secondary"><i class="ti ti-chevron-left me-1"></i> Önceki</a>
+            }
+            else
+            {
+                <span></span>
+            }
+            <span class="text-secondary">Sayfa @Model.Page / @Model.TotalPages</span>
+            @if (Model.Page < Model.TotalPages)
+            {
+                <a asp-action="Index" asp-route-q="@Model.Search" asp-route-role="@Model.Role" asp-route-page="@(Model.Page + 1)"
+                   class="btn btn-outline-secondary">Sonraki <i class="ti ti-chevron-right ms-1"></i></a>
+            }
+            else
+            {
+                <span></span>
+            }
+        </nav>
+    }
+}

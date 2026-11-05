@@ -1,6 +1,8 @@
+@using EmlakOfisi.EntityLayer.Constants
 @{
     var current = ViewContext.RouteData.Values["controller"]?.ToString();
     string Active(string controller) => current == controller ? "active" : "";
+    var isStaff = RoleNames.All.Any(r => User.IsInRole(r));
 }
 
 @* Mobil alt menü: sadece lg altı ekranlarda görünür. Hazır olmayan modüller pasif. *@
@@ -8,9 +10,18 @@
     <a class="bottom-nav-item @Active("Dashboard")" asp-controller="Dashboard" asp-action="Index">
         <i class="ti ti-home"></i><span>Ana sayfa</span>
     </a>
-    <span class="bottom-nav-item disabled" aria-disabled="true">
-        <i class="ti ti-users"></i><span>Müşteri</span>
-    </span>
+    @if (isStaff)
+    {
+        <a class="bottom-nav-item @Active("Contact")" asp-controller="Contact" asp-action="Index">
+            <i class="ti ti-users"></i><span>Müşteri</span>
+        </a>
+    }
+    else
+    {
+        <span class="bottom-nav-item disabled" aria-disabled="true">
+            <i class="ti ti-users"></i><span>Müşteri</span>
+        </span>
+    }
     <span class="bottom-nav-item disabled" aria-disabled="true">
         <i class="ti ti-building-community"></i><span>Portföy</span>
     </span>

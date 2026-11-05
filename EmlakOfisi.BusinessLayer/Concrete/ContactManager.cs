@@ -29,7 +29,7 @@ namespace EmlakOfisi.BusinessLayer.Concrete
                     nameSearch = search.Trim();
             }
 
-            if (page < 1) page = 1;
+            page = Math.Clamp(page, 1, 100_000); // çok büyük değer (page-1)*pageSize hesabını taşırmasın
             pageSize = Math.Clamp(pageSize, 1, 100); // adresten çok büyük değer gelirse tüm tablo çekilmesin
 
             var items = _contactDal.GetVisibleList(userId, canSeeAll, nameSearch, phoneSearch, role,

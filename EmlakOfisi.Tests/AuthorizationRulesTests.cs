@@ -23,7 +23,7 @@ public class AuthorizationRulesTests
     public void OnlyKnownEndpoints_AllowAnonymous()
     {
         var controllers = WebAssembly.GetTypes()
-            .Where(t => typeof(Controller).IsAssignableFrom(t) && !t.IsAbstract);
+            .Where(t => typeof(ControllerBase).IsAssignableFrom(t) && !t.IsAbstract);
 
         var anonymous = new List<string>();
 
@@ -51,6 +51,35 @@ public class AuthorizationRulesTests
 
         Assert.NotNull(attribute);
         Assert.Equal(RoleNames.Admin, attribute!.Roles);
+    }
+
+    // Rol şartı olmayabilecek (sadece giriş yeterli) controller'lar. Bunların dışındaki her controller
+    // ya Admin ya da Staff (ofis çalışanı) rolü istemeli; rolsüz kullanıcı iş verisine erişemesin.
+    private static readonly HashSet<string> NoRoleRequired = new()
+    {
+        "LoginController", "ErrorController", "DashboardController", "ProfileController"
+    };
+
+    [Fact]
+    public void BusinessControllers_RequireStaffOrAdminRole()
+    {
+        var missing = WebAssembly.GetTypes()
+            .Where(t => typeof(ControllerBase).IsAssignableFrom(t) && !t.IsAbstract && !NoRoleRequired.Contains(t.Name))
+            .Where(t =>
+            {
+                var roles = t.GetCustomAttribute<AuthorizeAttribute>()?.Roles;
+                return roles != RoleNames.Staff && roles != RoleNames.Admin;
+            })
+            .Select(t => t.Name)
+            .ToList();
+
+        Assert.True(missing.Count == 0, "Rol şartı olmayan controller: " + string.Join(", ", missing));
+    }
+
+    [Fact]
+    public void ContactController_RequiresStaffRole()
+    {
+        Assert.Equal(RoleNames.Staff, typeof(ContactController).GetCustomAttribute<AuthorizeAttribute>()!.Roles);
     }
 
     [Fact]
@@ -82,7 +111,7 @@ public class AuthorizationRulesTests
         // ([FromServices] ile action'a enjekte edilen Dal da yakalanır).
         var types = WebAssembly.GetTypes()
             .Where(t => !t.IsAbstract &&
-                        (typeof(Controller).IsAssignableFrom(t) || typeof(ViewComponent).IsAssignableFrom(t)));
+                        (typeof(ControllerBase).IsAssignableFrom(t) || typeof(ViewComponent).IsAssignableFrom(t)));
 
         var offenders = types
             .SelectMany(t => t.GetConstructors().SelectMany(c => c.GetParameters())

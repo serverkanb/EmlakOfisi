@@ -32,7 +32,14 @@ namespace EmlakOfisi.DataAccessLayer.Context
                     foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
                 }
             }
+
+            // Türkçe arama: ad/soyad karşılaştırması Türkçe kurallarla ve büyük/küçük harfe duyarsız
+            // ("IŞIK" araması "Işık" ve "ışık"ı da bulsun). InMemory test veritabanı bunu yok sayar.
+            modelBuilder.Entity<Contact>().Property(c => c.Name).UseCollation(TurkishCollation);
+            modelBuilder.Entity<Contact>().Property(c => c.Surname).UseCollation(TurkishCollation);
         }
+
+        public const string TurkishCollation = "Turkish_CI_AS";
 
         public DbSet<Contact> Contacts { get; set; }
         public DbSet<Property> Properties { get; set; }

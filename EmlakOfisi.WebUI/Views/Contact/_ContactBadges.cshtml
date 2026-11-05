@@ -1,0 +1,17 @@
+@using EmlakOfisi.EntityLayer.Enums
+@model ContactListItemViewModel
+
+@* Rol ve görünürlük rozetleri (liste, kart ve detayda ortak) *@
+@if (Model.IsBuyer) { <span class="badge bg-blue-lt">Alıcı</span> }
+@if (Model.IsSeller) { <span class="badge bg-green-lt">Satıcı</span> }
+@if (Model.IsTenant) { <span class="badge bg-orange-lt">Kiracı</span> }
+@if (Model.IsLandlord) { <span class="badge bg-purple-lt">Mülk sahibi</span> }
+@if (Model.Visibility == Visibility.OnlyMe)
+{
+    <span class="badge bg-secondary-lt" title="Sadece kaydı oluşturan ve yöneticiler görür"><i class="ti ti-lock"></i> Sadece Ben</span>
+}
+else
+{
+    <span class="badge bg-cyan-lt" title="Ofisteki herkes görür"><i class="ti ti-world"></i> Herkese Açık</span>
+}
+@if (Model.IsMine) { <span class="badge bg-yellow-lt">Benim</span> }

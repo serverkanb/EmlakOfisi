@@ -1,0 +1,69 @@
+@model ContactDetailViewModel
+@{
+    ViewData["Title"] = Model.Summary.FullName;
+}
+
+@* Salt okunur detay. Düzenleme, silme ve görüşme geçmişi görev 9-10'da eklenecek. *@
+<div class="row g-3" style="max-width: 900px;">
+    <div class="col-12">
+        <div class="d-flex flex-wrap gap-1 mb-2">
+            <partial name="_ContactBadges" model="Model.Summary" />
+        </div>
+        @if (Model.Summary.HasPhoneLinks)
+        {
+            <div class="d-flex gap-2">
+                <a href="@Model.Summary.TelLink" class="btn btn-primary flex-fill flex-md-grow-0 contact-action">
+                    <i class="ti ti-phone me-1"></i> Ara
+                </a>
+                <a href="@Model.Summary.WhatsAppLink" target="_blank" rel="noopener" class="btn btn-success flex-fill flex-md-grow-0 contact-action">
+                    <i class="ti ti-brand-whatsapp me-1"></i> WhatsApp
+                </a>
+            </div>
+        }
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-5 col-md-3">Telefon</dt>
+                    <dd class="col-7 col-md-9">@Model.Summary.Phone</dd>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Phone2))
+                    {
+                        <dt class="col-5 col-md-3">2. telefon</dt>
+                        <dd class="col-7 col-md-9">@Model.Phone2</dd>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Email))
+                    {
+                        <dt class="col-5 col-md-3">E-posta</dt>
+                        <dd class="col-7 col-md-9 text-break"><a href="mailto:@Model.Email">@Model.Email</a></dd>
+                    }
+
+                    <dt class="col-5 col-md-3">Kayıt tarihi</dt>
+                    <dd class="col-7 col-md-9">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+
+                    @if (Model.UpdatedAt != null)
+                    {
+                        <dt class="col-5 col-md-3">Güncelleme</dt>
+                        <dd class="col-7 col-md-9">@Model.UpdatedAt.Value.ToString("dd.MM.yyyy HH:mm")</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Notes))
+    {
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header"><h3 class="card-title">Notlar</h3></div>
+                <div class="card-body" style="white-space: pre-line;">@Model.Notes</div>
+            </div>
+        </div>
+    }
+
+    <div class="col-12">
+        <a asp-action="Index" class="btn btn-link px-0"><i class="ti ti-arrow-left me-1"></i> Müşteri listesi</a>
+    </div>
+</div>
