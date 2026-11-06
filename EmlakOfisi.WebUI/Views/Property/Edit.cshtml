@@ -1,0 +1,24 @@
+@model PropertyFormViewModel
+@{
+    ViewData["Title"] = "Portföyü düzenle";
+    var id = ((PropertyFormOptions)ViewBag.Options).PropertyId;
+}
+
+<div class="card" style="max-width: 900px;">
+    <div class="card-body">
+        <form method="post" asp-action="Edit" asp-route-id="@id">
+            <partial name="_PropertyForm" model="Model" />
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary btn-lg flex-fill flex-sm-grow-0">
+                    <i class="ti ti-device-floppy me-1"></i> Kaydet
+                </button>
+                <a asp-action="Detail" asp-route-id="@id" class="btn btn-link btn-lg">Vazgeç</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

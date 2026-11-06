@@ -1,0 +1,161 @@
+@using EmlakOfisi.EntityLayer.Enums
+@model PropertyFormViewModel
+@{
+    var options = (PropertyFormOptions)ViewBag.Options;
+}
+
+@* Ekleme ve düzenleme formunun ortak alanları. Mobilde tek sütun. *@
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+<div class="row g-3">
+    <div class="col-12">
+        <label asp-for="Title" class="form-label required"></label>
+        <input asp-for="Title" class="form-control form-control-lg" placeholder="Ör. Kadıköy Moda 3+1 deniz manzaralı" autocomplete="off" />
+        <span asp-validation-for="Title" class="text-danger small"></span>
+    </div>
+
+    <div class="col-6 col-md-4">
+        <label asp-for="ListingType" class="form-label"></label>
+        <select asp-for="ListingType" class="form-select form-select-lg">
+            <option value="Sale">Satılık</option>
+            <option value="Rent">Kiralık</option>
+        </select>
+    </div>
+    <div class="col-6 col-md-4">
+        <label asp-for="PropertyType" class="form-label"></label>
+        <select asp-for="PropertyType" class="form-select form-select-lg">
+            @foreach (var t in new[] { PropertyType.Residence, PropertyType.Land, PropertyType.Commercial, PropertyType.Other })
+            {
+                <option value="@t">@PropertyLabels.Type(t)</option>
+            }
+        </select>
+    </div>
+    <div class="col-12 col-md-4">
+        <label asp-for="Status" class="form-label"></label>
+        <select asp-for="Status" class="form-select form-select-lg">
+            @foreach (var s in new[] { PropertyStatus.Active, PropertyStatus.Passive, PropertyStatus.Sold, PropertyStatus.Rented })
+            {
+                <option value="@s">@PropertyLabels.Status(s)</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-12 col-md-6">
+        <label asp-for="PriceText" class="form-label required"></label>
+        <div class="input-group input-group-lg">
+            <input asp-for="PriceText" type="text" inputmode="numeric" data-digits-only class="form-control" placeholder="5000000" autocomplete="off" />
+            <span class="input-group-text">₺</span>
+        </div>
+        <div class="form-hint">Sadece rakam, tam TL (kiralıkta aylık).</div>
+        <span asp-validation-for="PriceText" class="text-danger small"></span>
+    </div>
+    <div class="col-6 col-md-3">
+        <label asp-for="RoomCount" class="form-label"></label>
+        <input asp-for="RoomCount" class="form-control form-control-lg" placeholder="3+1" autocomplete="off" />
+        <span asp-validation-for="RoomCount" class="text-danger small"></span>
+    </div>
+    <div class="col-6 col-md-3">
+        <label asp-for="Floor" class="form-label"></label>
+        <input asp-for="Floor" type="number" inputmode="numeric" class="form-control form-control-lg" />
+        <span asp-validation-for="Floor" class="text-danger small"></span>
+    </div>
+    <div class="col-6 col-md-4">
+        <label asp-for="NetArea" class="form-label"></label>
+        <input asp-for="NetArea" type="number" inputmode="numeric" min="0" class="form-control form-control-lg" />
+        <span asp-validation-for="NetArea" class="text-danger small"></span>
+    </div>
+    <div class="col-6 col-md-4">
+        <label asp-for="GrossArea" class="form-label"></label>
+        <input asp-for="GrossArea" type="number" inputmode="numeric" min="0" class="form-control form-control-lg" />
+        <span asp-validation-for="GrossArea" class="text-danger small"></span>
+    </div>
+    <div class="col-12 col-md-4">
+        <label asp-for="BuildingAge" class="form-label"></label>
+        <input asp-for="BuildingAge" type="number" inputmode="numeric" min="0" class="form-control form-control-lg" />
+        <span asp-validation-for="BuildingAge" class="text-danger small"></span>
+    </div>
+
+    <div class="col-12 col-sm-6">
+        <label asp-for="City" class="form-label required"></label>
+        <input asp-for="City" class="form-control form-control-lg" autocomplete="off" />
+        <span asp-validation-for="City" class="text-danger small"></span>
+    </div>
+    <div class="col-12 col-sm-6">
+        <label asp-for="District" class="form-label required"></label>
+        <input asp-for="District" class="form-control form-control-lg" autocomplete="off" />
+        <span asp-validation-for="District" class="text-danger small"></span>
+    </div>
+    <div class="col-12 col-sm-6">
+        <label asp-for="Neighborhood" class="form-label"></label>
+        <input asp-for="Neighborhood" class="form-control form-control-lg" autocomplete="off" />
+    </div>
+    <div class="col-12 col-sm-6">
+        <label asp-for="LocationText" class="form-label"></label>
+        <input asp-for="LocationText" class="form-control form-control-lg" placeholder="40.98765, 29.03123" autocomplete="off" />
+        <div class="form-hint">Google Haritalar'da konuma basılı tutup koordinatı kopyalayın. Boş bırakılırsa adresle aranır.</div>
+        <span asp-validation-for="LocationText" class="text-danger small"></span>
+    </div>
+    <div class="col-12">
+        <label asp-for="Address" class="form-label"></label>
+        <textarea asp-for="Address" rows="2" class="form-control"></textarea>
+    </div>
+
+    <div class="col-12 col-md-6">
+        <label asp-for="OwnerContactId" class="form-label"></label>
+        @if (options.OwnerHidden)
+        {
+            @* Mevcut sahip bu kullanıcıya görünmüyor: değiştirilemez, id forma konmaz *@
+            <div class="form-control form-control-lg bg-light text-secondary"><i class="ti ti-lock me-1"></i>Gizli kayıt (değiştirilemez)</div>
+        }
+        else
+        {
+            <select asp-for="OwnerContactId" class="form-select form-select-lg">
+                <option value="">Belirtilmemiş</option>
+                @foreach (var o in options.Owners)
+                {
+                    <option value="@o.Id">@o.Name</option>
+                }
+            </select>
+            <div class="form-hint">Görebildiğiniz satıcı ve mülk sahibi müşteriler listelenir.</div>
+        }
+    </div>
+
+    @if (options.CanChooseAgent)
+    {
+        <div class="col-12 col-md-6">
+            <label asp-for="AgentUserId" class="form-label"></label>
+            <select asp-for="AgentUserId" class="form-select form-select-lg">
+                @foreach (var a in options.Agents)
+                {
+                    <option value="@a.Id">@a.Name</option>
+                }
+            </select>
+        </div>
+    }
+
+    <div class="col-12">
+        <div class="form-label">Kim görebilir?</div>
+        <div class="form-selectgroup form-selectgroup-boxes d-flex flex-column flex-sm-row gap-2">
+            <label class="form-selectgroup-item flex-fill">
+                <input type="radio" asp-for="Visibility" value="@Visibility.OnlyMe" class="form-selectgroup-input" />
+                <span class="form-selectgroup-label d-flex align-items-center p-3">
+                    <i class="ti ti-lock me-2"></i>
+                    <span><strong>Sadece Ben</strong><br /><span class="text-secondary small">Oluşturan, sorumlu danışman ve yöneticiler görür</span></span>
+                </span>
+            </label>
+            <label class="form-selectgroup-item flex-fill">
+                <input type="radio" asp-for="Visibility" value="@Visibility.Public" class="form-selectgroup-input" />
+                <span class="form-selectgroup-label d-flex align-items-center p-3">
+                    <i class="ti ti-world me-2"></i>
+                    <span><strong>Herkese Açık</strong><br /><span class="text-secondary small">Ofisteki herkes görür (düzenleyemez)</span></span>
+                </span>
+            </label>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" rows="5" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger small"></span>
+    </div>
+</div>

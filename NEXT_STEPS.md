@@ -204,14 +204,27 @@
     - Mülk sahibi kuralları, geçersiz değerler.
   - `kod-inceleyici` ve `yetki-denetcisi` bulguları kapatıldı.
 
+- 2026-11-07: Görev 12 `portfoy: liste, arama, CRUD, harita linki`
+  - `PropertyController` (`[Staff]`):
+    - `Index`: arama, filtreler (satılık/kiralık, tür, durum, fiyat aralığı, "sadece benimkiler"), 20'li sayfalama, taşan sayfada son sayfaya yönlendirme.
+    - `Detail`: görünmeyen kayıt → 404. Mülk sahibi görünmüyorsa sadece "Gizli kayıt" yazıyor (id, ad, telefon yok). "Haritada aç" linki koordinattan, koordinat yoksa adresten üretiliyor (sabit Google Haritalar adresi, değerler kodlanıyor).
+    - `Create`/`Edit`/`Delete` (POST): önce yetki (404/403), sonra form doğrulaması; servisten gelen `Invalid` form hatasına çevriliyor.
+  - `PropertyFormViewModel`: id, sahip, tarih ve silinme alanları yok. Fiyat sadece rakam (binlik nokta ya da boşluk kabul; "1.5" gibi ondalıklar reddediliyor). Konum "enlem, boylam" metni olarak giriliyor.
+  - Sorumlu danışman seçimi sadece yöneticiye görünüyor; seçenekler aktif ve rolü olan çalışanlar. Mevcut sorumlu pasifse listede "(pasif)" etiketiyle seçili kalıyor, böylece yönetici başka bir alanı kaydederken sorumlu fark edilmeden değişmiyor.
+  - Mülk sahibi seçenekleri: kullanıcının görebildiği satıcı ve mülk sahibi müşteriler (her rolden en fazla 100). Gizli sahibin id'si forma konmuyor, kayıtta korunuyor.
+  - Liste ViewModel'ine sorumlunun sadece adı aktarılıyor (entity view'a verilmiyor).
+  - Menü: "Portföyler" sol menüde ve alt menüde aktif.
+  - `TestDataSeeder`: 8 sahte portföy (iki tanesinin sorumlusu müdür tarafından atanmış, biri pasif).
+  - Testler 268/268 yeşil (`PropertyControllerTests`): liste görünürlüğü, 404/403 sırası, gizli sahip sızıntısı, harita linki, sorumlu atama kuralları, pasif sorumlunun korunması, fiyat/konum doğrulaması, over-posting.
+  - Uçtan uca (curl) denendi: danisman1 6, danisman2 6, mudur1 8 portföy görüyor; filtreler ve Türkçe arama (İZMİR/izmir) doğru; gizli portföy 404; sorumlu danışman düzenleyebiliyor ama silemiyor (403). 375px'te yatay kaydırma yok.
+  - `kod-inceleyici` ve `yetki-denetcisi` bulguları kapatıldı. Bilinçli bırakılanlar "Açık kararlar" bölümünde.
+
 ## Sıradaki küçük görev
-- Görev 12 `portfoy: liste, arama, CRUD, harita linki`. Yetki denetçisinin şartları:
-  - `PropertyController`'a `[Authorize(Roles = RoleNames.Staff)]` konacak. Görünmeyen kayıt → 404, düzenleyemeyen → 403, kontrol form doğrulamasından önce yapılacak. Servisten gelen `Invalid` form hatasına çevrilecek.
-  - ViewModel'de `CreatedByUserId`, `IsDeleted`, `CreatedAt` ve `PropertyId` olmayacak. Sorumlu danışman alanı sadece yöneticiye gösterilecek; seçenekleri aktif çalışanlardan gelecek (servis zaten doğruluyor).
-  - **Entity view'a ya da JSON'a doğrudan verilmeyecek.** `AgentUser` tam `AppUser` satırı (şifre özeti vb.) olarak yükleniyor; ViewModel'e sadece ad ve soyad aktarılacak.
-  - Mülk sahibi seçimi, müşteri servisinin görünür liste ve arama metoduyla yapılacak; filtresiz bir "kişi ara" ucu açılmayacak. Detayda sahip görünmüyorsa sadece "Gizli kayıt" yazacak (id, ad, telefon yok). Formda gizli sahibin id'si taşınmayacak.
-  - Harita linki görünürlük kontrolünden geçmiş detaydan üretilecek. Fiyat `decimal`, gösterimde Türk lirası biçimi.
-  - Activity'ye portföy bağlanırsa hem müşterinin hem portföyün görünür olduğu kontrol edilecek; listeler birbirinin gizli kaydını sızdırmayacak.
+- Görev 13 `portfoy: fotograf yukleme ve guvenli gosterim`. Şartlar:
+  - Dosyalar `App_Data/uploads` altında (wwwroot dışında) saklanacak, klasör `.gitignore`'a eklenecek.
+  - Fotoğraf sadece portföyü görebilen kişiye, yetki kontrollü bir uçtan (`PropertyPhotoController`) verilecek. Yükleme ve silme, portföyü düzenleyebilen kişiye açık olacak.
+  - Uzantı, içerik tipi ve boyut sunucuda kontrol edilecek; dosya adı sunucuda üretilecek (kullanıcının verdiği ad yol olarak kullanılmayacak).
+  - Telefondan kamera ile yükleme (`accept="image/*" capture="environment"`).
 - Görev 15'te (Dashboard sayıları): `DashboardController`'a Staff şartı konacak ve sayılar sadece görünürlük filtreli sorgularla (`CountVisible`) alınacak.
 - Görev 6b (.NET 10 yükseltme) .NET 10 SDK kurulunca yapılacak.
 
@@ -238,6 +251,10 @@
 - Bilinen ve şimdilik kabul edilen durumlar (görev 9 denetimi):
   - Contacts'ta eşzamanlılık kontrolü (rowversion) yok; yönetici ve kayıt sahibi aynı anda düzenlerse son kaydeden kazanır.
   - `PhoneNormalized` indeksi benzersiz değil; aynı anda gelen iki eklemede aynı numara iki kez kaydedilebilir.
+- Portföy ekranları bilinçli kabulleri (görev 12 denetimi):
+  - Mülk sahibi listesi her rolden ilk 100 kişiyle sınırlı. Kayıt artınca görünür liste servisini kullanan bir arama alanı gerekecek.
+  - Sahibi silinmiş (soft delete) portföyde yönetici de "Gizli kayıt" görüyor; sızıntı değil ama yanıltıcı. İleride ayrı bir "Silinmiş kişi" durumu eklenebilir.
+  - Liste ve detayda `Include(AgentUser)` tam kullanıcı satırını belleğe alıyor; view'a sadece ad gidiyor. İleride ad/soyad projeksiyonu yapılabilir.
 - Portföy bilinçli kabulleri (görev 11):
   - Yönetici sorumluyu başkasına verse de kaydı oluşturan kişi görme, düzenleme ve silme yetkisini korur.
   - Sorumlu değişince eski sorumlu (oluşturan değilse) "Sadece Ben" bir portföyü artık göremez. İleride portföye bağlı randevu ve görüşme kayıtlarında erişim, kaydın kendi alanlarından değil portföy görünürlüğünden türetilmeli.

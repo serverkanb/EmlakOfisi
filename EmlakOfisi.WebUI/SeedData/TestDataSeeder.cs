@@ -1,4 +1,5 @@
 using EmlakOfisi.BusinessLayer.Abstract;
+using EmlakOfisi.DataAccessLayer.Abstract;
 using EmlakOfisi.EntityLayer.Constants;
 using EmlakOfisi.EntityLayer.Entities;
 using EmlakOfisi.EntityLayer.Enums;
@@ -25,6 +26,7 @@ namespace EmlakOfisi.WebUI.SeedData
         public static async Task SeedAsync(
             UserManager<AppUser> userManager,
             IContactService contactService,
+            IPropertyService propertyService,
             IConfiguration configuration,
             IHostEnvironment environment,
             ILogger logger)
@@ -77,7 +79,10 @@ namespace EmlakOfisi.WebUI.SeedData
             // Silinmemiş müşteri varsa dokunma (hepsi silinmişse sahte kişiler yeniden eklenir; sadece geliştirme)
             var (_, existing) = contactService.TGetVisibleList(ids["mudur1"], canSeeAll: true, null, null, 1, 1);
             if (existing > 0)
+            {
+                SeedProperties(propertyService, contactService, ids, logger);
                 return;
+            }
 
             var a1 = ids["danisman1"];
             var a2 = ids["danisman2"];
@@ -133,6 +138,69 @@ namespace EmlakOfisi.WebUI.SeedData
             Add(m, "Sibel", "Acar", Visibility.Public, landlord: true);
 
             logger.LogInformation("{Count} sahte müşteri oluşturuldu.", n);
+
+            SeedProperties(propertyService, contactService, ids, logger);
+        }
+
+        // Sahte portföyler: sadece hiç (silinmemiş) portföy yoksa. Sahipler yukarıdaki sahte müşterilerden seçilir;
+        // iki portföyün sorumlusu müdür tarafından başka bir danışmana atanır ("sorumlu da görür" kuralını denemek için).
+        private static void SeedProperties(IPropertyService propertyService, IContactService contactService,
+            Dictionary<string, int> ids, ILogger logger)
+        {
+            var m = ids["mudur1"];
+            var (_, existing) = propertyService.TGetVisibleList(m, true, new PropertyFilter(), 1, 1);
+            if (existing > 0)
+                return;
+
+            var a1 = ids["danisman1"];
+            var a2 = ids["danisman2"];
+
+            // Sahibi, o kişiyi gören kullanıcının gözünden bul (servis görünmeyen sahibi kabul etmez)
+            int? Owner(int viewer, string fullName) =>
+                contactService.TGetVisibleList(viewer, viewer == m, fullName, null, 1, 1).Items.FirstOrDefault()?.ContactId;
+
+            var count = 0;
+            void Add(int creator, string title, ListingType listing, PropertyType type, decimal price,
+                string city, string district, string? neighborhood, Visibility visibility, int? ownerId,
+                PropertyStatus status = PropertyStatus.Active, string? rooms = null, int? net = null,
+                decimal? lat = null, decimal? lng = null, int agent = 0)
+            {
+                var result = propertyService.TCreate(new Property
+                {
+                    Title = title, ListingType = listing, PropertyType = type, Price = price, Status = status,
+                    City = city, District = district, Neighborhood = neighborhood, Visibility = visibility,
+                    OwnerContactId = ownerId, RoomCount = rooms, NetArea = net, GrossArea = net == null ? null : net + 15,
+                    Latitude = lat, Longitude = lng, AgentUserId = agent,
+                    Description = "Sahte deneme kaydıdır."
+                }, creator, canSeeAll: creator == m);
+                if (result == OperationResult.Success) count++;
+                else logger.LogWarning("Sahte portföy eklenemedi: {Title} ({Result})", title, result);
+            }
+
+            // danisman1 (Ahmet)
+            Add(a1, "Moda 3+1 Deniz Manzaralı Daire", ListingType.Sale, PropertyType.Residence, 8_500_000,
+                "İstanbul", "Kadıköy", "Moda", Visibility.Public, Owner(a1, "Ayşe Çelik"), rooms: "3+1", net: 125,
+                lat: 40.984900m, lng: 29.026200m);
+            Add(a1, "Kadıköy 2+1 Kiralık Daire", ListingType.Rent, PropertyType.Residence, 32_000,
+                "İstanbul", "Kadıköy", "Fenerbahçe", Visibility.OnlyMe, Owner(a1, "Deniz Arslan"), rooms: "2+1", net: 90);
+            Add(a1, "Ataşehir Satılık Ofis", ListingType.Sale, PropertyType.Commercial, 12_000_000,
+                "İstanbul", "Ataşehir", null, Visibility.OnlyMe, Owner(a1, "Fatma Kılıç"), PropertyStatus.Sold, net: 140);
+
+            // danisman2 (Zeynep)
+            Add(a2, "Urla Bağ Evi", ListingType.Sale, PropertyType.Residence, 15_000_000,
+                "İzmir", "Urla", "Kuşçular", Visibility.OnlyMe, Owner(a2, "Murat Polat"), rooms: "4+1", net: 210);
+            Add(a2, "Bornova 1+1 Öğrenciye Uygun", ListingType.Rent, PropertyType.Residence, 15_000,
+                "İzmir", "Bornova", "Kazımdirik", Visibility.Public, Owner(a2, "Ufuk Bulut"), PropertyStatus.Rented, "1+1", 55);
+
+            // mudur1 (Merve): sorumluyu danışmanlara atar
+            Add(m, "Gölbaşı İmarlı Arsa", ListingType.Sale, PropertyType.Land, 4_750_000,
+                "Ankara", "Gölbaşı", null, Visibility.OnlyMe, Owner(m, "Zafer Ateş"), agent: a2);
+            Add(m, "Çankaya Cadde Üstü Dükkan", ListingType.Rent, PropertyType.Commercial, 45_000,
+                "Ankara", "Çankaya", "Kızılay", Visibility.Public, Owner(m, "Sibel Acar"), net: 80, agent: a1);
+            Add(m, "Nilüfer Havuzlu Villa", ListingType.Sale, PropertyType.Residence, 22_000_000,
+                "Bursa", "Nilüfer", null, Visibility.Public, null, PropertyStatus.Passive, "5+2", 320);
+
+            logger.LogInformation("{Count} sahte portföy oluşturuldu.", count);
         }
     }
 }

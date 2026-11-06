@@ -97,6 +97,9 @@ public class AuthorizationRulesTests
             typeof(ContactController).GetMethod(nameof(ContactController.Delete))!,
             typeof(ActivityController).GetMethod(nameof(ActivityController.Create))!,
             typeof(ActivityController).GetMethod(nameof(ActivityController.Delete))!,
+            typeof(PropertyController).GetMethods().Single(m => m.Name == nameof(PropertyController.Create) && m.GetParameters().Length == 1),
+            typeof(PropertyController).GetMethods().Single(m => m.Name == nameof(PropertyController.Edit) && m.GetParameters().Length == 2),
+            typeof(PropertyController).GetMethod(nameof(PropertyController.Delete))!,
         };
 
         foreach (var action in actions)

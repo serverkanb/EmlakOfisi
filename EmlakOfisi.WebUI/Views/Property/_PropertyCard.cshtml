@@ -1,0 +1,24 @@
+@model PropertyListItemViewModel
+
+@* Mobil liste kartı: tamamına dokununca detay açılır.
+   (Bootstrap'in "card-link" sınıfı kullanılmaz: ardışık card-link'lere soldan boşluk verip kartları kaydırıyor.) *@
+<a asp-action="Detail" asp-route-id="@Model.PropertyId" class="card d-block mb-2 text-reset text-decoration-none">
+    <div class="card-body p-3">
+        <div class="fw-bold fs-3 text-break">@Model.Title</div>
+        <div class="text-secondary"><i class="ti ti-map-pin me-1"></i>@Model.Location</div>
+        <div class="d-flex justify-content-between align-items-center mt-2">
+            <span class="fs-3 fw-bold ak-price">@Model.PriceText</span>
+            <span class="text-secondary small">
+                @if (!string.IsNullOrEmpty(Model.RoomCount)) { <span>@Model.RoomCount</span> }
+                @if (Model.NetArea != null) { <span> · @Model.NetArea m²</span> }
+            </span>
+        </div>
+        <div class="mt-2 d-flex flex-wrap gap-1">
+            <partial name="_PropertyBadges" model="Model" />
+        </div>
+        @if (!string.IsNullOrEmpty(Model.AgentName))
+        {
+            <div class="text-secondary small mt-2"><i class="ti ti-user me-1"></i>@Model.AgentName</div>
+        }
+    </div>
+</a>

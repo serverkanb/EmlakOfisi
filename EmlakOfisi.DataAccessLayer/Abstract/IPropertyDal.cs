@@ -21,6 +21,9 @@ namespace EmlakOfisi.DataAccessLayer.Abstract
         // Sorumlu danışman olabilir mi: kayıtlı, aktif ve en az bir rolü olan (ofis çalışanı) kullanıcı
         bool IsActiveStaff(int userId);
 
+        // Sorumlu danışman seçimi için: aktif ve rolü olan çalışanlar (sadece id ve ad; şifre vb. alanlar okunmaz)
+        List<(int Id, string FullName)> GetActiveStaff();
+
         void Create(Property property);
 
         void Update(Property property);

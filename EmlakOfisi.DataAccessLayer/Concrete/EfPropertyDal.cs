@@ -86,6 +86,18 @@ namespace EmlakOfisi.DataAccessLayer.Concrete
                    _context.UserRoles.Any(ur => ur.UserId == userId);
         }
 
+        public List<(int Id, string FullName)> GetActiveStaff()
+        {
+            var staffIds = _context.UserRoles.Select(ur => ur.UserId);
+            return _context.Users
+                .Where(u => u.IsActive && staffIds.Contains(u.Id))
+                .OrderBy(u => u.Name).ThenBy(u => u.Surname)
+                .Select(u => new { u.Id, u.Name, u.Surname })
+                .AsEnumerable()
+                .Select(u => (u.Id, $"{u.Name} {u.Surname}"))
+                .ToList();
+        }
+
         public void Create(Property property)
         {
             _context.Properties.Add(property);

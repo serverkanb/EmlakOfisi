@@ -1,0 +1,131 @@
+@model PropertyDetailViewModel
+@{
+    ViewData["Title"] = Model.Summary.Title;
+}
+
+<div class="row g-3" style="max-width: 900px;">
+    <div class="col-12">
+        <div class="d-flex flex-wrap gap-1 mb-2">
+            <partial name="_PropertyBadges" model="Model.Summary" />
+        </div>
+        <div class="fs-1 fw-bold ak-price">@Model.Summary.PriceText</div>
+        <div class="text-secondary"><i class="ti ti-map-pin me-1"></i>@(Model.Neighborhood != null ? Model.Neighborhood + ", " : "")@Model.Summary.Location</div>
+    </div>
+
+    @if (Model.MapLink != null)
+    {
+        <div class="col-12">
+            @* Link görünürlük kontrolünden geçmiş detaydan üretilir *@
+            <a href="@Model.MapLink" target="_blank" rel="noopener" class="btn btn-outline-primary contact-action w-100 w-md-auto">
+                <i class="ti ti-map-2 me-1"></i> Haritada aç
+            </a>
+        </div>
+    }
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <dl class="row mb-0">
+                    @if (!string.IsNullOrEmpty(Model.Summary.RoomCount))
+                    {
+                        <dt class="col-5 col-md-3">Oda sayısı</dt>
+                        <dd class="col-7 col-md-9">@Model.Summary.RoomCount</dd>
+                    }
+                    @if (Model.Summary.NetArea != null || Model.GrossArea != null)
+                    {
+                        <dt class="col-5 col-md-3">Alan</dt>
+                        <dd class="col-7 col-md-9">
+                            @if (Model.Summary.NetArea != null) { <span>@Model.Summary.NetArea m² net</span> }
+                            @if (Model.Summary.NetArea != null && Model.GrossArea != null) { <span> · </span> }
+                            @if (Model.GrossArea != null) { <span>@Model.GrossArea m² brüt</span> }
+                        </dd>
+                    }
+                    @if (Model.Floor != null)
+                    {
+                        <dt class="col-5 col-md-3">Kat</dt>
+                        <dd class="col-7 col-md-9">@Model.Floor</dd>
+                    }
+                    @if (Model.BuildingAge != null)
+                    {
+                        <dt class="col-5 col-md-3">Bina yaşı</dt>
+                        <dd class="col-7 col-md-9">@Model.BuildingAge</dd>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Address))
+                    {
+                        <dt class="col-5 col-md-3">Adres</dt>
+                        <dd class="col-7 col-md-9 text-break">@Model.Address</dd>
+                    }
+
+                    <dt class="col-5 col-md-3">Sorumlu danışman</dt>
+                    <dd class="col-7 col-md-9">@Model.Summary.AgentName</dd>
+
+                    <dt class="col-5 col-md-3">Mülk sahibi</dt>
+                    <dd class="col-7 col-md-9">
+                        @if (!Model.HasOwner)
+                        {
+                            <span class="text-secondary">Belirtilmemiş</span>
+                        }
+                        else if (Model.OwnerHidden)
+                        {
+                            @* Sahip bu kullanıcıya görünmüyor: id, ad ve telefon verilmez *@
+                            <span class="text-secondary"><i class="ti ti-lock me-1"></i>Gizli kayıt</span>
+                        }
+                        else
+                        {
+                            <a asp-controller="Contact" asp-action="Detail" asp-route-id="@Model.OwnerContactId">@Model.OwnerName</a>
+                            @if (!string.IsNullOrEmpty(Model.OwnerPhone))
+                            {
+                                <span class="text-secondary ms-1">@Model.OwnerPhone</span>
+                            }
+                            @if (Model.OwnerTelLink != null)
+                            {
+                                <a href="@Model.OwnerTelLink" class="btn btn-sm btn-outline-primary ms-2"><i class="ti ti-phone"></i> Ara</a>
+                            }
+                        }
+                    </dd>
+
+                    <dt class="col-5 col-md-3">Kayıt tarihi</dt>
+                    <dd class="col-7 col-md-9">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+                    @if (Model.UpdatedAt != null)
+                    {
+                        <dt class="col-5 col-md-3">Güncelleme</dt>
+                        <dd class="col-7 col-md-9">@Model.UpdatedAt.Value.ToString("dd.MM.yyyy HH:mm")</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Description))
+    {
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header"><h3 class="card-title">Açıklama</h3></div>
+                <div class="card-body text-break" style="white-space: pre-line;">@Model.Description</div>
+            </div>
+        </div>
+    }
+
+    @if (Model.CanEdit || Model.CanDelete)
+    {
+        <div class="col-12 d-flex flex-wrap gap-2">
+            @if (Model.CanEdit)
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Summary.PropertyId" class="btn btn-outline-primary">
+                    <i class="ti ti-pencil me-1"></i> Düzenle
+                </a>
+            }
+            @if (Model.CanDelete)
+            {
+                <form method="post" asp-action="Delete" asp-route-id="@Model.Summary.PropertyId"
+                      onsubmit="return confirm('Bu portföy silinsin mi? Listeden kaldırılacak.');">
+                    <button type="submit" class="btn btn-outline-danger"><i class="ti ti-trash me-1"></i> Sil</button>
+                </form>
+            }
+        </div>
+    }
+
+    <div class="col-12">
+        <a asp-action="Index" class="btn btn-link px-0"><i class="ti ti-arrow-left me-1"></i> Portföy listesi</a>
+    </div>
+</div>

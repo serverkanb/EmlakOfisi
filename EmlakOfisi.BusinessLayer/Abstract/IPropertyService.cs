@@ -28,6 +28,9 @@ namespace EmlakOfisi.BusinessLayer.Abstract
         // (portföyü görmek, sahibini görmek anlamına gelmez)
         Contact? TGetVisibleOwner(Property property, int userId, bool canSeeAll);
 
+        // Yöneticinin sorumlu danışman seçebileceği kişiler (aktif ve rolü olan çalışanlar)
+        List<(int Id, string FullName)> TGetAssignableAgents();
+
         // Sahip, tarih, silinme durumu serviste atanır. Geçersiz değer (görünmeyen sahip, negatif fiyat,
         // geçersiz koordinat) -> Invalid
         OperationResult TCreate(Property property, int userId, bool canSeeAll);

@@ -1,0 +1,155 @@
+@using EmlakOfisi.EntityLayer.Enums
+@model PropertyListViewModel
+@{
+    ViewData["Title"] = "Portföyler";
+}
+
+<div class="d-flex justify-content-end mb-3">
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="ti ti-building-plus me-1"></i> Yeni portföy
+    </a>
+</div>
+
+@* Arama ve filtreler: sunucuda, görünürlük kuralıyla aynı sorguda uygulanır *@
+<form method="get" asp-action="Index" class="contact-search mb-2" role="search">
+    <div class="input-group input-group-lg">
+        <span class="input-group-text"><i class="ti ti-search"></i></span>
+        <input type="search" name="q" value="@Model.Q" class="form-control"
+               placeholder="Başlık, şehir, ilçe veya mahalle" aria-label="Portföy ara" autocomplete="off" />
+        <button type="submit" class="btn btn-primary">Ara</button>
+    </div>
+
+    <details class="mt-2" @(Model.HasFilter && string.IsNullOrWhiteSpace(Model.Q) ? "open" : "")>
+        <summary class="text-secondary small py-2">Filtreler</summary>
+        <div class="row g-2 mt-1">
+            <div class="col-6 col-md-3">
+                <select name="listingType" class="form-select" aria-label="İlan tipi">
+                    <option value="">Satılık / kiralık</option>
+                    <option value="Sale" selected="@(Model.ListingType == ListingType.Sale)">Satılık</option>
+                    <option value="Rent" selected="@(Model.ListingType == ListingType.Rent)">Kiralık</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <select name="propertyType" class="form-select" aria-label="Gayrimenkul türü">
+                    <option value="">Tüm türler</option>
+                    @foreach (var t in new[] { PropertyType.Residence, PropertyType.Land, PropertyType.Commercial, PropertyType.Other })
+                    {
+                        <option value="@t" selected="@(Model.PropertyType == t)">@PropertyLabels.Type(t)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <select name="status" class="form-select" aria-label="Durum">
+                    <option value="">Tüm durumlar</option>
+                    @foreach (var s in new[] { PropertyStatus.Active, PropertyStatus.Passive, PropertyStatus.Sold, PropertyStatus.Rented })
+                    {
+                        <option value="@s" selected="@(Model.Status == s)">@PropertyLabels.Status(s)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-6 col-md-3 d-flex align-items-center">
+                <label class="form-check m-0">
+                    <input class="form-check-input" type="checkbox" name="mine" value="true" @(Model.Mine ? "checked" : "") />
+                    <span class="form-check-label">Sadece benimkiler</span>
+                </label>
+            </div>
+            <div class="col-6 col-md-3">
+                <input type="text" inputmode="numeric" data-digits-only name="minPrice" value="@Model.MinPrice?.ToString("0")"
+                       class="form-control" placeholder="En az ₺" aria-label="En düşük fiyat" />
+            </div>
+            <div class="col-6 col-md-3">
+                <input type="text" inputmode="numeric" data-digits-only name="maxPrice" value="@Model.MaxPrice?.ToString("0")"
+                       class="form-control" placeholder="En çok ₺" aria-label="En yüksek fiyat" />
+            </div>
+            <div class="col-12 col-md-6 d-flex gap-2">
+                <button type="submit" class="btn btn-outline-primary flex-fill">Filtrele</button>
+                @if (Model.HasFilter)
+                {
+                    <a asp-action="Index" class="btn btn-link">Temizle</a>
+                }
+            </div>
+        </div>
+    </details>
+</form>
+
+<div class="text-secondary small mb-2">@Model.TotalCount portföy</div>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="empty">
+        <div class="empty-icon"><i class="ti ti-building-community fs-1"></i></div>
+        <p class="empty-title">Portföy bulunamadı</p>
+        <p class="empty-subtitle text-secondary">Aramayı veya filtreleri değiştirip tekrar deneyin.</p>
+    </div>
+}
+else
+{
+    @* Mobil: kartlar *@
+    <div class="d-md-none">
+        @foreach (var item in Model.Items)
+        {
+            <partial name="_PropertyCard" model="item" />
+        }
+    </div>
+
+    @* Tablet/masaüstü: tablo *@
+    <div class="card d-none d-md-block">
+        <div class="table-responsive">
+            <table class="table table-vcenter card-table">
+                <thead>
+                    <tr>
+                        <th>Başlık</th>
+                        <th>Konum</th>
+                        <th class="text-end">Fiyat</th>
+                        <th>Durum / görünürlük</th>
+                        <th>Sorumlu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td>
+                                <a asp-action="Detail" asp-route-id="@item.PropertyId" class="fw-bold">@item.Title</a>
+                                <div class="text-secondary small">
+                                    @item.RoomCount @(item.NetArea != null ? $"· {item.NetArea} m²" : "")
+                                </div>
+                            </td>
+                            <td class="text-nowrap">@item.Location</td>
+                            <td class="text-end text-nowrap fw-bold ak-price">@item.PriceText</td>
+                            <td><div class="d-flex flex-wrap gap-1"><partial name="_PropertyBadges" model="item" /></div></td>
+                            <td class="text-nowrap text-secondary">@item.AgentName</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Sayfalar">
+            @if (Model.Page > 1)
+            {
+                <a asp-action="Index" asp-route-q="@Model.Q" asp-route-listingType="@Model.ListingType" asp-route-propertyType="@Model.PropertyType"
+                   asp-route-status="@Model.Status" asp-route-minPrice="@Model.MinPrice" asp-route-maxPrice="@Model.MaxPrice" asp-route-mine="@(Model.Mine ? true : null)"
+                   asp-route-page="@(Model.Page - 1)" class="btn btn-outline-secondary"><i class="ti ti-chevron-left me-1"></i> Önceki</a>
+            }
+            else
+            {
+                <span></span>
+            }
+            <span class="text-secondary">Sayfa @Model.Page / @Model.TotalPages</span>
+            @if (Model.Page < Model.TotalPages)
+            {
+                <a asp-action="Index" asp-route-q="@Model.Q" asp-route-listingType="@Model.ListingType" asp-route-propertyType="@Model.PropertyType"
+                   asp-route-status="@Model.Status" asp-route-minPrice="@Model.MinPrice" asp-route-maxPrice="@Model.MaxPrice" asp-route-mine="@(Model.Mine ? true : null)"
+                   asp-route-page="@(Model.Page + 1)" class="btn btn-outline-secondary">Sonraki <i class="ti ti-chevron-right ms-1"></i></a>
+            }
+            else
+            {
+                <span></span>
+            }
+        </nav>
+    }
+}

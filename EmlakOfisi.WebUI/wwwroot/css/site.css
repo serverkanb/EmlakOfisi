@@ -85,6 +85,11 @@ aside.navbar-vertical .navbar-nav .nav-item.active > .nav-link .nav-link-icon {
     max-width: 160px;
 }
 
+/* Portföy fiyatı: beyaz zeminde okunur koyu altın */
+.ak-price {
+    color: var(--ak-gold-text);
+}
+
 /* Sayfa başlıklarında küçük altın vurgu */
 .page-header .page-title {
     border-inline-start: 3px solid var(--ak-gold);

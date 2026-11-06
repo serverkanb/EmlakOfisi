@@ -51,6 +51,11 @@ namespace EmlakOfisi.BusinessLayer.Concrete
                 : _contactService.TGetVisibleById(property.OwnerContactId.Value, userId, canSeeAll);
         }
 
+        public List<(int Id, string FullName)> TGetAssignableAgents()
+        {
+            return _propertyDal.GetActiveStaff();
+        }
+
         public OperationResult TCreate(Property property, int userId, bool canSeeAll)
         {
             if (!IsValid(property))

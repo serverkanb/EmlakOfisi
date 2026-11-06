@@ -1,0 +1,16 @@
+@using EmlakOfisi.EntityLayer.Enums
+@model PropertyListItemViewModel
+
+@* Durum, ilan tipi, tür ve görünürlük rozetleri (liste, kart ve detayda ortak) *@
+<span class="badge @PropertyLabels.StatusBadge(Model.Status)">@PropertyLabels.Status(Model.Status)</span>
+<span class="badge bg-primary-lt">@PropertyLabels.Listing(Model.ListingType)</span>
+<span class="badge bg-secondary-lt">@PropertyLabels.Type(Model.PropertyType)</span>
+@if (Model.Visibility == Visibility.OnlyMe)
+{
+    <span class="badge bg-secondary-lt" title="Oluşturan, sorumlu danışman ve yöneticiler görür"><i class="ti ti-lock"></i> Sadece Ben</span>
+}
+else
+{
+    <span class="badge bg-cyan-lt" title="Ofisteki herkes görür"><i class="ti ti-world"></i> Herkese Açık</span>
+}
+@if (Model.IsMine) { <span class="badge bg-yellow-lt">Benim</span> }
