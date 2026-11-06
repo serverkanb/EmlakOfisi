@@ -178,8 +178,40 @@
   - 199/199 test yeşil. 375px ve 1280px'te ekran görüntüsü ve hesaplanan stillerle kontrol edildi.
   - Giriş sayfası tarayıcıda görülemedi (panelde açık bir kullanıcı oturumu vardı, kapatılmadı); aynı renkli logo hata sayfasında kontrol edildi.
 
+- 2026-11-07: Görev 11 `portfoy: gorunurluk sorgulari ve testleri` (ekran yok, görev 12'nin temeli)
+  - `EfPropertyDal`:
+    - Generic yapıdan türemiyor.
+    - Görünürlük kuralı tek yerde (`Visible()`): `!IsDeleted && (yönetici || Herkese Açık || oluşturan || sorumlu danışman)`.
+    - Filtreler aynı sorguda: arama (başlık, şehir, ilçe, mahalle), satılık/kiralık, tür, durum, fiyat aralığı, "sadece benimkiler". Sayfalama da aynı sorguda.
+    - Detay okuması salt okunur, sorumlu danışmanla birlikte. Mülk sahibi (`OwnerContact`) yüklenmiyor.
+    - `IsActiveStaff`: kullanıcı aktif mi ve rolü var mı.
+  - `PropertyManager` (`IPropertyService`, `IContactService`'e dayanıyor):
+    - Düzenleme: yönetici, oluşturan ya da sorumlu danışman. Silme (soft): yönetici ya da oluşturan.
+    - Sorumlu danışman: danışmanın eklediği portföyün sorumlusu kendisi. Sorumluyu sadece yönetici değiştirebiliyor; yeni sorumlu aktif ve rolü olan bir çalışan olmalı, değilse `Invalid`.
+    - Mülk sahibi:
+      - Kullanıcının görebildiği bir kişi olmalı, değilse `Invalid`.
+      - Mevcut sahibi göremeyen kişi (ör. sorumlu danışman) sahibi değiştiremiyor ve kaldıramıyor; gönderdiği değer yok sayılıyor, sahip korunuyor.
+      - `TGetVisibleOwner`, sahibi sadece müşteri görünürlüğüyle döndürüyor.
+    - Geçersiz değerler (negatif fiyat ya da alan, geçersiz koordinat) `Invalid`. Geçersiz enum güvenli varsayılana düşüyor (görünürlük için "Sadece Ben").
+    - **Kullanıcı kararı:** Sorumlu danışman da görünürlüğü değiştirebilir (portföyü ofise açabilir).
+  - Ortak sonuç tipi `OperationResult` (eski adı `ContactOperationResult`), `Invalid` değeri eklendi.
+  - **Türkçe arama:** `Properties.Title/City/District/Neighborhood` kolonları `Turkish_CI_AS`. `PropertyTurkishCollation` migration'ı uygulandı (tablo boştu, veri kaybı yok).
+  - Testler 237/237 yeşil (`PropertyVisibilityTests`):
+    - Oluşturan, sorumlu, diğer danışman ve yönetici matrisi; silinmiş kayıt.
+    - Aramada ve filtrelerde gizli kayıt sızıntısı; sayfalama.
+    - Düzenleme/silme yetkisi, korunan alanlar.
+    - Sorumlu değiştirme ve doğrulaması (olmayan, pasif, rolsüz kullanıcı).
+    - Mülk sahibi kuralları, geçersiz değerler.
+  - `kod-inceleyici` ve `yetki-denetcisi` bulguları kapatıldı.
+
 ## Sıradaki küçük görev
-- Görev 11 `portfoy: gorunurluk sorgulari ve testleri` (müşterideki yapının aynısı; Property'de görünürlük kuralına sorumlu danışman da giriyor: `|| AgentUserId == userId`).
+- Görev 12 `portfoy: liste, arama, CRUD, harita linki`. Yetki denetçisinin şartları:
+  - `PropertyController`'a `[Authorize(Roles = RoleNames.Staff)]` konacak. Görünmeyen kayıt → 404, düzenleyemeyen → 403, kontrol form doğrulamasından önce yapılacak. Servisten gelen `Invalid` form hatasına çevrilecek.
+  - ViewModel'de `CreatedByUserId`, `IsDeleted`, `CreatedAt` ve `PropertyId` olmayacak. Sorumlu danışman alanı sadece yöneticiye gösterilecek; seçenekleri aktif çalışanlardan gelecek (servis zaten doğruluyor).
+  - **Entity view'a ya da JSON'a doğrudan verilmeyecek.** `AgentUser` tam `AppUser` satırı (şifre özeti vb.) olarak yükleniyor; ViewModel'e sadece ad ve soyad aktarılacak.
+  - Mülk sahibi seçimi, müşteri servisinin görünür liste ve arama metoduyla yapılacak; filtresiz bir "kişi ara" ucu açılmayacak. Detayda sahip görünmüyorsa sadece "Gizli kayıt" yazacak (id, ad, telefon yok). Formda gizli sahibin id'si taşınmayacak.
+  - Harita linki görünürlük kontrolünden geçmiş detaydan üretilecek. Fiyat `decimal`, gösterimde Türk lirası biçimi.
+  - Activity'ye portföy bağlanırsa hem müşterinin hem portföyün görünür olduğu kontrol edilecek; listeler birbirinin gizli kaydını sızdırmayacak.
 - Görev 15'te (Dashboard sayıları): `DashboardController`'a Staff şartı konacak ve sayılar sadece görünürlük filtreli sorgularla (`CountVisible`) alınacak.
 - Görev 6b (.NET 10 yükseltme) .NET 10 SDK kurulunca yapılacak.
 
@@ -206,6 +238,10 @@
 - Bilinen ve şimdilik kabul edilen durumlar (görev 9 denetimi):
   - Contacts'ta eşzamanlılık kontrolü (rowversion) yok; yönetici ve kayıt sahibi aynı anda düzenlerse son kaydeden kazanır.
   - `PhoneNormalized` indeksi benzersiz değil; aynı anda gelen iki eklemede aynı numara iki kez kaydedilebilir.
+- Portföy bilinçli kabulleri (görev 11):
+  - Yönetici sorumluyu başkasına verse de kaydı oluşturan kişi görme, düzenleme ve silme yetkisini korur.
+  - Sorumlu değişince eski sorumlu (oluşturan değilse) "Sadece Ben" bir portföyü artık göremez. İleride portföye bağlı randevu ve görüşme kayıtlarında erişim, kaydın kendi alanlarından değil portföy görünürlüğünden türetilmeli.
+  - Bir çalışan pasif yapılınca sorumlusu olduğu portföylerin ne olacağı (yöneticiye devir uyarısı vb.) henüz kararlaştırılmadı.
 - Görüşme silme kuralı bilinçli kabul (görev 10 denetimi): rolü yöneticilikten danışmana düşürülen biri, yönetici iken başkasının müşterisine yazdığı kendi notlarını silebilir ("notu yazan silebilir" kararı). İstenirse silme için müşteriyi düzenleme yetkisi de şart koşulabilir.
 - Form binder'ının İngilizce mesajları (örneğin sayı alanına harf girilince çıkan "The value 'x' is not valid") henüz Türkçe değil. Tüm formlar için `ModelBindingMessageProvider` ayarı ayrı bir küçük görev olabilir.
 - Test kullanıcılarının şifresi (`mudur1`, `danisman1`, `danisman2`): `dotnet user-secrets list --project EmlakOfisi.WebUI` → `Seed:TestUserPassword`.

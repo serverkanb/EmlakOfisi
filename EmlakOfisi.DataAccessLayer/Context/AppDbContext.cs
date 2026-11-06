@@ -37,6 +37,12 @@ namespace EmlakOfisi.DataAccessLayer.Context
             // ("IŞIK" araması "Işık" ve "ışık"ı da bulsun). InMemory test veritabanı bunu yok sayar.
             modelBuilder.Entity<Contact>().Property(c => c.Name).UseCollation(TurkishCollation);
             modelBuilder.Entity<Contact>().Property(c => c.Surname).UseCollation(TurkishCollation);
+
+            // Portföy aramasında da aynı (başlık, şehir, ilçe, mahalle)
+            modelBuilder.Entity<Property>().Property(p => p.Title).UseCollation(TurkishCollation);
+            modelBuilder.Entity<Property>().Property(p => p.City).UseCollation(TurkishCollation);
+            modelBuilder.Entity<Property>().Property(p => p.District).UseCollation(TurkishCollation);
+            modelBuilder.Entity<Property>().Property(p => p.Neighborhood).UseCollation(TurkishCollation);
         }
 
         public const string TurkishCollation = "Turkish_CI_AS";

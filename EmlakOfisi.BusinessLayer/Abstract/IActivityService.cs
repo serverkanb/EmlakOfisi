@@ -14,14 +14,14 @@ namespace EmlakOfisi.BusinessLayer.Abstract
         bool TCanAdd(Contact contact, int userId, bool canSeeAll);
 
         // Ekleme yetkisi var mı (form geçersiz olsa bile önce bu kontrol edilir): NotFound/Forbidden/Success
-        ContactOperationResult TCheckAdd(int contactId, int userId, bool canSeeAll);
+        OperationResult TCheckAdd(int contactId, int userId, bool canSeeAll);
 
         bool TCanDelete(Activity activity, int userId, bool canSeeAll);
 
         // Kaydı giren kişi ve müşteri id'si serviste atanır; formdan gelmez
-        ContactOperationResult TAdd(int contactId, Activity activity, int userId, bool canSeeAll);
+        OperationResult TAdd(int contactId, Activity activity, int userId, bool canSeeAll);
 
         // contactId: notun bağlı olduğu müşteri (sadece başarıda dolu; geri yönlendirme için)
-        ContactOperationResult TDelete(int activityId, int userId, bool canSeeAll, out int contactId);
+        OperationResult TDelete(int activityId, int userId, bool canSeeAll, out int contactId);
     }
 }

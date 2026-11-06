@@ -27,9 +27,9 @@ namespace EmlakOfisi.WebUI.Controllers
         {
             // Önce yetki (form hatalarından önce): göremeyen 404, ekleyemeyen 403 alır
             var check = _activityService.TCheckAdd(contactId, User.GetUserId(), User.CanSeeAll());
-            if (check == ContactOperationResult.NotFound)
+            if (check == OperationResult.NotFound)
                 return NotFound();
-            if (check == ContactOperationResult.Forbidden)
+            if (check == OperationResult.Forbidden)
                 return Forbid();
 
             // Tarih makul aralıkta olmalı (ileri tarihli not geçmişin en üstüne yapışmasın)
@@ -51,9 +51,9 @@ namespace EmlakOfisi.WebUI.Controllers
             };
 
             var result = _activityService.TAdd(contactId, activity, User.GetUserId(), User.CanSeeAll());
-            if (result == ContactOperationResult.NotFound)
+            if (result == OperationResult.NotFound)
                 return NotFound();
-            if (result == ContactOperationResult.Forbidden)
+            if (result == OperationResult.Forbidden)
                 return Forbid();
 
             TempData["Success"] = "Görüşme kaydedildi.";
@@ -65,9 +65,9 @@ namespace EmlakOfisi.WebUI.Controllers
         {
             // Geri dönülecek müşteri, notun gerçekten bağlı olduğu müşteri (formdan alınmaz)
             var result = _activityService.TDelete(id, User.GetUserId(), User.CanSeeAll(), out var contactId);
-            if (result == ContactOperationResult.NotFound)
+            if (result == OperationResult.NotFound)
                 return NotFound();
-            if (result == ContactOperationResult.Forbidden)
+            if (result == OperationResult.Forbidden)
                 return Forbid();
 
             TempData["Success"] = "Görüşme silindi.";

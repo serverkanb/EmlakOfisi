@@ -165,9 +165,9 @@ namespace EmlakOfisi.WebUI.Controllers
 
             // Servis yetkiyi tekrar kontrol eder ve sadece izinli alanları kopyalar
             var result = _contactService.TUpdate(id, ToEntity(model), userId, canSeeAll);
-            if (result == ContactOperationResult.NotFound)
+            if (result == OperationResult.NotFound)
                 return NotFound();
-            if (result == ContactOperationResult.Forbidden)
+            if (result == OperationResult.Forbidden)
                 return Forbid();
 
             TempData["Success"] = "Müşteri bilgileri güncellendi.";
@@ -180,9 +180,9 @@ namespace EmlakOfisi.WebUI.Controllers
         public IActionResult Delete(int id)
         {
             var result = _contactService.TSoftDelete(id, User.GetUserId(), User.CanSeeAll());
-            if (result == ContactOperationResult.NotFound)
+            if (result == OperationResult.NotFound)
                 return NotFound();
-            if (result == ContactOperationResult.Forbidden)
+            if (result == OperationResult.Forbidden)
                 return Forbid();
 
             TempData["Success"] = "Müşteri silindi.";

@@ -69,13 +69,13 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             _contactDal.Create(contact);
         }
 
-        public ContactOperationResult TUpdate(int id, Contact changes, int userId, bool canSeeAll)
+        public OperationResult TUpdate(int id, Contact changes, int userId, bool canSeeAll)
         {
             var contact = _contactDal.GetVisibleByIdForUpdate(id, userId, canSeeAll);
             if (contact == null)
-                return ContactOperationResult.NotFound;
+                return OperationResult.NotFound;
             if (!TCanEdit(contact, userId, canSeeAll))
-                return ContactOperationResult.Forbidden;
+                return OperationResult.Forbidden;
 
             // Sadece izin verilen alanlar. CreatedByUserId, CreatedAt, IsDeleted değiştirilemez.
             contact.Name = changes.Name;
@@ -94,21 +94,21 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             contact.UpdatedAt = DateTime.Now;
 
             _contactDal.Update(contact);
-            return ContactOperationResult.Success;
+            return OperationResult.Success;
         }
 
-        public ContactOperationResult TSoftDelete(int id, int userId, bool canSeeAll)
+        public OperationResult TSoftDelete(int id, int userId, bool canSeeAll)
         {
             var contact = _contactDal.GetVisibleByIdForUpdate(id, userId, canSeeAll);
             if (contact == null)
-                return ContactOperationResult.NotFound;
+                return OperationResult.NotFound;
             if (!TCanDelete(contact, userId, canSeeAll))
-                return ContactOperationResult.Forbidden;
+                return OperationResult.Forbidden;
 
             contact.IsDeleted = true;
             contact.UpdatedAt = DateTime.Now;
             _contactDal.Update(contact);
-            return ContactOperationResult.Success;
+            return OperationResult.Success;
         }
 
         public DuplicatePhoneResult TCheckDuplicatePhone(string phone, int userId, bool canSeeAll, int? excludeContactId = null)

@@ -122,7 +122,7 @@ public class ActivityTests
         a.UserId = 999;      // sahte değerler: serviste ezilmeli
         a.ContactId = 999;
 
-        Assert.Equal(ContactOperationResult.Success, f.Activities.TAdd(c.ContactId, a, f.Ayse.Id, false));
+        Assert.Equal(OperationResult.Success, f.Activities.TAdd(c.ContactId, a, f.Ayse.Id, false));
         Assert.Equal(f.Ayse.Id, a.UserId);
         Assert.Equal(c.ContactId, a.ContactId);
     }
@@ -133,7 +133,7 @@ public class ActivityTests
         using var f = await Fixture.CreateAsync();
         var c = f.AddContact(f.Bora, Visibility.Public, "0100 800 00 06");
 
-        Assert.Equal(ContactOperationResult.Forbidden, f.Activities.TAdd(c.ContactId, f.Note(), f.Ayse.Id, false));
+        Assert.Equal(OperationResult.Forbidden, f.Activities.TAdd(c.ContactId, f.Note(), f.Ayse.Id, false));
         Assert.Empty(f.Activities.TGetForContact(c.ContactId, f.Bora.Id, false)!);
     }
 
@@ -143,7 +143,7 @@ public class ActivityTests
         using var f = await Fixture.CreateAsync();
         var c = f.AddContact(f.Bora, Visibility.OnlyMe, "0100 800 00 07");
 
-        Assert.Equal(ContactOperationResult.NotFound, f.Activities.TAdd(c.ContactId, f.Note(), f.Ayse.Id, false));
+        Assert.Equal(OperationResult.NotFound, f.Activities.TAdd(c.ContactId, f.Note(), f.Ayse.Id, false));
     }
 
     [Fact]
@@ -152,7 +152,7 @@ public class ActivityTests
         using var f = await Fixture.CreateAsync();
         var c = f.AddContact(f.Bora, Visibility.OnlyMe, "0100 800 00 08");
 
-        Assert.Equal(ContactOperationResult.Success, f.Activities.TAdd(c.ContactId, f.Note(), f.Mert.Id, true));
+        Assert.Equal(OperationResult.Success, f.Activities.TAdd(c.ContactId, f.Note(), f.Mert.Id, true));
     }
 
     [Fact]
@@ -177,7 +177,7 @@ public class ActivityTests
         var a = f.Note();
         f.Activities.TAdd(c.ContactId, a, f.Ayse.Id, false);
 
-        Assert.Equal(ContactOperationResult.Success, f.Activities.TDelete(a.ActivityId, f.Ayse.Id, false, out _));
+        Assert.Equal(OperationResult.Success, f.Activities.TDelete(a.ActivityId, f.Ayse.Id, false, out _));
         Assert.Empty(f.Activities.TGetForContact(c.ContactId, f.Ayse.Id, false)!);
     }
 
@@ -190,7 +190,7 @@ public class ActivityTests
         f.Activities.TAdd(c.ContactId, a, f.Mert.Id, true);
 
         // Ayşe müşterinin sahibi ama notu yazan değil
-        Assert.Equal(ContactOperationResult.Forbidden, f.Activities.TDelete(a.ActivityId, f.Ayse.Id, false, out _));
+        Assert.Equal(OperationResult.Forbidden, f.Activities.TDelete(a.ActivityId, f.Ayse.Id, false, out _));
     }
 
     [Fact]
@@ -201,7 +201,7 @@ public class ActivityTests
         var a = f.Note();
         f.Activities.TAdd(c.ContactId, a, f.Bora.Id, false);
 
-        Assert.Equal(ContactOperationResult.Forbidden, f.Activities.TDelete(a.ActivityId, f.Ayse.Id, false, out _));
+        Assert.Equal(OperationResult.Forbidden, f.Activities.TDelete(a.ActivityId, f.Ayse.Id, false, out _));
     }
 
     [Fact]
@@ -212,7 +212,7 @@ public class ActivityTests
         var a = f.Note();
         f.Activities.TAdd(c.ContactId, a, f.Bora.Id, false);
 
-        Assert.Equal(ContactOperationResult.NotFound, f.Activities.TDelete(a.ActivityId, f.Ayse.Id, false, out _));
+        Assert.Equal(OperationResult.NotFound, f.Activities.TDelete(a.ActivityId, f.Ayse.Id, false, out _));
     }
 
     [Fact]
@@ -223,14 +223,14 @@ public class ActivityTests
         var a = f.Note();
         f.Activities.TAdd(c.ContactId, a, f.Bora.Id, false);
 
-        Assert.Equal(ContactOperationResult.Success, f.Activities.TDelete(a.ActivityId, f.Mert.Id, true, out _));
+        Assert.Equal(OperationResult.Success, f.Activities.TDelete(a.ActivityId, f.Mert.Id, true, out _));
     }
 
     [Fact]
     public async Task Delete_UnknownId_IsNotFound()
     {
         using var f = await Fixture.CreateAsync();
-        Assert.Equal(ContactOperationResult.NotFound, f.Activities.TDelete(9999, f.Mert.Id, true, out _));
+        Assert.Equal(OperationResult.NotFound, f.Activities.TDelete(9999, f.Mert.Id, true, out _));
     }
 
     // ---------------- Controller ----------------
@@ -362,7 +362,7 @@ public class ActivityTests
         var open = f.AddContact(f.Bora, Visibility.Public, "0100 800 00 26");
         var a = f.Note(); f.Activities.TAdd(open.ContactId, a, f.Bora.Id, false);
 
-        Assert.Equal(ContactOperationResult.Success, f.Activities.TDelete(a.ActivityId, f.Mert.Id, true, out _));
+        Assert.Equal(OperationResult.Success, f.Activities.TDelete(a.ActivityId, f.Mert.Id, true, out _));
     }
 
     [Fact]
@@ -373,8 +373,8 @@ public class ActivityTests
         var a = f.Note(); f.Activities.TAdd(c.ContactId, a, f.Bora.Id, false);
         f.Contacts.TSoftDelete(c.ContactId, f.Bora.Id, false);
 
-        Assert.Equal(ContactOperationResult.NotFound, f.Activities.TAdd(c.ContactId, f.Note(), f.Mert.Id, true));
-        Assert.Equal(ContactOperationResult.NotFound, f.Activities.TDelete(a.ActivityId, f.Mert.Id, true, out _));
+        Assert.Equal(OperationResult.NotFound, f.Activities.TAdd(c.ContactId, f.Note(), f.Mert.Id, true));
+        Assert.Equal(OperationResult.NotFound, f.Activities.TDelete(a.ActivityId, f.Mert.Id, true, out _));
     }
 
     [Fact]

@@ -259,7 +259,7 @@ public class ContactVisibilityTests : IDisposable
 
         var result = _service.TUpdate(_ayseOnlyMe.ContactId, Changes("Alihan"), Ayse, false);
 
-        Assert.Equal(ContactOperationResult.Success, result);
+        Assert.Equal(OperationResult.Success, result);
         var reloaded = _service.TGetVisibleById(_ayseOnlyMe.ContactId, Ayse, false)!;
         Assert.Equal("Alihan", reloaded.Name);
         Assert.Equal("5550000001", reloaded.PhoneNormalized);
@@ -275,27 +275,27 @@ public class ContactVisibilityTests : IDisposable
     {
         var result = _service.TUpdate(_boraPublic.ContactId, Changes("Hack"), Ayse, false);
 
-        Assert.Equal(ContactOperationResult.Forbidden, result);
+        Assert.Equal(OperationResult.Forbidden, result);
         Assert.Equal("Deniz", _service.TGetVisibleById(_boraPublic.ContactId, Bora, false)!.Name);
     }
 
     [Fact]
     public void Update_OthersOnlyMe_IsNotFound()
     {
-        Assert.Equal(ContactOperationResult.NotFound, _service.TUpdate(_boraOnlyMe.ContactId, Changes(), Ayse, false));
+        Assert.Equal(OperationResult.NotFound, _service.TUpdate(_boraOnlyMe.ContactId, Changes(), Ayse, false));
         Assert.Equal("Cem", _service.TGetVisibleById(_boraOnlyMe.ContactId, Bora, false)!.Name);
     }
 
     [Fact]
     public void Update_DeletedRecord_IsNotFound()
     {
-        Assert.Equal(ContactOperationResult.NotFound, _service.TUpdate(_boraDeletedPublic.ContactId, Changes(), Mert, true));
+        Assert.Equal(OperationResult.NotFound, _service.TUpdate(_boraDeletedPublic.ContactId, Changes(), Mert, true));
     }
 
     [Fact]
     public void Update_Manager_CanEditOthersOnlyMe()
     {
-        Assert.Equal(ContactOperationResult.Success, _service.TUpdate(_boraOnlyMe.ContactId, Changes("Cemal", Visibility.OnlyMe), Mert, true));
+        Assert.Equal(OperationResult.Success, _service.TUpdate(_boraOnlyMe.ContactId, Changes("Cemal", Visibility.OnlyMe), Mert, true));
         Assert.Equal(Bora, _service.TGetVisibleById(_boraOnlyMe.ContactId, Bora, false)!.CreatedByUserId);
     }
 
@@ -311,14 +311,14 @@ public class ContactVisibilityTests : IDisposable
     [Fact]
     public void SoftDelete_OthersPublic_IsForbidden()
     {
-        Assert.Equal(ContactOperationResult.Forbidden, _service.TSoftDelete(_boraPublic.ContactId, Ayse, false));
+        Assert.Equal(OperationResult.Forbidden, _service.TSoftDelete(_boraPublic.ContactId, Ayse, false));
         Assert.NotNull(_service.TGetVisibleById(_boraPublic.ContactId, Ayse, false));
     }
 
     [Fact]
     public void SoftDelete_OthersOnlyMe_IsNotFound()
     {
-        Assert.Equal(ContactOperationResult.NotFound, _service.TSoftDelete(_boraOnlyMe.ContactId, Ayse, false));
+        Assert.Equal(OperationResult.NotFound, _service.TSoftDelete(_boraOnlyMe.ContactId, Ayse, false));
     }
 
     // ---------- Oluşturma ----------
@@ -349,7 +349,7 @@ public class ContactVisibilityTests : IDisposable
     [Fact]
     public void SoftDelete_HidesRecord_ButKeepsRow()
     {
-        Assert.Equal(ContactOperationResult.Success, _service.TSoftDelete(_aysePublic.ContactId, Ayse, false));
+        Assert.Equal(OperationResult.Success, _service.TSoftDelete(_aysePublic.ContactId, Ayse, false));
 
         Assert.Null(_service.TGetVisibleById(_aysePublic.ContactId, Ayse, false));
         Assert.True(_context.Contacts.Any(c => c.ContactId == _aysePublic.ContactId && c.IsDeleted));

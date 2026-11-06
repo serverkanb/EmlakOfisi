@@ -3,14 +3,6 @@ using EmlakOfisi.EntityLayer.Enums;
 
 namespace EmlakOfisi.BusinessLayer.Abstract
 {
-    // Güncelleme / silme sonucu: controller buna göre 404, 403 ya da başarı mesajı döner
-    public enum ContactOperationResult
-    {
-        Success,
-        NotFound,    // kayıt yok veya kullanıcı göremiyor (controller 404 döner; varlığı belli edilmez)
-        Forbidden    // görüyor ama düzenleme/silme yetkisi yok (controller 403 döner)
-    }
-
     // Tekrar kayıt kontrolü sonucu. Kayıt kullanıcıya görünmüyorsa id VERİLMEZ (bilgi sızmasın).
     public class DuplicatePhoneResult
     {
@@ -39,10 +31,10 @@ namespace EmlakOfisi.BusinessLayer.Abstract
         void TCreate(Contact contact, int userId);
 
         // Sadece izin verilen alanlar (ad, soyad, telefonlar, e-posta, not, roller, görünürlük) kopyalanır
-        ContactOperationResult TUpdate(int id, Contact changes, int userId, bool canSeeAll);
+        OperationResult TUpdate(int id, Contact changes, int userId, bool canSeeAll);
 
         // Gerçek silme yok: IsDeleted = true
-        ContactOperationResult TSoftDelete(int id, int userId, bool canSeeAll);
+        OperationResult TSoftDelete(int id, int userId, bool canSeeAll);
 
         // Aynı telefonla kayıt var mı? Güncellemede kaydın kendisi excludeContactId ile hariç tutulur.
         DuplicatePhoneResult TCheckDuplicatePhone(string phone, int userId, bool canSeeAll, int? excludeContactId = null);

@@ -35,18 +35,18 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             return canSeeAll || activity.UserId == userId;
         }
 
-        public ContactOperationResult TCheckAdd(int contactId, int userId, bool canSeeAll)
+        public OperationResult TCheckAdd(int contactId, int userId, bool canSeeAll)
         {
             var contact = _contactService.TGetVisibleById(contactId, userId, canSeeAll);
             if (contact == null)
-                return ContactOperationResult.NotFound;
-            return TCanAdd(contact, userId, canSeeAll) ? ContactOperationResult.Success : ContactOperationResult.Forbidden;
+                return OperationResult.NotFound;
+            return TCanAdd(contact, userId, canSeeAll) ? OperationResult.Success : OperationResult.Forbidden;
         }
 
-        public ContactOperationResult TAdd(int contactId, Activity activity, int userId, bool canSeeAll)
+        public OperationResult TAdd(int contactId, Activity activity, int userId, bool canSeeAll)
         {
             var check = TCheckAdd(contactId, userId, canSeeAll);
-            if (check != ContactOperationResult.Success)
+            if (check != OperationResult.Success)
                 return check;
 
             activity.ActivityId = 0;
@@ -58,26 +58,26 @@ namespace EmlakOfisi.BusinessLayer.Concrete
                 activity.Type = ActivityType.Note;
 
             _activityDal.Create(activity);
-            return ContactOperationResult.Success;
+            return OperationResult.Success;
         }
 
-        public ContactOperationResult TDelete(int activityId, int userId, bool canSeeAll, out int contactId)
+        public OperationResult TDelete(int activityId, int userId, bool canSeeAll, out int contactId)
         {
             contactId = 0;
             var activity = _activityDal.GetByIdForUpdate(activityId);
             if (activity == null)
-                return ContactOperationResult.NotFound;
+                return OperationResult.NotFound;
 
             // Bağlı müşteriyi göremeyen, notun varlığını da öğrenemez
             if (_contactService.TGetVisibleById(activity.ContactId, userId, canSeeAll) == null)
-                return ContactOperationResult.NotFound;
+                return OperationResult.NotFound;
 
             if (!TCanDelete(activity, userId, canSeeAll))
-                return ContactOperationResult.Forbidden;
+                return OperationResult.Forbidden;
 
             contactId = activity.ContactId;
             _activityDal.Delete(activity);
-            return ContactOperationResult.Success;
+            return OperationResult.Success;
         }
     }
 }

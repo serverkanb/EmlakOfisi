@@ -389,7 +389,8 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                     b.Property<string>("City")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .UseCollation("Turkish_CI_AS");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -404,7 +405,8 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                     b.Property<string>("District")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .UseCollation("Turkish_CI_AS");
 
                     b.Property<int?>("Floor")
                         .HasColumnType("int");
@@ -426,7 +428,8 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
 
                     b.Property<string>("Neighborhood")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .UseCollation("Turkish_CI_AS");
 
                     b.Property<int?>("NetArea")
                         .HasColumnType("int");
@@ -450,7 +453,8 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(200)")
+                        .UseCollation("Turkish_CI_AS");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
