@@ -132,10 +132,37 @@
     - 375px'te form düzgün.
   - Deneme kaydı (id 26) uygulamanın kendi silme işlemiyle silindi; sayılar 18/17/25'e döndü.
 
+- 2026-11-06: Görev 10 `musteri: gorusme gecmisi`
+  - **Kullanıcı kararı:**
+    - Görme: müşteriyi görebilen geçmişi de görür.
+    - Ekleme: müşteriyi düzenleyebilen ekler, yani sahibi ve yöneticiler (`IContactService.TCanEdit`). Diğer danışmanlar herkese açık müşterinin geçmişini sadece okur.
+    - Silme: notu yazan kişi ya da yönetici; ayrıca müşteriyi görebiliyor olmalı.
+  - `IActivityDal`/`EfActivityDal`: generic yapıdan türemiyor. Müşteriye göre liste (en yeni üstte, en fazla 200 kayıt, yazanın adıyla), takip edilen okuma, ekleme ve silme.
+  - `ActivityManager`:
+    - Müşteri kuralları için `IContactService`'e dayanıyor.
+    - `TCheckAdd`/`TAdd`/`TDelete` NotFound/Forbidden/Success döndürüyor.
+    - Yazan kişi, müşteri id'si ve tarih serviste atanıyor; geçersiz tür "Not"a düşüyor.
+    - Silme sonrası, notun gerçekten bağlı olduğu müşteriye dönülüyor (id formdan alınmıyor).
+  - `ActivityController` (`[Staff]`, sadece POST): önce yetki kontrol ediliyor (göremeyen 404, ekleyemeyen 403), form doğrulaması sonra. Tarih 2000 ile yarın arasında olmalı.
+  - Görünüm (`_ActivityHistory`, müşteri detayının altında):
+    - Tür ikonu, tarih, not ve yazan kişi gösteriliyor.
+    - Ekleme formu ve sil butonu sadece yetkisi olana görünüyor. Sil butonu 44×44.
+  - **Not silme gerçek silmedir.** Activity'de `IsDeleted` yok; geçmişin hiç kaybolmaması istenirse migration'la eklenir.
+  - Testler 199/199 yeşil (`ActivityTests`):
+    - Görme, ekleme ve silme matrisi; silinmiş müşteri.
+    - Controller seviyesinde 404/403, geçersiz form, tarih aralığı, silme yönlendirmesi.
+    - Over-posting; mimari POST-only listesi.
+  - Uçtan uca (curl) denendi:
+    - danisman2, danisman1'in herkese açık müşterisine not ekleyemiyor (403), ama notu görüyor.
+    - Gizli müşteride işlemler 404 veriyor.
+    - danisman1 müdürün notunu silemiyor (403).
+    - Adresteki müşteri id'si değiştirilse de yetki notun gerçek müşterisine göre kontrol ediliyor.
+    - Token'sız silme 400 veriyor.
+    - Deneme notları silindi.
+  - Telefon görünümü bu görevde tarayıcıda kontrol edilemedi (tarayıcı oturumu kapanmıştı). Kullanıcının bir kez bakması önerildi.
+
 ## Sıradaki küçük görev
-- Görev 10 `musteri: gorusme gecmisi` (müşteri detayında Activity ekleme ve listeleme).
-  - Activity görünürlüğü bağlı olduğu müşteriden gelecek: müşteriyi göremeyen görüşmeyi de göremez. Ekleme için müşteriyi görebilmek yeterli mi, yoksa düzenleme yetkisi mi gerekecek, görevin başında karar verilecek.
-  - Yetki denetçisi bağlı kayıtları ayrıca denetleyecek.
+- Görev 11 `portfoy: gorunurluk sorgulari ve testleri` (müşterideki yapının aynısı; Property'de görünürlük kuralına sorumlu danışman da giriyor: `|| AgentUserId == userId`).
 - Görev 15'te (Dashboard sayıları): `DashboardController`'a Staff şartı konacak ve sayılar sadece görünürlük filtreli sorgularla (`CountVisible`) alınacak.
 - Görev 6b (.NET 10 yükseltme) .NET 10 SDK kurulunca yapılacak.
 
@@ -162,6 +189,8 @@
 - Bilinen ve şimdilik kabul edilen durumlar (görev 9 denetimi):
   - Contacts'ta eşzamanlılık kontrolü (rowversion) yok; yönetici ve kayıt sahibi aynı anda düzenlerse son kaydeden kazanır.
   - `PhoneNormalized` indeksi benzersiz değil; aynı anda gelen iki eklemede aynı numara iki kez kaydedilebilir.
+- Görüşme silme kuralı bilinçli kabul (görev 10 denetimi): rolü yöneticilikten danışmana düşürülen biri, yönetici iken başkasının müşterisine yazdığı kendi notlarını silebilir ("notu yazan silebilir" kararı). İstenirse silme için müşteriyi düzenleme yetkisi de şart koşulabilir.
+- Form binder'ının İngilizce mesajları (örneğin sayı alanına harf girilince çıkan "The value 'x' is not valid") henüz Türkçe değil. Tüm formlar için `ModelBindingMessageProvider` ayarı ayrı bir küçük görev olabilir.
 - Test kullanıcılarının şifresi (`mudur1`, `danisman1`, `danisman2`): `dotnet user-secrets list --project EmlakOfisi.WebUI` → `Seed:TestUserPassword`.
 - Sahte telefon numaraları için **gerçek operatör önekleri (05xx) kullanılmaz**. Seed `0100` önekini kullanıyor (`TestDataSeeder.FakePhone`).
 - Bellek açıldıktan sonra (2026-11-06, kullanıcı programları kapattı) sanal bellekte 7,8 GB boş yer vardı. Sayfa dosyası hâlâ 2 GB'a sabit; sorun tekrar ederse büyütülmesi önerilir.

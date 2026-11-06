@@ -43,7 +43,7 @@ public class ContactCrudTests
         }
 
         public ContactController As(AppUser user, string role) =>
-            Identity.SignedInAs(new ContactController(Service), user, role);
+            Identity.SignedInAs(new ContactController(Service, new ActivityManager(new EfActivityDal(Identity.Db), Service)), user, role);
 
         public Contact? Read(int id) => Service.TGetVisibleById(id, Mert.Id, canSeeAll: true);
 

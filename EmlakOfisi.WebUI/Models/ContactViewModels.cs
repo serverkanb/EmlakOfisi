@@ -85,5 +85,10 @@ namespace EmlakOfisi.WebUI.Models
         public DateTime? UpdatedAt { get; set; }
         public bool CanEdit { get; set; }
         public bool CanDelete { get; set; }
+
+        // Görüşme geçmişi (görev 10)
+        public List<ActivityItemViewModel> Activities { get; set; } = new();
+        public bool CanAddActivity { get; set; }
+        public ActivityFormViewModel NewActivity { get; set; } = new();
     }
 }

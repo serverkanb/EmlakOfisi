@@ -20,10 +20,12 @@ namespace EmlakOfisi.WebUI.Controllers
         public const int PageSize = 20;
 
         private readonly IContactService _contactService;
+        private readonly IActivityService _activityService;
 
-        public ContactController(IContactService contactService)
+        public ContactController(IContactService contactService, IActivityService activityService)
         {
             _contactService = contactService;
+            _activityService = activityService;
         }
 
         [HttpGet]
@@ -69,7 +71,19 @@ namespace EmlakOfisi.WebUI.Controllers
                 CreatedAt = contact.CreatedAt,
                 UpdatedAt = contact.UpdatedAt,
                 CanEdit = _contactService.TCanEdit(contact, userId, canSeeAll),
-                CanDelete = _contactService.TCanDelete(contact, userId, canSeeAll)
+                CanDelete = _contactService.TCanDelete(contact, userId, canSeeAll),
+                CanAddActivity = _activityService.TCanAdd(contact, userId, canSeeAll),
+                Activities = (_activityService.TGetForContact(id, userId, canSeeAll) ?? new List<Activity>())
+                    .Select(a => new ActivityItemViewModel
+                    {
+                        ActivityId = a.ActivityId,
+                        Type = a.Type,
+                        Description = a.Description,
+                        ActivityDate = a.ActivityDate,
+                        UserName = a.User == null ? "" : $"{a.User.Name} {a.User.Surname}",
+                        CanDelete = _activityService.TCanDelete(a, userId, canSeeAll)
+                    })
+                    .ToList()
             };
 
             return View(model);

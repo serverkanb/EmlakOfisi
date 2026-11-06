@@ -31,6 +31,9 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(conn
 builder.Services.AddScoped<IContactDal, EfContactDal>();
 builder.Services.AddScoped<IContactService, ContactManager>();
 
+builder.Services.AddScoped<IActivityDal, EfActivityDal>();
+builder.Services.AddScoped<IActivityService, ActivityManager>();
+
 // ---------------------------
 //  Identity Ayarları
 // ---------------------------

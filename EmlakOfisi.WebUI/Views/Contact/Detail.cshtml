@@ -3,8 +3,7 @@
     ViewData["Title"] = Model.Summary.FullName;
 }
 
-@* Düzenle / Sil butonları sadece yetki varsa görünür; asıl kontrol POST'ta serviste yapılır.
-   Görüşme geçmişi görev 10'da eklenecek. *@
+@* Düzenle / Sil butonları sadece yetki varsa görünür; asıl kontrol POST'ta serviste yapılır. *@
 <div class="row g-3" style="max-width: 900px;">
     <div class="col-12">
         <div class="d-flex flex-wrap gap-1 mb-2">
@@ -84,6 +83,10 @@
             }
         </div>
     }
+
+    <div class="col-12">
+        <partial name="_ActivityHistory" model="Model" />
+    </div>
 
     <div class="col-12">
         <a asp-action="Index" class="btn btn-link px-0"><i class="ti ti-arrow-left me-1"></i> Müşteri listesi</a>

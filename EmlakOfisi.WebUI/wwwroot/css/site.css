@@ -65,6 +65,12 @@
     }
 }
 
+/* Görüşme silme (sadece ikon) butonu: dokunmatik için en az 44x44 */
+.activity-delete {
+    min-width: 44px;
+    min-height: 44px;
+}
+
 /* Alt menü içeriği kapatmasın */
 @media (max-width: 991.98px) {
     .page-wrapper {
