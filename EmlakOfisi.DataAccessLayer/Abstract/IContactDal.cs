@@ -24,6 +24,9 @@ namespace EmlakOfisi.DataAccessLayer.Abstract
         // Sadece id döner; kaydın kendisi görünürlük kontrolü olmadan dışarı verilmez.
         int? FindIdByPhone(string phoneNormalized, int? excludeContactId);
 
+        // Aynı kontrol, ama sadece kullanıcının görebildiği kayıtlar arasında (önce bu denenir)
+        int? FindVisibleIdByPhone(string phoneNormalized, int? excludeContactId, int userId, bool canSeeAll);
+
         void Create(Contact contact);
 
         void Update(Contact contact);

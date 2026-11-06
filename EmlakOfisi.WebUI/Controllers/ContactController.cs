@@ -12,6 +12,8 @@ namespace EmlakOfisi.WebUI.Controllers
 {
     // Müşteriler. Sadece ofis çalışanları (rolü olan kullanıcılar).
     // Görünürlük kuralı serviste/sorguda uygulanır; controller sadece giriş yapan kişiyi iletir.
+    // Görmeye yetkisi olmayan kayıt -> 404 (varlığı belli edilmez); görüp düzenleyemediği kayıt -> 403.
+    // Silme gerçek silme değildir (IsDeleted). Tüm POST'larda antiforgery global olarak açık.
     [Authorize(Roles = RoleNames.Staff)]
     public class ContactController : Controller
     {
@@ -72,6 +74,165 @@ namespace EmlakOfisi.WebUI.Controllers
 
             return View(model);
         }
+
+        // ---------------- Ekleme ----------------
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View(new ContactFormViewModel()); // görünürlük varsayılanı: Sadece Ben
+        }
+
+        [HttpPost]
+        public IActionResult Create(ContactFormViewModel model)
+        {
+            var userId = User.GetUserId();
+            var canSeeAll = User.CanSeeAll();
+
+            ValidateForm(model, userId, canSeeAll, excludeContactId: null);
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var contact = ToEntity(model);
+            _contactService.TCreate(contact, userId); // sahip = giriş yapan kişi (formdan gelmez)
+
+            TempData["Success"] = $"{contact.Name} {contact.Surname} eklendi.";
+            return RedirectToAction(nameof(Detail), new { id = contact.ContactId });
+        }
+
+        // ---------------- Düzenleme ----------------
+
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var userId = User.GetUserId();
+            var canSeeAll = User.CanSeeAll();
+
+            var contact = _contactService.TGetVisibleById(id, userId, canSeeAll);
+            if (contact == null)
+                return NotFound();
+            if (!_contactService.TCanEdit(contact, userId, canSeeAll))
+                return Forbid();
+
+            ViewBag.ContactId = id;
+            return View(new ContactFormViewModel
+            {
+                Name = contact.Name,
+                Surname = contact.Surname,
+                Phone = contact.Phone,
+                Phone2 = contact.Phone2,
+                Email = contact.Email,
+                Notes = contact.Notes,
+                IsBuyer = contact.IsBuyer,
+                IsSeller = contact.IsSeller,
+                IsTenant = contact.IsTenant,
+                IsLandlord = contact.IsLandlord,
+                Visibility = contact.Visibility
+            });
+        }
+
+        [HttpPost]
+        public IActionResult Edit(int id, ContactFormViewModel model)
+        {
+            var userId = User.GetUserId();
+            var canSeeAll = User.CanSeeAll();
+            ViewBag.ContactId = id;
+
+            // Önce yetki: göremiyorsa 404, düzenleyemiyorsa 403 (form hatalarından önce, bilgi sızmasın)
+            var existing = _contactService.TGetVisibleById(id, userId, canSeeAll);
+            if (existing == null)
+                return NotFound();
+            if (!_contactService.TCanEdit(existing, userId, canSeeAll))
+                return Forbid();
+
+            ValidateForm(model, userId, canSeeAll, excludeContactId: id);
+            if (!ModelState.IsValid)
+                return View(model);
+
+            // Servis yetkiyi tekrar kontrol eder ve sadece izinli alanları kopyalar
+            var result = _contactService.TUpdate(id, ToEntity(model), userId, canSeeAll);
+            if (result == ContactOperationResult.NotFound)
+                return NotFound();
+            if (result == ContactOperationResult.Forbidden)
+                return Forbid();
+
+            TempData["Success"] = "Müşteri bilgileri güncellendi.";
+            return RedirectToAction(nameof(Detail), new { id });
+        }
+
+        // ---------------- Silme ----------------
+
+        [HttpPost]
+        public IActionResult Delete(int id)
+        {
+            var result = _contactService.TSoftDelete(id, User.GetUserId(), User.CanSeeAll());
+            if (result == ContactOperationResult.NotFound)
+                return NotFound();
+            if (result == ContactOperationResult.Forbidden)
+                return Forbid();
+
+            TempData["Success"] = "Müşteri silindi.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // ---------------- Yardımcılar ----------------
+
+        // Telefon geçerliliği ve tekrar kayıt kontrolü (sadece POST'ta; ayrı bir "numara var mı" ucu yok)
+        private void ValidateForm(ContactFormViewModel model, int userId, bool canSeeAll, int? excludeContactId)
+        {
+            AddPhoneError(nameof(model.Phone), model.Phone);
+            AddPhoneError(nameof(model.Phone2), model.Phone2);
+
+            if (!Enum.IsDefined(model.Visibility))
+                ModelState.AddModelError(nameof(model.Visibility), "Geçersiz görünürlük seçimi.");
+
+            if (!ModelState.IsValid)
+                return;
+
+            var duplicate = _contactService.TCheckDuplicatePhone(model.Phone, userId, canSeeAll, excludeContactId);
+            if (!duplicate.Exists)
+                return;
+
+            if (duplicate.VisibleContactId != null)
+            {
+                // Kullanıcı o kaydı görebiliyor: formun üstünde kayda link verilir, alanda kısa uyarı
+                ViewBag.DuplicateContactId = duplicate.VisibleContactId;
+                ModelState.AddModelError(nameof(model.Phone), "Bu numara kayıtlı.");
+            }
+            else
+            {
+                // Göremediği bir kayıt: kim olduğu, kimin kaydı olduğu söylenmez
+                ModelState.AddModelError(nameof(model.Phone),
+                    "Bu telefon numarası ofiste başka bir kayıtta bulunuyor. Lütfen ofis yöneticinize danışın.");
+            }
+        }
+
+        // Telefon sadece rakam içermeli ve geçerli uzunlukta olmalı (boşsa zorunluluk ayrıca kontrol edilir)
+        private void AddPhoneError(string field, string? phone)
+        {
+            if (string.IsNullOrWhiteSpace(phone))
+                return;
+
+            if (!PhoneNormalizer.HasOnlyDigits(phone))
+                ModelState.AddModelError(field, "Telefona sadece rakam girilebilir.");
+            else if (!PhoneNormalizer.IsValid(phone))
+                ModelState.AddModelError(field, "Geçerli bir telefon girin (ör. 05321112233).");
+        }
+
+        private static Contact ToEntity(ContactFormViewModel m) => new()
+        {
+            Name = m.Name.Trim(),
+            Surname = m.Surname.Trim(),
+            Phone = m.Phone.Trim(),
+            Phone2 = string.IsNullOrWhiteSpace(m.Phone2) ? null : m.Phone2.Trim(),
+            Email = string.IsNullOrWhiteSpace(m.Email) ? null : m.Email.Trim(),
+            Notes = string.IsNullOrWhiteSpace(m.Notes) ? null : m.Notes.Trim(),
+            IsBuyer = m.IsBuyer,
+            IsSeller = m.IsSeller,
+            IsTenant = m.IsTenant,
+            IsLandlord = m.IsLandlord,
+            Visibility = m.Visibility
+        };
 
         private static ContactListItemViewModel ToListItem(Contact c, int userId)
         {

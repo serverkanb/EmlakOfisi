@@ -3,7 +3,8 @@
     ViewData["Title"] = Model.Summary.FullName;
 }
 
-@* Salt okunur detay. Düzenleme, silme ve görüşme geçmişi görev 9-10'da eklenecek. *@
+@* Düzenle / Sil butonları sadece yetki varsa görünür; asıl kontrol POST'ta serviste yapılır.
+   Görüşme geçmişi görev 10'da eklenecek. *@
 <div class="row g-3" style="max-width: 900px;">
     <div class="col-12">
         <div class="d-flex flex-wrap gap-1 mb-2">
@@ -60,6 +61,27 @@
                 <div class="card-header"><h3 class="card-title">Notlar</h3></div>
                 <div class="card-body" style="white-space: pre-line;">@Model.Notes</div>
             </div>
+        </div>
+    }
+
+    @if (Model.CanEdit || Model.CanDelete)
+    {
+        <div class="col-12 d-flex flex-wrap gap-2">
+            @if (Model.CanEdit)
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Summary.ContactId" class="btn btn-outline-primary">
+                    <i class="ti ti-pencil me-1"></i> Düzenle
+                </a>
+            }
+            @if (Model.CanDelete)
+            {
+                <form method="post" asp-action="Delete" asp-route-id="@Model.Summary.ContactId"
+                      onsubmit="return confirm('Bu müşteri silinsin mi? Listeden kaldırılacak.');">
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="ti ti-trash me-1"></i> Sil
+                    </button>
+                </form>
+            }
         </div>
     }
 

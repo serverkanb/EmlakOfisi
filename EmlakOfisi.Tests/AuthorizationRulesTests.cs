@@ -92,6 +92,9 @@ public class AuthorizationRulesTests
             typeof(AdminUserController).GetMethods().Single(m => m.Name == nameof(AdminUserController.Create) && m.GetParameters().Length == 1),
             typeof(RoleAssignController).GetMethods().Single(m => m.Name == nameof(RoleAssignController.AssignRole) && m.GetParameters().Length == 2),
             typeof(ProfileController).GetMethods().Single(m => m.Name == nameof(ProfileController.ChangePassword) && m.GetParameters().Length == 1),
+            typeof(ContactController).GetMethods().Single(m => m.Name == nameof(ContactController.Create) && m.GetParameters().Length == 1),
+            typeof(ContactController).GetMethods().Single(m => m.Name == nameof(ContactController.Edit) && m.GetParameters().Length == 2),
+            typeof(ContactController).GetMethod(nameof(ContactController.Delete))!,
         };
 
         foreach (var action in actions)

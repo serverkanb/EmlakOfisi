@@ -19,6 +19,32 @@ namespace EmlakOfisi.BusinessLayer.Helpers
             return digits.Length > 10 ? digits[^10..] : digits;
         }
 
+        // Formdan girilen numara geçerli bir Türkiye numarası mı? Kırpmadan ÖNCE hane sayısına bakar:
+        // 10 hane, 0 ile başlayan 11 hane veya 90 ile başlayan 12 hane kabul edilir.
+        // ("0532 111 22 333" gibi fazla haneli numara sessizce kırpılıp kabul edilmesin.)
+        public static bool IsValid(string? phone)
+        {
+            if (string.IsNullOrWhiteSpace(phone))
+                return false;
+
+            // Formdaki telefon sadece rakam (ve okunurluk için boşluk) içerebilir; harf/simge kabul edilmez
+            if (!HasOnlyDigits(phone))
+                return false;
+
+            var digits = new string(phone.Where(char.IsAsciiDigit).ToArray());
+            return digits.Length switch
+            {
+                10 => true,
+                11 => digits.StartsWith("0"),
+                12 => digits.StartsWith("90"),
+                _ => false
+            };
+        }
+
+        // Sadece rakam ve boşluk var mı? (eski kayıtlarda "0532 111 22 33" gibi boşluklu yazım duruyor)
+        public static bool HasOnlyDigits(string phone) =>
+            phone.All(ch => char.IsAsciiDigit(ch) || ch == ' ');
+
         // Arama kutusundaki ifade telefon araması mı? (en az 3 rakam, harf yok)
         public static bool LooksLikePhone(string search)
         {

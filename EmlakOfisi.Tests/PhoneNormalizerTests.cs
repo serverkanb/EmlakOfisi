@@ -19,6 +19,23 @@ public class PhoneNormalizerTests
     }
 
     [Theory]
+    [InlineData("5321112233", true)]
+    [InlineData("0532 111 22 33", true)]
+    [InlineData("905321112233", true)]
+    [InlineData("+90 532 111 22 33", false)] // formda sadece rakam: "+" kabul edilmez
+    [InlineData("0532a1112233", false)]      // harf var
+    [InlineData("0532-111-22-33", false)]    // simge var
+    [InlineData("0532 111 22 333", false)]  // 12 hane, 90 ile başlamıyor
+    [InlineData("532 111 22 3", false)]     // 9 hane
+    [InlineData("15321112233", false)]      // 11 hane, 0 ile başlamıyor
+    [InlineData("", false)]
+    [InlineData(null, false)]
+    public void IsValid(string? input, bool expected)
+    {
+        Assert.Equal(expected, PhoneNormalizer.IsValid(input));
+    }
+
+    [Theory]
     [InlineData("0532", true)]
     [InlineData("111 22", true)]
     [InlineData("12", false)]      // çok kısa

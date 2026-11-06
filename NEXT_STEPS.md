@@ -100,13 +100,42 @@
     - 375px'te yatay kaydırma yok, 1280px'te tablo düzgün.
   - `kod-inceleyici` ve `yetki-denetcisi` bulguları kapatıldı.
 
+- 2026-11-06: Görev 9 `musteri: ekle, guncelle, detay, sil`
+  - `ContactController`:
+    - `Create`: formda görünürlüğün varsayılanı "Sadece Ben"; kaydın sahibi her zaman giriş yapan kişi.
+    - `Edit`: GET ve POST'ta önce yetki kontrol ediliyor (görünmüyorsa 404, düzenleyemiyorsa 403), form doğrulaması sonra yapılıyor; servis yetkiyi bir kez daha kontrol ediyor.
+    - `Delete`: POST, soft delete (`IsDeleted`), servis sonucuna göre 404/403.
+  - `ContactFormViewModel`: sahip, tarih, silinme durumu ve id alanları yok (over-posting kapalı). E-posta için `[EmailAddress]`, alan mesajları Türkçe.
+  - Telefon doğrulaması (`PhoneNormalizer.IsValid`): 10 hane, 0 ile başlayan 11 hane veya 90 ile başlayan 12 hane. Fazla haneli numara artık kırpılıp kabul edilmiyor.
+  - **Telefona sadece rakam** (kullanıcı isteği):
+    - Tarayıcı: `data-digits-only` alanlarına yazılan ya da yapıştırılan harf ve simgeler anında siliniyor (`wwwroot/js/site.js`). Mobilde rakam klavyesi açılıyor (`inputmode="numeric"`).
+    - Sunucu: harf ya da simge (`+`, `-` dahil) içeren telefon "Telefona sadece rakam girilebilir." mesajıyla reddediliyor. Eski kayıtlardaki boşluklu yazım ("0100 001 01 07") kabul ediliyor.
+    - Arama kutusu bundan etkilenmiyor; orada "+90 532…" yazmak hâlâ çalışıyor.
+  - Tekrar telefon kontrolü sadece POST'ta yapılıyor:
+    - Önce kullanıcının görebildiği kayıtlarda aranıyor; bulunursa kayda "Kaydı aç" linki veriliyor.
+    - Bulunmazsa gizli kayıtlara bakılıyor; varsa sadece genel bir mesaj çıkıyor (ad, sahip ve id yok).
+    - Aynı numarayla ikinci kayıt engelleniyor.
+  - Görünüm:
+    - Ortak form partial'ı `_ContactForm`. Mobilde tek sütun, telefon alanında rakam klavyesi, görünürlük seçimi büyük kutularla.
+    - Detayda Düzenle/Sil butonları sadece yetkisi olana görünüyor; silme onaylı form POST (native `confirm`, AdminUser ile aynı).
+    - Listede "Yeni müşteri" butonu var.
+  - Testler 171/171 yeşil (`ContactCrudTests`):
+    - Yetki: her rol için 404/403 matrisi.
+    - Tekrar telefon: gizli kayıt bilgisi sızmıyor, görünen kayıt öncelikli.
+    - Form: over-posting, e-posta, telefon hane sayısı, Trim/null dönüşümü.
+    - Mimari: POST-only listesi güncellendi.
+  - Uçtan uca denendi:
+    - Başkasının herkese açık kaydında Edit ve Delete 403 veriyor, kayıt değişmiyor; gizli kayıtta 404.
+    - Token'sız silme 400.
+    - Sahibi silince kayıt herkes için 404 oluyor.
+    - Gizli kayıtla aynı telefon girilince genel mesaj çıkıyor.
+    - 375px'te form düzgün.
+  - Deneme kaydı (id 26) uygulamanın kendi silme işlemiyle silindi; sayılar 18/17/25'e döndü.
+
 ## Sıradaki küçük görev
-- Görev 9 `musteri: ekle, guncelle, detay, sil`. Yetki denetçisinin şartları:
-  - Edit/Delete POST'ları `TUpdate`/`TSoftDelete` sonucuna göre 404/403 dönecek. Butonu gizlemek tek başına yetmez; detayda `CanEdit`/`CanDelete` sadece butonları göstermek için kullanılacak.
-  - Formlar ViewModel kullanacak, `CreatedByUserId` bağlanmayacak, görünürlüğün varsayılanı "Sadece Ben" olacak.
-  - E-posta alanında `[EmailAddress]` doğrulaması olacak (`mailto:` linkine parametre eklenmesin).
-  - Tekrar telefon kontrolü sadece Create/Edit POST'ta yapılacak, ayrı bir AJAX/GET ucu açılmayacak. Kayıt görünmüyorsa genel mesaj gösterilecek (ad/sahip bilgisi yok).
-  - Silme onayı için SweetAlert2 (InstrumentTrade'deki gibi, CDN) kullanılabilir; form POST + antiforgery olacak.
+- Görev 10 `musteri: gorusme gecmisi` (müşteri detayında Activity ekleme ve listeleme).
+  - Activity görünürlüğü bağlı olduğu müşteriden gelecek: müşteriyi göremeyen görüşmeyi de göremez. Ekleme için müşteriyi görebilmek yeterli mi, yoksa düzenleme yetkisi mi gerekecek, görevin başında karar verilecek.
+  - Yetki denetçisi bağlı kayıtları ayrıca denetleyecek.
 - Görev 15'te (Dashboard sayıları): `DashboardController`'a Staff şartı konacak ve sayılar sadece görünürlük filtreli sorgularla (`CountVisible`) alınacak.
 - Görev 6b (.NET 10 yükseltme) .NET 10 SDK kurulunca yapılacak.
 
@@ -127,6 +156,12 @@
 - Bu bilgisayarda sanal bellek çok dolu (2026-11-06: 17,9 GB'ın 0,4 GB'ı boştu). Derleme "Out of memory" verebiliyor. Önce `dotnet build-server shutdown` denenir. Gerekirse Windows sayfa dosyası büyütülür ya da Visual Studio/Chrome kapatılır (bu kararı kullanıcı verir).
 - LocalDB bazen kendiliğinden duruyor. Uygulama "SQL Server process failed to start" hatasıyla açılmazsa önce `sqllocaldb start MSSQLLocalDB` çalıştırılır.
 - Türkçe arama `Turkish_CI_AS` collation'ıyla çözüldü (görev 8). InMemory test veritabanı collation'ı yok saydığı için büyük/küçük harf davranışı otomatik testle değil, LocalDB'de elle doğrulanıyor.
+- **Açık karar: telefonla numara yoklama riski** (yetki denetimi, görev 9). Gizli bir kayıtla aynı telefon girilince çıkan genel mesaj, o numaranın ofiste başka bir danışmanın müşterisi olduğunu evet/hayır olarak belli ediyor. Ad, sahip ve id verilmiyor. Bu, "aynı kişi tekrar kaydedilmesin" kuralının bilinen bir bedeli. Önerilen sınırlamalar (kullanıcı onayıyla, ayrı bir görevde):
+  - Create/Edit POST'a kullanıcı başına hız sınırı. ASP.NET Core'un yerleşik `RateLimiting` özelliği yeterli, ek paket gerekmez.
+  - Bu çakışmalar için denetim kaydı (kim, ne zaman).
+- Bilinen ve şimdilik kabul edilen durumlar (görev 9 denetimi):
+  - Contacts'ta eşzamanlılık kontrolü (rowversion) yok; yönetici ve kayıt sahibi aynı anda düzenlerse son kaydeden kazanır.
+  - `PhoneNormalized` indeksi benzersiz değil; aynı anda gelen iki eklemede aynı numara iki kez kaydedilebilir.
 - Test kullanıcılarının şifresi (`mudur1`, `danisman1`, `danisman2`): `dotnet user-secrets list --project EmlakOfisi.WebUI` → `Seed:TestUserPassword`.
 - Sahte telefon numaraları için **gerçek operatör önekleri (05xx) kullanılmaz**. Seed `0100` önekini kullanıyor (`TestDataSeeder.FakePhone`).
 - Bellek açıldıktan sonra (2026-11-06, kullanıcı programları kapattı) sanal bellekte 7,8 GB boş yer vardı. Sayfa dosyası hâlâ 2 GB'a sabit; sorun tekrar ederse büyütülmesi önerilir.

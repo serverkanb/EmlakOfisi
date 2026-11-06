@@ -382,6 +382,19 @@ public class ContactVisibilityTests : IDisposable
     }
 
     [Fact]
+    public void DuplicatePhone_PrefersVisibleRecord_WhenHiddenOneHasLowerId()
+    {
+        // Aynı numara: önce Bora'nın gizli kaydı (küçük id), sonra Bora'nın herkese açık kaydı.
+        Add("Gizli2", "Kayit", "0100 777 77 77", Bora, Visibility.OnlyMe);
+        var open = Add("Acik2", "Kayit", "0100 777 77 77", Bora, Visibility.Public);
+
+        var result = _service.TCheckDuplicatePhone("0100 777 77 77", Ayse, false);
+
+        Assert.True(result.Exists);
+        Assert.Equal(open.ContactId, result.VisibleContactId);
+    }
+
+    [Fact]
     public void DuplicatePhone_ExcludesOwnRecordOnUpdate()
     {
         Assert.False(_service.TCheckDuplicatePhone("0532 111 11 11", Ayse, false, excludeContactId: _ayseOnlyMe.ContactId).Exists);

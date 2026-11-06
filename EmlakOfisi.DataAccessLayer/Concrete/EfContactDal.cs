@@ -92,6 +92,16 @@ namespace EmlakOfisi.DataAccessLayer.Concrete
                 .FirstOrDefault();
         }
 
+        public int? FindVisibleIdByPhone(string phoneNormalized, int? excludeContactId, int userId, bool canSeeAll)
+        {
+            return Visible(userId, canSeeAll)
+                .Where(c => c.PhoneNormalized == phoneNormalized &&
+                            (excludeContactId == null || c.ContactId != excludeContactId))
+                .OrderBy(c => c.ContactId)
+                .Select(c => (int?)c.ContactId)
+                .FirstOrDefault();
+        }
+
         public void Create(Contact contact)
         {
             _context.Contacts.Add(contact);

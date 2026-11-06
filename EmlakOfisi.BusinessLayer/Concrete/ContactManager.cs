@@ -117,17 +117,14 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             if (normalized.Length == 0)
                 return new DuplicatePhoneResult();
 
-            var existingId = _contactDal.FindIdByPhone(normalized, excludeContactId);
-            if (existingId == null)
-                return new DuplicatePhoneResult();
+            // 1) Önce kullanıcının görebildiği kayıtlarda ara: varsa id'sini ver (link gösterilsin)
+            var visibleId = _contactDal.FindVisibleIdByPhone(normalized, excludeContactId, userId, canSeeAll);
+            if (visibleId != null)
+                return new DuplicatePhoneResult { Exists = true, VisibleContactId = visibleId };
 
-            // Var. Kullanıcı o kaydı görebiliyorsa id'sini ver (link gösterilsin), göremiyorsa verme.
-            var visible = _contactDal.GetVisibleById(existingId.Value, userId, canSeeAll) != null;
-            return new DuplicatePhoneResult
-            {
-                Exists = true,
-                VisibleContactId = visible ? existingId : null
-            };
+            // 2) Göremediği bir kayıtta var mı: sadece "var" bilgisi, id/ad verilmez
+            var hiddenId = _contactDal.FindIdByPhone(normalized, excludeContactId);
+            return new DuplicatePhoneResult { Exists = hiddenId != null };
         }
     }
 }
