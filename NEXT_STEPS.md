@@ -161,6 +161,23 @@
     - Deneme notları silindi.
   - Telefon görünümü bu görevde tarayıcıda kontrol edilemedi (tarayıcı oturumu kapanmıştı). Kullanıcının bir kez bakması önerildi.
 
+- 2026-11-07: Ara görev `arayuz: kurumsal logo ve renkler` (kullanıcı isteği; logo ofise ait, kullanım hakkı kullanıcı tarafından onaylandı)
+  - Logo kaynağı: `docs/brand/altinkule-logo-orijinal.webp`. Şeffaf PNG'ler `docs/brand/logo-donustur.ps1` ile üretiliyor (Windows WIC/WPF, ek paket yok). Logo değişirse aynı betik yeniden çalıştırılır.
+  - Üretilen dosyalar (`wwwroot/images/brand/`):
+    - `altinkule-logo.png`: renkli; giriş ve hata sayfalarında kullanılıyor (480px, ~86 KB).
+    - `altinkule-logo-beyaz.png`: yazıları beyaz, koyu menü için (300px, ~35 KB; her sayfada yüklendiği için küçük tutuldu).
+    - `altinkule-ikon-512/192/64.png`: sekme ikonu ve apple-touch-icon; görev 16'da PWA ikonu olarak da kullanılacak.
+  - Renkler (logodan ölçüldü): altın `#C9A24D`, koyu altın `#B0902B`, açık altın `#D8B66D`, antrasit `#2C2928`. Beyaz zemin üzerindeki altın metin için `#8A6A1E` kullanılıyor.
+  - `site.css` Tabler'ın değişkenlerini eziyor, Tabler dosyalarına dokunulmadı:
+    - Ana renk altın, butonlarda yazı antrasit.
+    - Sol menü antrasit; seçili satır açık altın ve solunda altın çizgi.
+    - Linkler, çerçeveli butonlar, `text-primary` ve `bg-primary-lt` (kullanıcı baş harfleri, görüşme ve dashboard ikonları) koyu altın.
+    - Sayfa başlığında ve mobil alt menünün seçili ikonunda altın çizgi.
+  - Kontrast oranları: altın üzerine antrasit 6,0:1, koyu altın link 5,0:1, menüde açık altın 7,4:1. **Altın zemin üzerine beyaz yazı kullanılmaz** (2,4:1).
+  - Tabler'ın `navbar-brand-autodark` sınıfı, logoya renkleri ters çeviren filtre uyguladığı için menüde kullanılmıyor.
+  - 199/199 test yeşil. 375px ve 1280px'te ekran görüntüsü ve hesaplanan stillerle kontrol edildi.
+  - Giriş sayfası tarayıcıda görülemedi (panelde açık bir kullanıcı oturumu vardı, kapatılmadı); aynı renkli logo hata sayfasında kontrol edildi.
+
 ## Sıradaki küçük görev
 - Görev 11 `portfoy: gorunurluk sorgulari ve testleri` (müşterideki yapının aynısı; Property'de görünürlük kuralına sorumlu danışman da giriyor: `|| AgentUserId == userId`).
 - Görev 15'te (Dashboard sayıları): `DashboardController`'a Staff şartı konacak ve sayılar sadece görünürlük filtreli sorgularla (`CountVisible`) alınacak.

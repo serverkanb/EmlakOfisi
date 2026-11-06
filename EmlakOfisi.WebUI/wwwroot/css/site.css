@@ -1,5 +1,96 @@
 /* Emlak Ofisi - Tabler üzerine küçük eklemeler */
 
+/* ===================== Altınkule kurumsal renkleri =====================
+   Logodan ölçüldü (docs/brand). Okunabilirlik (WCAG kontrast oranı):
+   - Altın zemin üzerine antrasit yazı 6,0:1  (beyaz yazı 2,4:1 olduğu için KULLANILMAZ)
+   - Koyu altın link beyaz üzerinde 5,0:1, antrasit menüde açık altın 7,4:1
+   Tabler'ın kendi değişkenleri ezilir; Tabler dosyalarına dokunulmaz. */
+:root {
+    --ak-gold: #C9A24D;          /* logo: "ALTIN" yazısı */
+    --ak-gold-dark: #B0902B;     /* logo: büyük kavis */
+    --ak-gold-light: #D8B66D;    /* logo: dış kavisler */
+    --ak-gold-text: #8A6A1E;     /* beyaz zemin üzerinde okunur altın (link, vurgu) */
+    --ak-charcoal: #2C2928;      /* logo: "KULE GAYRİMENKUL" yazısı */
+
+    --tblr-primary: var(--ak-gold);
+    --tblr-primary-rgb: 201, 162, 77;
+    --tblr-primary-fg: var(--ak-charcoal);   /* altın butonda yazı antrasit */
+    --tblr-link-color: var(--ak-gold-text);
+    --tblr-link-color-rgb: 138, 106, 30;
+    --tblr-link-hover-color: #6E5418;
+}
+
+/* Çerçeveli altın butonlar (ör. "Ara"): beyaz zeminde yazı ve çerçeve koyu altın (5,0:1);
+   üzerine gelince altın zemin + antrasit yazı (Tabler'ın varsayılanı) */
+.btn-outline-primary {
+    --tblr-btn-color: var(--ak-gold-text);
+    --tblr-btn-border-color: var(--ak-gold-text);
+    --tblr-btn-disabled-color: var(--ak-gold-text);
+}
+
+/* "text-primary" gibi düz metinde de okunur ton */
+.text-primary {
+    color: var(--ak-gold-text) !important;
+}
+
+/* Açık altın rozet/avatar (kullanıcı baş harfleri, görüşme ve dashboard ikonları): yazı/ikon koyu altın.
+   Tabler'ın kuralı da !important olduğu için burada da gerekli. */
+.bg-primary-lt {
+    color: var(--ak-gold-text) !important;
+}
+
+/* Sol menü: lacivert yerine antrasit; seçili satır altın */
+aside.navbar-vertical[data-bs-theme=dark] {
+    --tblr-navbar-bg: var(--ak-charcoal);
+    --tblr-navbar-active-color: var(--ak-gold-light);
+    --tblr-navbar-active-bg: rgba(201, 162, 77, 0.14);
+    background-color: var(--ak-charcoal);
+}
+
+aside.navbar-vertical .navbar-nav .nav-item.active > .nav-link {
+    color: var(--ak-gold-light);
+    box-shadow: inset 3px 0 0 var(--ak-gold);
+}
+
+aside.navbar-vertical .navbar-nav .nav-item.active > .nav-link .nav-link-icon {
+    color: var(--ak-gold);
+}
+
+/* Logo: menüde (koyu zemin, beyaz yazılı sürüm) ve giriş sayfasında (renkli sürüm) */
+.ak-brand {
+    display: inline-flex;
+    align-items: center;
+}
+
+.ak-logo-sidebar {
+    height: 40px;          /* mobil üst çubukta */
+    width: auto;
+}
+
+@media (min-width: 992px) {
+    .ak-logo-sidebar {
+        height: auto;
+        width: 150px;      /* masaüstü sol menüde */
+        margin: 0.25rem 0 0.5rem;
+    }
+}
+
+.ak-logo-login {
+    width: 100%;
+    max-width: 240px;
+    height: auto;
+}
+
+.ak-logo-small {
+    max-width: 160px;
+}
+
+/* Sayfa başlıklarında küçük altın vurgu */
+.page-header .page-title {
+    border-inline-start: 3px solid var(--ak-gold);
+    padding-inline-start: 0.6rem;
+}
+
 /* Mobil alt menü (sadece lg altı) */
 .bottom-nav {
     position: fixed;
@@ -31,7 +122,8 @@
 }
 
 .bottom-nav-item.active {
-    color: var(--tblr-primary);
+    color: var(--ak-gold-text);              /* beyaz zeminde okunur koyu altın */
+    box-shadow: inset 0 3px 0 var(--ak-gold); /* üstte altın çizgi */
 }
 
 .bottom-nav-item.disabled {
