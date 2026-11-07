@@ -182,7 +182,50 @@ Roller (`IdentityInitializer` ile oluşturulacak): **Admin**, **Manager** (Ofis 
    - Tarayıcı desteklemiyorsa düğme görünmez.
    - Dokunmatik için büyük düğme (en az 44px), dinlerken görsel geri bildirim.
    - Not: Chrome ve Safari konuşmayı tanımak için sesi kendi sunucularına (Google/Apple) gönderir; uygulama ek servis kullanmaz ama ses tarayıcı üreticisine gider. HTTPS gerekir.
-17. (Faz 2) `talep: musteri talepleri` → 18. `islem: satis/kiralama ve komisyon`
+17. (Faz 2) `talep: musteri talepleri` → 18. `islem: satis/kiralama ve komisyon` → 18b. `islem: danisman primi` (tamamlandı)
+
+### Eklenen özellikler (2026-11-07, kullanıcı onayıyla)
+Sıra: önce yayın hazırlığı (Türkçe form mesajları, canlı sistemde ilk admin), sonra kontrat dosyası (22–23, MVP'ye dahil, yayından önce), sonra aday listesi (19–21, Faz 3). .NET 10'a geçiş şimdilik ertelendi (kullanıcı kararı). Her görevin sonunda `yetki-denetcisi` ve `kod-inceleyici` çalışır.
+
+**Aday (potansiyel müşteri) arama listesi – Faz 3**
+- Ayrı tablo yok. `Contacts`'a eklenecekler:
+  - `Stage` (enum `ContactStage`: Aday=1, Müşteri=2; mevcut kayıtlar Müşteri olur)
+  - `LeadSource` (enum: Sahibinden, Emlakjet, Hepsiemlak, Tabela, Referans, SosyalMedya, Diğer)
+  - Kısa mülk bilgisi: `LeadDistrict` (semt), `LeadPropertyType`, `LeadListingUrl`
+  - `LastCallResult` (enum `CallResult`), `NextCallAt`, `DoNotCall` (bool)
+  - `SharedWithUserId` (görünürlük "Seçili danışman" için)
+  - İndeks: (`CreatedByUserId`, `Stage`, `NextCallAt`)
+- `Activities`'e `CallResult` (enum, boş olabilir). Her arama `Type = Call` olan bir görüşme kaydıdır; ayrı arama tablosu yok.
+- `CallResult`: Ulaşılamadı, Tekrar ara, İlgilenmiyor, Görüşme ayarlandı, Aranmak istemiyor.
+- **Görünürlük (müşteri ve aday için):** Sadece Ben (varsayılan) / Herkese Açık / **Seçili danışman** (ekleyen + seçilen tek danışman). Yöneticiler (Admin ve Ofis yöneticisi) hepsini görür. Seçili danışman kaydı görür ve arama sonucu girer; kaydı düzenleyemez, silemez. Kural `VisibilityRules`'ta tek yerde.
+- **"Aranacaklar" listesi:** Danışmanın aranmayı bekleyen tüm adayları (kendi + kendisine paylaşılan). Sıralama: tarihi geçmiş/bugün olanlar (vurgulu), sonra ileri tarihliler, en sonda tarihsiz. Filtre: bugün/bu hafta, kaynak, son sonuç. Mobilde dokun-ara, dönüşte tek dokunuşla sonuç. "Tekrar ara" sonraki tarihi sorar. Ana ekranda "Bugün aranacak: N".
+- "Aranmak istemiyor" olanlar ve müşteriye çevrilenler listeye düşmez.
+- **Telefon tekrar kontrolü:**
+  - Adaylarda engel yerine uyarı + "Yine de kaydet". Uyarı numaranın kimde olduğunu söylemez ("Başka bir danışmanın listesinde kayıtlı. Kimde olduğunu yöneticiniz görebilir"). Görebildiği kayıtsa link verilir.
+  - "Aranmak istemiyor" numaralarda bu ayrıca yazılır; yeni kayıt da "aranmak istemiyor" işaretli açılır.
+  - Müşterilerde mevcut engel kalır. Müşteriye çevirirken aynı numarayla müşteri varsa çevirme durur.
+  - Telefon zaten normalize edilip (`PhoneNormalized`, son 10 hane) indeksli saklanıyor (görev 7).
+- **"Müşteriye çevir":** aynı kaydın aşaması değişir, rol seçilir (alıcı/satıcı/kiracı/mülk sahibi), geçmiş korunur.
+
+**Kontrat dosyası (sade) – MVP, yayından önce**
+- `Transactions`'a eklenecekler:
+  - `LeaseStartDate`, `LeaseEndDate` (sadece kiralama; bitiş başlangıçtan sonra)
+  - `ContractFileName` (GUID), `ContractOriginalName`, `ContractContentType`, `ContractUploadedAt`, `ContractUploadedByUserId`
+  - İndeks: (`Type`, `Status`, `LeaseEndDate`)
+- İşlem başına tek dosya; yenisi eskisinin yerine geçer. Genel Documents tablosu ve belge türleri şimdilik yok.
+- PDF/JPG/PNG, en fazla 10 MB; tür içerikten (imza baytları) kontrol edilir.
+- `wwwroot` dışında, `Documents:Root` ayarındaki klasörde (varsayılan `App_Data/documents`) GUID adla saklanır.
+- Yükleme: işlemi düzenleyebilen ("aynı gün" kuralı dahil). İndirme: sadece controller üzerinden, işlemin görünürlük kuralıyla; görmeyen 404; önbellekte tutulmaz.
+- Mobilde dosya alanında `capture` yok: kamera, dosyalar ve tarayıcı (taranmış PDF) birlikte sunulur.
+- Ana ekranda "önümüzdeki 60 gün içinde biten kira kontratları" (danışman kendi işlemleri, yönetici ofis).
+- Yayın kontrol listesine: fotoğraf ve belge klasörleri yedeklenmeli, IIS uygulama havuzunun yazma izni olmalı.
+
+**Görevler**
+19. (Faz 3) `musteri: aday asamasi, secili danisman gorunurlugu, telefon uyarisi` → yetki-denetcisi
+20. (Faz 3) `aday: aranacaklar listesi ve arama sonucu` → yetki-denetcisi
+21. (Faz 3) `aday: musteriye cevir` → yetki-denetcisi
+22. (MVP) `islem: kira tarihleri ve kontrat dosyasi` → yetki-denetcisi
+23. (MVP) `dashboard: biten kira kontratlari` → yetki-denetcisi
 
 ---
 

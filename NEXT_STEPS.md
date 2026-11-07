@@ -400,12 +400,21 @@
   - Bilinçli kabuller: oranı tanımlı olmayan danışmanın tamamlanmış işlemi, Admin sonradan oran tanımlarsa ve işlem tekrar kaydedilirse yeni oranla hesaplanır; yönetici elle yazdığı oranı, sorumluyu değiştirirken yeni danışmanınkiyle değişmiş bulur (formda yazıyor); ofis varsayılan oranı yok (istenirse eklenir).
   - Not: geliştirme veritabanında `sqlcmd` ile güncelleme yaparken `-I` (QUOTED_IDENTIFIER) gerekiyor (AspNetUsers'ta filtreli indeks var).
 
+- 2026-11-07: Plana iki yeni özellik eklendi (kullanıcı onayıyla; ayrıntılar `docs/MIMARI_PLAN.md` "Eklenen özellikler"): **aday arama listesi** (görev 19–21, Faz 3) ve **kontrat dosyası** (görev 22–23, MVP).
+  - **Kullanıcı kararları:**
+    - Görünürlüğe üçüncü seçenek: **Seçili danışman** (ekleyen + seçilen tek danışman). Seçilen danışman görür ve arama sonucu girer, kaydı düzenleyemez/silemez. Yöneticiler (Admin ve Ofis yöneticisi) her şeyi görmeye devam eder.
+    - Aynı telefon: adaylarda engel yerine uyarı + "Yine de kaydet"; uyarı numaranın kimde olduğunu söylemez ("Kimde olduğunu yöneticiniz görebilir"). Müşterilerde mevcut engel kalır. Bu yüzden hız sınırı gerekmiyor.
+    - Liste adı "Aranacaklar" (sadece bugün değil; tarihi geçmiş/bugün olanlar üstte).
+    - **.NET 10'a geçiş şimdilik ertelendi.** Not: .NET 9'un desteği 10 Kasım 2026'da bitiyor (güvenlik güncellemesi gelmez); yayına almadan önce yeniden konuşulacak.
+
 ## Sıradaki küçük görev
-- MVP (Faz 1 ve 2) tamamlandı. Yayına hazırlık için öneriler (kullanıcıyla önceliklendirilecek):
-  - Production'da ilk admin kullanıcının nasıl oluşturulacağı (açık karar).
-  - IIS'e yayın: HTTPS, `Uploads:Root` yazma izni, yedekleme, connection string ortam değişkeni.
-  - Form binder'ının İngilizce mesajlarını Türkçeleştirme (`ModelBindingMessageProvider`).
-- Görev 6b (.NET 10 yükseltme) .NET 10 SDK kurulunca yapılacak.
+- Sıra (kullanıcı onayıyla):
+  1. `arayuz: form mesajlari turkce` – form binder'ının İngilizce mesajları (`ModelBindingMessageProvider`), ör. "The value 'abc' is not valid".
+  2. `kimlik: canli sistemde ilk admin` – uygulama ilk açılışta sunucu ayarındaki kullanıcı adı/şifreyle admin'i bir kez oluşturur; giriş yapıp şifre değiştirildikten sonra ayar silinir.
+  3. Görev 22 `islem: kira tarihleri ve kontrat dosyasi`, ardından görev 23 `dashboard: biten kira kontratlari`.
+  4. IIS'e yayın kontrol listesi (hosting bilgisi gelince): HTTPS, `Uploads:Root` ve `Documents:Root` yazma izni ve yedeklemesi, connection string ortam değişkeni.
+  5. Faz 3: görev 19–21 (aday arama listesi).
+- Görev 6b (.NET 10 yükseltme) kullanıcı kararıyla ertelendi.
 
 ## Açık kararlar / notlar
 - Mimari, InstrumentTrade projesindeki 4 katmanlı yapıya göre kuruluyor (Generic Dal/Service, EfXDal, XManager). Farkları `docs/MIMARI_PLAN.md` bölüm 0'da anlatılıyor.
