@@ -59,6 +59,10 @@ namespace EmlakOfisi.EntityLayer.Entities
         [StringLength(4000)]
         public string? Description { get; set; }
 
+        // Dış ilan sitesindeki ilanın adresi (sahibinden.com vb.). Sadece http/https kabul edilir.
+        [StringLength(500)]
+        public string? ListingUrl { get; set; }
+
         // İlişkiler
         public int? OwnerContactId { get; set; }   // Mülk sahibi
         public Contact? OwnerContact { get; set; }

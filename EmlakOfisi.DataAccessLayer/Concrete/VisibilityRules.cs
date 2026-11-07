@@ -1,0 +1,21 @@
+using EmlakOfisi.EntityLayer.Entities;
+using EmlakOfisi.EntityLayer.Enums;
+
+namespace EmlakOfisi.DataAccessLayer.Concrete
+{
+    // GÖRÜNÜRLÜK KURALLARI (tek yer). EfContactDal, EfPropertyDal ve iki kaydı birbirine bağlayan
+    // sorgular (ör. portföyle ilgilenen müşteriler) hep bunları kullanır; kural başka yerde tekrar yazılmaz.
+    public static class VisibilityRules
+    {
+        // Müşteri: silinmemiş VE (yönetici VEYA herkese açık VEYA kaydı oluşturan kişi)
+        public static IQueryable<Contact> VisibleTo(this IQueryable<Contact> contacts, int userId, bool canSeeAll) =>
+            contacts.Where(c => !c.IsDeleted &&
+                (canSeeAll || c.Visibility == Visibility.Public || c.CreatedByUserId == userId));
+
+        // Portföy: silinmemiş VE (yönetici VEYA herkese açık VEYA kaydı oluşturan VEYA sorumlu danışman)
+        public static IQueryable<Property> VisibleTo(this IQueryable<Property> properties, int userId, bool canSeeAll) =>
+            properties.Where(p => !p.IsDeleted &&
+                (canSeeAll || p.Visibility == Visibility.Public ||
+                 p.CreatedByUserId == userId || p.AgentUserId == userId));
+    }
+}

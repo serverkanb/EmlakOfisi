@@ -1,4 +1,5 @@
 using EmlakOfisi.BusinessLayer.Abstract;
+using EmlakOfisi.BusinessLayer.Helpers;
 using EmlakOfisi.DataAccessLayer.Abstract;
 using EmlakOfisi.EntityLayer.Entities;
 using EmlakOfisi.EntityLayer.Enums;
@@ -132,6 +133,7 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             property.Floor = changes.Floor;
             property.BuildingAge = changes.BuildingAge;
             property.Description = changes.Description;
+            property.ListingUrl = changes.ListingUrl;
             property.OwnerContactId = newOwnerId;
             property.AgentUserId = newAgentId;
             // Kullanıcı kararı (görev 11): düzenleyebilen herkes (sorumlu danışman dahil) görünürlüğü değiştirebilir
@@ -164,6 +166,7 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             if (p.GrossArea < 0 || p.NetArea < 0 || p.BuildingAge < 0) return false;
             if (p.Latitude is < -90 or > 90) return false;
             if (p.Longitude is < -180 or > 180) return false;
+            if (p.ListingUrl != null && !UrlValidator.IsSafeHttpUrl(p.ListingUrl)) return false;
             return true;
         }
 

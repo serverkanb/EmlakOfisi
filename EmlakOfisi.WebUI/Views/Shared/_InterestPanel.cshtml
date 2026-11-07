@@ -1,0 +1,113 @@
+@model InterestPanelViewModel
+@using EmlakOfisi.WebUI.Controllers
+@{
+    // Portföy sayfasında: "İlgilenenler" (satırlar müşteri). Müşteri sayfasında: "İlgilendiği portföyler" (satırlar portföy).
+    // Listeler sunucuda görünürlüğe göre süzülür; burada sadece gösterilir. Asıl kontrol PropertyInterestController/serviste.
+    var forContact = Model.ForContact;
+    var title = forContact ? "İlgilendiği portföyler" : "İlgilenenler";
+    var anchor = forContact ? "ilgilenilen-portfoyler" : "ilgilenenler";
+    var returnTo = forContact ? PropertyInterestController.ReturnToContact : "property";
+    var selectName = forContact ? "propertyId" : "contactId";
+    var selectId = forContact ? "NewInterest_PropertyId" : "NewInterest_ContactId";
+}
+
+<div class="card" id="@anchor">
+    <div class="card-header">
+        <h3 class="card-title"><i class="ti @(forContact ? "ti-home-search" : "ti-users") me-1"></i> @title</h3>
+        <span class="badge bg-secondary-lt ms-2">@Model.Items.Count</span>
+    </div>
+
+    @if (Model.Choices.Count > 0)
+    {
+        <div class="card-body border-bottom">
+            <form method="post" asp-controller="PropertyInterest" asp-action="Add">
+                @if (forContact)
+                {
+                    <input type="hidden" name="contactId" value="@Model.AnchorId" />
+                }
+                else
+                {
+                    <input type="hidden" name="propertyId" value="@Model.AnchorId" />
+                }
+                <input type="hidden" name="returnTo" value="@returnTo" />
+                <div class="row g-2">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label" for="@selectId">@(forContact ? "Portföy" : "Müşteri")</label>
+                        <select id="@selectId" name="@selectName" class="form-select form-select-lg" required>
+                            <option value="">Seçin…</option>
+                            @foreach (var c in Model.Choices)
+                            {
+                                <option value="@c.Id">@c.Name</option>
+                            }
+                        </select>
+                        <div class="form-hint">@Model.ChoiceHint</div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label" for="NewInterest_Note">Not (isteğe bağlı)</label>
+                        <input id="NewInterest_Note" name="note" maxlength="500" class="form-control form-control-lg"
+                               placeholder="Örn: Hafta sonu görmek istiyor" autocomplete="off" />
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="ti ti-plus me-1"></i> @(forContact ? "Portföye ilgilenen olarak ekle" : "İlgilenen ekle")
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    }
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="card-body text-secondary">@(forContact ? "Bu müşteri için henüz ilgilendiği portföy eklenmedi." : "Henüz ilgilenen kişi eklenmedi.")</div>
+    }
+    else
+    {
+        <div class="list-group list-group-flush">
+            @foreach (var i in Model.Items)
+            {
+                <div class="list-group-item">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                        <div class="flex-fill" style="min-width: 0;">
+                            @if (forContact)
+                            {
+                                <a asp-controller="Property" asp-action="Detail" asp-route-id="@i.PropertyId" class="fw-bold text-break">@i.PropertyTitle</a>
+                                <div class="ak-price small fw-bold">@i.PropertyPriceText</div>
+                            }
+                            else
+                            {
+                                <a asp-controller="Contact" asp-action="Detail" asp-route-id="@i.ContactId" class="fw-bold text-break">@i.ContactName</a>
+                                @if (!string.IsNullOrEmpty(i.Phone))
+                                {
+                                    <div class="text-secondary small">@i.Phone</div>
+                                }
+                            }
+                            @if (!string.IsNullOrEmpty(i.Note))
+                            {
+                                <div class="text-break mt-1" style="white-space: pre-line;">@i.Note</div>
+                            }
+                            <div class="text-secondary small mt-1">@i.AddedBy · @i.CreatedAt.ToString("dd.MM.yyyy")</div>
+                        </div>
+                        <div class="d-flex gap-1 align-items-center">
+                            @if (!forContact && i.TelLink.Length > 0)
+                            {
+                                <a href="@i.TelLink" class="btn btn-outline-primary icon-touch" aria-label="Ara"><i class="ti ti-phone"></i></a>
+                                <a href="@i.WhatsAppLink" target="_blank" rel="noopener" class="btn btn-outline-success icon-touch" aria-label="WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>
+                            }
+                            @if (i.CanDelete)
+                            {
+                                <form method="post" asp-controller="PropertyInterest" asp-action="Delete" asp-route-id="@i.PropertyInterestId"
+                                      onsubmit="return confirm('Bu kayıt ilgilenenler listesinden kaldırılsın mı?');">
+                                    <input type="hidden" name="returnTo" value="@returnTo" />
+                                    <button type="submit" class="btn btn-ghost-danger icon-touch" aria-label="Listeden kaldır">
+                                        <i class="ti ti-x"></i>
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

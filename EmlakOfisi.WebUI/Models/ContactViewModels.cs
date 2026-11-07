@@ -90,5 +90,8 @@ namespace EmlakOfisi.WebUI.Models
         public List<ActivityItemViewModel> Activities { get; set; } = new();
         public bool CanAddActivity { get; set; }
         public ActivityFormViewModel NewActivity { get; set; } = new();
+
+        // Görev 12c: ilgilendiği portföyler
+        public InterestPanelViewModel Interests { get; set; } = new();
     }
 }

@@ -12,13 +12,23 @@
         <div class="text-secondary"><i class="ti ti-map-pin me-1"></i>@(Model.Neighborhood != null ? Model.Neighborhood + ", " : "")@Model.Summary.Location</div>
     </div>
 
-    @if (Model.MapLink != null)
+    @if (Model.MapLink != null || Model.ListingUrl != null)
     {
-        <div class="col-12">
-            @* Link görünürlük kontrolünden geçmiş detaydan üretilir *@
-            <a href="@Model.MapLink" target="_blank" rel="noopener" class="btn btn-outline-primary contact-action w-100 w-md-auto">
-                <i class="ti ti-map-2 me-1"></i> Haritada aç
-            </a>
+        <div class="col-12 d-flex flex-column flex-md-row gap-2">
+            @* Linkler görünürlük kontrolünden geçmiş detaydan üretilir *@
+            @if (Model.MapLink != null)
+            {
+                <a href="@Model.MapLink" target="_blank" rel="noopener" class="btn btn-outline-primary contact-action">
+                    <i class="ti ti-map-2 me-1"></i> Haritada aç
+                </a>
+            }
+            @if (Model.ListingUrl != null)
+            {
+                @* Adres kayıtta http/https olarak doğrulandı; dış siteye bilgi gitmesin diye noreferrer *@
+                <a href="@Model.ListingUrl" target="_blank" rel="noopener noreferrer nofollow" class="btn btn-outline-primary contact-action">
+                    <i class="ti ti-external-link me-1"></i> İlanı aç
+                </a>
+            }
         </div>
     }
 
@@ -105,6 +115,10 @@
             </div>
         </div>
     }
+
+    <div class="col-12">
+        <partial name="_InterestPanel" model="Model.Interests" />
+    </div>
 
     @if (Model.CanEdit || Model.CanDelete)
     {

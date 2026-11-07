@@ -100,6 +100,8 @@ public class AuthorizationRulesTests
             typeof(PropertyController).GetMethods().Single(m => m.Name == nameof(PropertyController.Create) && m.GetParameters().Length == 1),
             typeof(PropertyController).GetMethods().Single(m => m.Name == nameof(PropertyController.Edit) && m.GetParameters().Length == 2),
             typeof(PropertyController).GetMethod(nameof(PropertyController.Delete))!,
+            typeof(PropertyInterestController).GetMethod(nameof(PropertyInterestController.Add))!,
+            typeof(PropertyInterestController).GetMethod(nameof(PropertyInterestController.Delete))!,
         };
 
         foreach (var action in actions)

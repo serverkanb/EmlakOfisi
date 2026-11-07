@@ -54,5 +54,6 @@ namespace EmlakOfisi.DataAccessLayer.Context
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<Activity> Activities { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<PropertyInterest> PropertyInterests { get; set; }
     }
 }

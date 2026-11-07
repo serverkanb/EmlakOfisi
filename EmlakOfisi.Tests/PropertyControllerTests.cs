@@ -40,7 +40,7 @@ public class PropertyControllerTests
         }
 
         public PropertyController As(AppUser user, string role) =>
-            Identity.SignedInAs(new PropertyController(Properties, Contacts), user, role);
+            Identity.SignedInAs(TestControllers.Property(Identity.Db, Properties, Contacts), user, role);
 
         public Property Add(AppUser creator, string title, Visibility visibility, int agent = 0, int? ownerId = null,
             decimal? lat = null, decimal? lng = null)
@@ -210,6 +210,57 @@ public class PropertyControllerTests
         var saved = f.Read(p.PropertyId)!;
         Assert.Equal(f.Cem.Id, saved.AgentUserId);
         Assert.Equal("Fiyat düzeltildi", saved.Title);
+    }
+
+    // ---------------- İlan linki (görev 12b) ----------------
+
+    [Fact]
+    public async Task ListingUrl_IsSaved_ShownInDetail_AndPrefilledInEdit()
+    {
+        using var f = await Fixture.CreateAsync();
+        var c = f.As(f.Ayse, RoleNames.Agent);
+        var form = Form();
+        form.ListingUrl = "  https://www.sahibinden.com/ilan/emlak-konut-satilik-deneme-123  ";
+
+        var redirect = Assert.IsType<RedirectToActionResult>(c.Create(form));
+        var id = (int)redirect.RouteValues!["id"]!;
+
+        Assert.Equal("https://www.sahibinden.com/ilan/emlak-konut-satilik-deneme-123", f.Read(id)!.ListingUrl);
+        Assert.Equal(f.Read(id)!.ListingUrl, ModelOf<PropertyDetailViewModel>(c.Detail(id)).ListingUrl);
+        Assert.Equal(f.Read(id)!.ListingUrl, ModelOf<PropertyFormViewModel>(c.Edit(id)).ListingUrl);
+
+        // Boş bırakılırsa link kaldırılır
+        var clear = Form();
+        clear.ListingUrl = "  ";
+        Assert.IsType<RedirectToActionResult>(c.Edit(id, clear));
+        Assert.Null(f.Read(id)!.ListingUrl);
+    }
+
+    [Theory]
+    [InlineData("javascript:alert(1)")]
+    [InlineData("data:text/html,<script>alert(1)</script>")]
+    [InlineData("www.sahibinden.com/ilan/1")]   // şema yok
+    [InlineData("/Property/Detail/1")]          // göreli adres
+    [InlineData("ftp://ornek.test/ilan")]
+    public async Task ListingUrl_Unsafe_IsRejected_InControllerAndService(string url)
+    {
+        using var f = await Fixture.CreateAsync();
+        var c = f.As(f.Ayse, RoleNames.Agent);
+        var form = Form();
+        form.ListingUrl = url;
+
+        Assert.IsType<ViewResult>(c.Create(form));
+        Assert.True(c.ModelState.ContainsKey(nameof(PropertyFormViewModel.ListingUrl)));
+        Assert.Empty(f.Identity.Db.Properties);
+
+        // Controller atlansa bile servis kabul etmez
+        var p = new Property { Title = "X", City = "A", District = "B", ListingUrl = url };
+        Assert.Equal(BusinessLayer.Abstract.OperationResult.Invalid, f.Properties.TCreate(p, f.Ayse.Id, false));
+
+        var existing = f.Add(f.Ayse, "Var olan", Visibility.OnlyMe);
+        var changes = new Property { Title = "X", City = "A", District = "B", ListingUrl = url };
+        Assert.Equal(BusinessLayer.Abstract.OperationResult.Invalid, f.Properties.TUpdate(existing.PropertyId, changes, f.Ayse.Id, false));
+        Assert.Null(f.Read(existing.PropertyId)!.ListingUrl);
     }
 
     [Theory]

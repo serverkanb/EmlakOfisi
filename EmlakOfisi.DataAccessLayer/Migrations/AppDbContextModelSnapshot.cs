@@ -423,6 +423,10 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                     b.Property<int>("ListingType")
                         .HasColumnType("int");
 
+                    b.Property<string>("ListingUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<decimal?>("Longitude")
                         .HasColumnType("decimal(9,6)");
 
@@ -475,6 +479,42 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                     b.HasIndex("Status", "ListingType");
 
                     b.ToTable("Properties");
+                });
+
+            modelBuilder.Entity("EmlakOfisi.EntityLayer.Entities.PropertyInterest", b =>
+                {
+                    b.Property<int>("PropertyInterestId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PropertyInterestId"));
+
+                    b.Property<int>("ContactId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PropertyInterestId");
+
+                    b.HasIndex("ContactId");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("PropertyId", "ContactId")
+                        .IsUnique();
+
+                    b.ToTable("PropertyInterests");
                 });
 
             modelBuilder.Entity("EmlakOfisi.EntityLayer.Entities.PropertyPhoto", b =>
@@ -795,6 +835,33 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("OwnerContact");
+                });
+
+            modelBuilder.Entity("EmlakOfisi.EntityLayer.Entities.PropertyInterest", b =>
+                {
+                    b.HasOne("EmlakOfisi.EntityLayer.Entities.Contact", "Contact")
+                        .WithMany()
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("EmlakOfisi.EntityLayer.Entities.AppUser", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("EmlakOfisi.EntityLayer.Entities.Property", "Property")
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Contact");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("Property");
                 });
 
             modelBuilder.Entity("EmlakOfisi.EntityLayer.Entities.PropertyPhoto", b =>

@@ -21,11 +21,16 @@ namespace EmlakOfisi.WebUI.Controllers
 
         private readonly IContactService _contactService;
         private readonly IActivityService _activityService;
+        private readonly IPropertyInterestService _interestService;
+        private readonly IPropertyService _propertyService;
 
-        public ContactController(IContactService contactService, IActivityService activityService)
+        public ContactController(IContactService contactService, IActivityService activityService,
+            IPropertyInterestService interestService, IPropertyService propertyService)
         {
             _contactService = contactService;
             _activityService = activityService;
+            _interestService = interestService;
+            _propertyService = propertyService;
         }
 
         [HttpGet]
@@ -83,10 +88,33 @@ namespace EmlakOfisi.WebUI.Controllers
                         UserName = a.User == null ? "" : $"{a.User.Name} {a.User.Surname}",
                         CanDelete = _activityService.TCanDelete(a, userId, canSeeAll)
                     })
-                    .ToList()
+                    .ToList(),
+                Interests = BuildInterestPanel(id, userId, canSeeAll)
             };
 
             return View(model);
+        }
+
+        // "İlgilendiği portföyler": sadece kullanıcının görebildiği portföyler (sorguda filtrelenir).
+        // Ekleme seçenekleri: görebildiği aktif portföyler, listede olanlar hariç.
+        private InterestPanelViewModel BuildInterestPanel(int contactId, int userId, bool canSeeAll)
+        {
+            var items = _interestService.TGetForContact(contactId, userId, canSeeAll) ?? new List<PropertyInterest>();
+            var existing = items.Select(i => i.PropertyId).ToHashSet();
+            var active = new DataAccessLayer.Abstract.PropertyFilter { Status = PropertyStatus.Active };
+
+            return new InterestPanelViewModel
+            {
+                ForContact = true,
+                AnchorId = contactId,
+                Items = items.Select(i => InterestItemViewModel.From(i,
+                    i.Property != null && _interestService.TCanDelete(i, i.Property, userId, canSeeAll))).ToList(),
+                Choices = _propertyService.TGetVisibleList(userId, canSeeAll, active, 1, 100).Items
+                    .Where(p => !existing.Contains(p.PropertyId))
+                    .Select(p => (p.PropertyId, $"{p.Title} · {p.District} / {p.City}"))
+                    .ToList(),
+                ChoiceHint = "Görebildiğiniz aktif portföyler listelenir."
+            };
         }
 
         // ---------------- Ekleme ----------------

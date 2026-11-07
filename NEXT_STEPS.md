@@ -219,6 +219,33 @@
   - Uçtan uca (curl) denendi: danisman1 6, danisman2 6, mudur1 8 portföy görüyor; filtreler ve Türkçe arama (İZMİR/izmir) doğru; gizli portföy 404; sorumlu danışman düzenleyebiliyor ama silemiyor (403). 375px'te yatay kaydırma yok.
   - `kod-inceleyici` ve `yetki-denetcisi` bulguları kapatıldı. Bilinçli bırakılanlar "Açık kararlar" bölümünde.
 
+- 2026-11-07: Ara görevler 12b ve 12c `portfoy: ilan linki ve ilgilenen musteriler` (kullanıcı isteği)
+  - **12b İlan linki:** `Property.ListingUrl` (nvarchar(500), boş olabilir). Sadece tam http/https adresi kabul ediliyor (`BusinessLayer/Helpers/UrlValidator`); kontrol hem formda hem serviste. Detayda "İlanı aç" butonu yeni sekmede, `noopener noreferrer nofollow` ile açılıyor. `PropertyListingUrl` migration'ı uygulandı (sadece kolon ekleme).
+  - **12c İlgilenen müşteriler:** yeni tablo `PropertyInterests` (portföy, müşteri, not, ekleyen, tarih). Aynı kişi aynı portföye bir kez eklenebiliyor (benzersiz indeks). `PropertyInterests` migration'ı uygulandı (sadece yeni tablo).
+  - **Kullanıcı kararları:**
+    - Ekleme: portföyü gören herkes, görebildiği bir müşteriyi ekleyebilir.
+    - Görme: satır için hem portföy hem müşteri görünür olmalı. Görünmeyen satır hiç çıkmıyor, gizli kişi sayısı da gösterilmiyor.
+    - Tek link alanı.
+  - Silme: ekleyen kişi, portföyü düzenleyebilen (oluşturan, sorumlu) ya da yönetici. İki kayıttan biri görünmüyorsa 404.
+  - **Görünürlük kuralları tek yere taşındı:** `DataAccessLayer/Concrete/VisibilityRules.cs` (`VisibleTo`). `EfContactDal`, `EfPropertyDal` ve `EfPropertyInterestDal` bunu kullanıyor; kural değişmedi.
+  - Ekranlar:
+    - Portföy detayında "İlgilenenler": ad, telefon, Ara ve WhatsApp butonları, not, ekleyen kişi.
+    - Müşteri detayında "İlgilendiği portföyler".
+    - İki sayfadan da ekleme yapılabiliyor (`PropertyInterestController`, sadece POST; `returnTo` sadece site içine yönlendiriyor).
+  - Testlerde controller'lar `TestControllers` yardımcısıyla kuruluyor.
+  - Testler 290/290 yeşil (`PropertyInterestTests`, ilan linki testleri, POST-only listesi).
+  - Uçtan uca (curl) denendi:
+    - danisman1, danisman2'nin gizli müşterisini Moda'nın listesinde görmüyor; müdür ikisini de görüyor.
+    - Gizli portföye ya da gizli müşteriye ekleme 404 veriyor; başkasının gizli satırını silme 404 veriyor.
+    - Token'sız ekleme 400 veriyor. Dış `returnTo` yok sayılıyor.
+    - `javascript:` link reddediliyor, https link kaydediliyor.
+    - Deneme kayıtları silindi.
+    - 375px'te yatay kaydırma yok, butonlar 48×44.
+  - `kod-inceleyici` ve `yetki-denetcisi` bulguları kapatıldı:
+    - Aynı anda gelen iki eklemede hata sayfası yerine "zaten listede" mesajı çıkıyor.
+    - Mesaj metni düzeltildi.
+    - Ortak `icon-touch` sınıfı eklendi.
+
 ## Sıradaki küçük görev
 - Görev 13 `portfoy: fotograf yukleme ve guvenli gosterim`. Şartlar:
   - Dosyalar `App_Data/uploads` altında (wwwroot dışında) saklanacak, klasör `.gitignore`'a eklenecek.
@@ -251,6 +278,11 @@
 - Bilinen ve şimdilik kabul edilen durumlar (görev 9 denetimi):
   - Contacts'ta eşzamanlılık kontrolü (rowversion) yok; yönetici ve kayıt sahibi aynı anda düzenlerse son kaydeden kazanır.
   - `PhoneNormalized` indeksi benzersiz değil; aynı anda gelen iki eklemede aynı numara iki kez kaydedilebilir.
+- İlgilenenler bilinçli kabulleri (görev 12c denetimi):
+  - Ekleme seçenekleri en fazla 100 kayıt: portföy sayfasında alıcılar (kiralıkta kiracılar), müşteri sayfasında aktif portföyler. Kayıt sayısı artınca görünürlük filtreli bir arama kutusu gerekecek (filtresiz "kişi ara" ucu açılmayacak).
+  - Müşteri sayfasından müşterinin rolüne bakılmadan herhangi bir aktif portföy eklenebiliyor (satıcı rolündeki kişi de ilgilenen olabilir).
+  - İlan linki girildiği biçimiyle saklanıyor. Kontrol `Uri` ile yapılıyor ve Razor linki kodluyor; istenirse `AbsoluteUri` saklanarak sıkılaştırılabilir.
+  - Listelerde `Include(CreatedByUser)` tam kullanıcı satırını belleğe alıyor; view'a sadece ad gidiyor.
 - Portföy ekranları bilinçli kabulleri (görev 12 denetimi):
   - Mülk sahibi listesi her rolden ilk 100 kişiyle sınırlı. Kayıt artınca görünür liste servisini kullanan bir arama alanı gerekecek.
   - Sahibi silinmiş (soft delete) portföyde yönetici de "Gizli kayıt" görüyor; sızıntı değil ama yanıltıcı. İleride ayrı bir "Silinmiş kişi" durumu eklenebilir.

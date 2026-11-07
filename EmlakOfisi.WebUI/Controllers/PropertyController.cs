@@ -21,11 +21,14 @@ namespace EmlakOfisi.WebUI.Controllers
 
         private readonly IPropertyService _propertyService;
         private readonly IContactService _contactService;
+        private readonly IPropertyInterestService _interestService;
 
-        public PropertyController(IPropertyService propertyService, IContactService contactService)
+        public PropertyController(IPropertyService propertyService, IContactService contactService,
+            IPropertyInterestService interestService)
         {
             _propertyService = propertyService;
             _contactService = contactService;
+            _interestService = interestService;
         }
 
         // ---------------- Liste ----------------
@@ -81,6 +84,7 @@ namespace EmlakOfisi.WebUI.Controllers
                 Floor = p.Floor,
                 BuildingAge = p.BuildingAge,
                 Description = p.Description,
+                ListingUrl = p.ListingUrl,
                 MapLink = PropertyLabels.MapLink(p.Latitude, p.Longitude, p.Address, p.Neighborhood, p.District, p.City),
                 CreatedAt = p.CreatedAt,
                 UpdatedAt = p.UpdatedAt,
@@ -91,7 +95,8 @@ namespace EmlakOfisi.WebUI.Controllers
                 OwnerPhone = owner?.Phone,
                 OwnerTelLink = ownerPhoneOk ? $"tel:+90{owner!.PhoneNormalized}" : null,
                 CanEdit = _propertyService.TCanEdit(p, userId, canSeeAll),
-                CanDelete = _propertyService.TCanDelete(p, userId, canSeeAll)
+                CanDelete = _propertyService.TCanDelete(p, userId, canSeeAll),
+                Interests = BuildInterestPanel(p, userId, canSeeAll)
             });
         }
 
@@ -164,6 +169,7 @@ namespace EmlakOfisi.WebUI.Controllers
                 Floor = p.Floor,
                 BuildingAge = p.BuildingAge,
                 Description = p.Description,
+                ListingUrl = p.ListingUrl,
                 OwnerContactId = ownerHidden ? null : p.OwnerContactId, // gizli sahibin id'si forma konmaz
                 AgentUserId = p.AgentUserId,
                 Visibility = p.Visibility
@@ -236,6 +242,10 @@ namespace EmlakOfisi.WebUI.Controllers
             if (!PropertyLabels.TryParseLocation(m.LocationText, out var lat, out var lng))
                 ModelState.AddModelError(nameof(m.LocationText), "Konumu \"40.98765, 29.03123\" biçiminde girin (Google Haritalar'dan kopyalayabilirsiniz).");
 
+            var listingUrl = Clean(m.ListingUrl);
+            if (listingUrl != null && !UrlValidator.IsSafeHttpUrl(listingUrl))
+                ModelState.AddModelError(nameof(m.ListingUrl), "İlan linki http:// ya da https:// ile başlayan tam bir adres olmalıdır.");
+
             if (!Enum.IsDefined(m.Visibility)) ModelState.AddModelError(nameof(m.Visibility), "Geçersiz görünürlük seçimi.");
             if (!Enum.IsDefined(m.ListingType)) ModelState.AddModelError(nameof(m.ListingType), "Geçersiz ilan tipi.");
             if (!Enum.IsDefined(m.PropertyType)) ModelState.AddModelError(nameof(m.PropertyType), "Geçersiz gayrimenkul türü.");
@@ -263,6 +273,7 @@ namespace EmlakOfisi.WebUI.Controllers
                 Floor = m.Floor,
                 BuildingAge = m.BuildingAge,
                 Description = Clean(m.Description),
+                ListingUrl = listingUrl,
                 OwnerContactId = m.OwnerContactId,
                 AgentUserId = m.AgentUserId,
                 Visibility = m.Visibility
@@ -310,6 +321,29 @@ namespace EmlakOfisi.WebUI.Controllers
                                .Select(o => (o.Key, o.Value)).ToList(),
                 CanChooseAgent = canSeeAll,
                 Agents = agents
+            };
+        }
+
+        // "İlgilenenler": sadece kullanıcının görebildiği müşteriler (sorguda filtrelenir; gizli kişi sayısı da verilmez).
+        // Ekleme seçenekleri: görebildiği alıcılar (kiralıkta kiracılar), listede olanlar hariç.
+        private InterestPanelViewModel BuildInterestPanel(Property p, int userId, bool canSeeAll)
+        {
+            var items = _interestService.TGetForProperty(p.PropertyId, userId, canSeeAll) ?? new List<PropertyInterest>();
+            var existing = items.Select(i => i.ContactId).ToHashSet();
+            var role = p.ListingType == ListingType.Rent ? ContactRole.Tenant : ContactRole.Buyer;
+
+            return new InterestPanelViewModel
+            {
+                ForContact = false,
+                AnchorId = p.PropertyId,
+                Items = items.Select(i => InterestItemViewModel.From(i, _interestService.TCanDelete(i, p, userId, canSeeAll))).ToList(),
+                Choices = _contactService.TGetVisibleList(userId, canSeeAll, null, role, 1, 100).Items
+                    .Where(c => !existing.Contains(c.ContactId))
+                    .Select(c => (c.ContactId, $"{c.Name} {c.Surname}"))
+                    .ToList(),
+                ChoiceHint = p.ListingType == ListingType.Rent
+                    ? "Görebildiğiniz kiracı müşteriler listelenir. Kişi listede yoksa müşterinin sayfasından ekleyin."
+                    : "Görebildiğiniz alıcı müşteriler listelenir. Kişi listede yoksa müşterinin sayfasından ekleyin."
             };
         }
 

@@ -116,6 +116,10 @@ namespace EmlakOfisi.WebUI.Models
         [Display(Name = "Açıklama")]
         public string? Description { get; set; }
 
+        [StringLength(500, ErrorMessage = "İlan linki en fazla 500 karakter olabilir.")]
+        [Display(Name = "İlan linki")]
+        public string? ListingUrl { get; set; }
+
         [Display(Name = "Mülk sahibi")]
         public int? OwnerContactId { get; set; }
 
@@ -147,6 +151,7 @@ namespace EmlakOfisi.WebUI.Models
         public int? BuildingAge { get; set; }
         public string? Description { get; set; }
         public string? MapLink { get; set; }
+        public string? ListingUrl { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
@@ -160,6 +165,9 @@ namespace EmlakOfisi.WebUI.Models
 
         public bool CanEdit { get; set; }
         public bool CanDelete { get; set; }
+
+        // Görev 12c: ilgilenen müşteriler
+        public InterestPanelViewModel Interests { get; set; } = new();
     }
 
     // Etiketler, fiyat ve konum biçimleri tek yerde

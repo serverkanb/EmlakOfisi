@@ -16,14 +16,9 @@ namespace EmlakOfisi.DataAccessLayer.Concrete
             _context = context;
         }
 
-        // GÖRÜNÜRLÜK KURALI (tek yer):
-        // silinmemiş VE (yönetici VEYA herkese açık VEYA kaydı oluşturan VEYA sorumlu danışman)
-        private IQueryable<Property> Visible(int userId, bool canSeeAll)
-        {
-            return _context.Properties.Where(p => !p.IsDeleted &&
-                (canSeeAll || p.Visibility == Visibility.Public ||
-                 p.CreatedByUserId == userId || p.AgentUserId == userId));
-        }
+        // Görünürlük kuralı VisibilityRules'ta (tek yer)
+        private IQueryable<Property> Visible(int userId, bool canSeeAll) =>
+            _context.Properties.VisibleTo(userId, canSeeAll);
 
         private IQueryable<Property> Filtered(int userId, bool canSeeAll, PropertyFilter f)
         {

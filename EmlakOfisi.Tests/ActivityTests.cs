@@ -53,7 +53,7 @@ public class ActivityTests
             Identity.SignedInAs(new ActivityController(Activities), user, role);
 
         public ContactController ContactController(AppUser user, string role) =>
-            Identity.SignedInAs(new ContactController(Contacts, Activities), user, role);
+            Identity.SignedInAs(TestControllers.Contact(Identity.Db, Contacts, Activities), user, role);
 
         public void Dispose() => Identity.Dispose();
     }

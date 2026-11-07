@@ -37,6 +37,9 @@ builder.Services.AddScoped<IActivityService, ActivityManager>();
 builder.Services.AddScoped<IPropertyDal, EfPropertyDal>();
 builder.Services.AddScoped<IPropertyService, PropertyManager>();
 
+builder.Services.AddScoped<IPropertyInterestDal, EfPropertyInterestDal>();
+builder.Services.AddScoped<IPropertyInterestService, PropertyInterestManager>();
+
 // ---------------------------
 //  Identity Ayarları
 // ---------------------------
