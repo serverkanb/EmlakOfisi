@@ -105,6 +105,9 @@ public class AuthorizationRulesTests
             typeof(PropertyPhotoController).GetMethod(nameof(PropertyPhotoController.Upload))!,
             typeof(PropertyPhotoController).GetMethod(nameof(PropertyPhotoController.Delete))!,
             typeof(PropertyPhotoController).GetMethod(nameof(PropertyPhotoController.SetCover))!,
+            typeof(AppointmentController).GetMethods().Single(m => m.Name == nameof(AppointmentController.Create) && m.GetParameters().Length == 1),
+            typeof(AppointmentController).GetMethods().Single(m => m.Name == nameof(AppointmentController.Edit) && m.GetParameters().Length == 2),
+            typeof(AppointmentController).GetMethod(nameof(AppointmentController.SetStatus))!,
         };
 
         foreach (var action in actions)

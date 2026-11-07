@@ -17,5 +17,10 @@ namespace EmlakOfisi.DataAccessLayer.Concrete
             properties.Where(p => !p.IsDeleted &&
                 (canSeeAll || p.Visibility == Visibility.Public ||
                  p.CreatedByUserId == userId || p.AgentUserId == userId));
+
+        // Randevu (danışmanın ajandası): yönetici VEYA sorumlu danışman VEYA randevuyu oluşturan.
+        // Bağlı müşteri/portföy ayrıca kendi kuralıyla kontrol edilir; görünmüyorsa bilgisi verilmez.
+        public static IQueryable<Appointment> VisibleTo(this IQueryable<Appointment> appointments, int userId, bool canSeeAll) =>
+            appointments.Where(a => canSeeAll || a.AgentUserId == userId || a.CreatedByUserId == userId);
     }
 }

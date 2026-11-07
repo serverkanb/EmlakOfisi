@@ -20,6 +20,13 @@
                 </a>
             </div>
         }
+        @* Müşteriyi gören herkes kendi ajandasına randevu ekleyebilir (id serviste tekrar kontrol edilir) *@
+        <div class="d-flex mt-2">
+            <a asp-controller="Appointment" asp-action="Create" asp-route-contactId="@Model.Summary.ContactId"
+               class="btn btn-outline-primary flex-fill flex-md-grow-0 contact-action">
+                <i class="ti ti-calendar-plus me-1"></i> Randevu ekle
+            </a>
+        </div>
     </div>
 
     <div class="col-12">

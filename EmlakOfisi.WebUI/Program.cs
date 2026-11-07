@@ -44,6 +44,9 @@ builder.Services.AddScoped<IPropertyInterestService, PropertyInterestManager>();
 builder.Services.AddScoped<IPropertyPhotoDal, EfPropertyPhotoDal>();
 builder.Services.AddScoped<IPropertyPhotoService, PropertyPhotoManager>();
 
+builder.Services.AddScoped<IAppointmentDal, EfAppointmentDal>();
+builder.Services.AddScoped<IAppointmentService, AppointmentManager>();
+
 // Fotoğraflar wwwroot DIŞINDA saklanır (adresle doğrudan açılamaz). Sunucuda farklı bir klasör
 // gerekirse "Uploads:Root" ayarıyla değiştirilir; uygulama havuzunun bu klasöre yazma izni olmalı.
 var uploadsRoot = builder.Configuration["Uploads:Root"];
@@ -147,7 +150,8 @@ using (var scope = app.Services.CreateScope())
 
     var contactService = scope.ServiceProvider.GetRequiredService<IContactService>();
     var propertyService = scope.ServiceProvider.GetRequiredService<IPropertyService>();
-    await TestDataSeeder.SeedAsync(userManager, contactService, propertyService, app.Configuration, app.Environment, logger);
+    var appointmentService = scope.ServiceProvider.GetRequiredService<IAppointmentService>();
+    await TestDataSeeder.SeedAsync(userManager, contactService, propertyService, appointmentService, app.Configuration, app.Environment, logger);
 }
 
 app.Run();

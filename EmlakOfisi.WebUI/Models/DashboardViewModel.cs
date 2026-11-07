@@ -11,5 +11,9 @@ namespace EmlakOfisi.WebUI.Models
         public int RentedProperties { get; set; }
         public int Contacts { get; set; }
         public bool CanSeeAll { get; set; }
+
+        // Yaklaşan randevular: danışman kendi ajandasını, yönetici tüm ofisi görür (en yakın 5)
+        public int UpcomingCount { get; set; }
+        public List<AppointmentItemViewModel> Upcoming { get; set; } = new();
     }
 }

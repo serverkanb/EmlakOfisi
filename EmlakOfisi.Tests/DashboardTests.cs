@@ -43,7 +43,7 @@ public class DashboardTests
 
         public DashboardViewModel View(AppUser user, string role)
         {
-            var controller = Identity.SignedInAs(new DashboardController(Properties, Contacts), user, role);
+            var controller = Identity.SignedInAs(TestControllers.Dashboard(Identity.Db, Properties, Contacts), user, role);
             return Assert.IsType<DashboardViewModel>(Assert.IsType<ViewResult>(controller.Index()).Model);
         }
 

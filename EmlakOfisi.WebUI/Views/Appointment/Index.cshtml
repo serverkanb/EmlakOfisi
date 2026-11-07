@@ -1,0 +1,92 @@
+@using EmlakOfisi.EntityLayer.Enums
+@model AppointmentListViewModel
+@{
+    ViewData["Title"] = "Randevular";
+    var tabs = new (AppointmentScope Scope, string Label)[]
+    {
+        (AppointmentScope.Upcoming, "Yaklaşan"),
+        (AppointmentScope.Past, "Geçmiş"),
+        (AppointmentScope.Cancelled, "İptal")
+    };
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    @* Sekmeler: mobilde tam genişlik, dokunmatik için büyük *@
+    <div class="btn-group flex-fill flex-sm-grow-0" role="group" aria-label="Randevu listesi">
+        @foreach (var t in tabs)
+        {
+            <a asp-action="Index" asp-route-scope="@t.Scope" asp-route-mine="@(Model.Mine ? true : null)"
+               class="btn @(Model.Scope == t.Scope ? "btn-primary" : "btn-outline-primary") appointment-tab">@t.Label</a>
+        }
+    </div>
+    <a asp-action="Create" class="btn btn-primary flex-fill flex-sm-grow-0">
+        <i class="ti ti-calendar-plus me-1"></i> Yeni randevu
+    </a>
+</div>
+
+@if (Model.CanSeeAll)
+{
+    @* Yönetici varsayılan olarak tüm ofisi görür; kendi ajandasına daraltabilir *@
+    <form method="get" asp-action="Index" class="mb-2">
+        <input type="hidden" name="scope" value="@Model.Scope" />
+        <label class="form-check form-switch m-0 py-2 appointment-mine">
+            <input class="form-check-input" type="checkbox" name="mine" value="true" @(Model.Mine ? "checked" : "")
+                   onchange="this.form.submit()" />
+            <span class="form-check-label">Sadece benim randevularım</span>
+        </label>
+    </form>
+}
+
+<div class="text-secondary small mb-2">@Model.TotalCount randevu</div>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="empty">
+        <div class="empty-icon"><i class="ti ti-calendar-event fs-1"></i></div>
+        <p class="empty-title">Randevu yok</p>
+        <p class="empty-subtitle text-secondary">
+            @(Model.Scope == AppointmentScope.Upcoming ? "Yaklaşan bir randevunuz bulunmuyor." : "Bu listede kayıt bulunmuyor.")
+        </p>
+    </div>
+}
+else
+{
+    @* Gün gün gruplanmış kartlar (telefonda tek sütun, geniş ekranda iki sütun) *@
+    @foreach (var day in Model.Items.GroupBy(i => i.StartAt.Date))
+    {
+        <h3 class="appointment-day mt-3 mb-2">@AppointmentLabels.DayTitle(day.Key)</h3>
+        <div class="row row-cards">
+            @foreach (var item in day)
+            {
+                <div class="col-12 col-xl-6">
+                    <partial name="_AppointmentCard" model="item" view-data='new ViewDataDictionary(ViewData) { ["Scope"] = Model.Scope, ["Mine"] = Model.Mine }' />
+                </div>
+            }
+        </div>
+    }
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Sayfalar">
+            @if (Model.Page > 1)
+            {
+                <a asp-action="Index" asp-route-scope="@Model.Scope" asp-route-mine="@(Model.Mine ? true : null)"
+                   asp-route-page="@(Model.Page - 1)" class="btn btn-outline-secondary"><i class="ti ti-chevron-left me-1"></i> Önceki</a>
+            }
+            else
+            {
+                <span></span>
+            }
+            <span class="text-secondary">Sayfa @Model.Page / @Model.TotalPages</span>
+            @if (Model.Page < Model.TotalPages)
+            {
+                <a asp-action="Index" asp-route-scope="@Model.Scope" asp-route-mine="@(Model.Mine ? true : null)"
+                   asp-route-page="@(Model.Page + 1)" class="btn btn-outline-secondary">Sonraki <i class="ti ti-chevron-right ms-1"></i></a>
+            }
+            else
+            {
+                <span></span>
+            }
+        </nav>
+    }
+}

@@ -34,7 +34,16 @@
             <i class="ti ti-building-community"></i><span>Portföy</span>
         </span>
     }
-    <span class="bottom-nav-item disabled" aria-disabled="true">
-        <i class="ti ti-calendar-event"></i><span>Randevu</span>
-    </span>
+    @if (isStaff)
+    {
+        <a class="bottom-nav-item @Active("Appointment")" asp-controller="Appointment" asp-action="Index">
+            <i class="ti ti-calendar-event"></i><span>Randevu</span>
+        </a>
+    }
+    else
+    {
+        <span class="bottom-nav-item disabled" aria-disabled="true">
+            <i class="ti ti-calendar-event"></i><span>Randevu</span>
+        </span>
+    }
 </nav>

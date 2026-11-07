@@ -173,6 +173,15 @@ Roller (`IdentityInitializer` ile oluşturulacak): **Admin**, **Manager** (Ofis 
 14. `randevu: liste ve ekleme`
 15. `dashboard: sayilar`
 16. `pwa: manifest ve service worker`
+16b. (MVP, formlar yapıldıktan sonra) `arayuz: not alanlari icin bas-konus mikrofon dugmesi`
+   - Web Speech API, dil `tr-TR`, harici paket/servis yok.
+   - Düğme basılı tutulunca dinler, bırakınca durur, metni alanın sonuna ekler.
+   - Tek ortak JS dosyası; sadece `data-mic` işaretli **textarea**'larda çalışır.
+   - Sadece serbest metin alanları: görüşme/aktivite notları, randevu notu, müşteri talep açıklaması (görev 17 gelince), portföy açıklaması.
+   - Telefon, fiyat, tarih gibi yapılandırılmış alanlara eklenmez.
+   - Tarayıcı desteklemiyorsa düğme görünmez.
+   - Dokunmatik için büyük düğme (en az 44px), dinlerken görsel geri bildirim.
+   - Not: Chrome ve Safari konuşmayı tanımak için sesi kendi sunucularına (Google/Apple) gönderir; uygulama ek servis kullanmaz ama ses tarayıcı üreticisine gider. HTTPS gerekir.
 17. (Faz 2) `talep: musteri talepleri` → 18. `islem: satis/kiralama ve komisyon`
 
 ---

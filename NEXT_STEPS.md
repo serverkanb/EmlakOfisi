@@ -280,8 +280,29 @@
   - Uçtan uca denendi: danisman1 18 müşteri / 6 portföy (3 aktif), danisman2 17 / 6 (4 aktif), mudur1 25 / 8 (5 aktif). Kart sayıları filtreli listelerle birebir tuttu. 375px'te yatay kaydırma yok, durum satırları 60px.
   - `kod-inceleyici` ve `yetki-denetcisi`: engelleyici bulgu yok. Kullanılmayan `Total` silindi, durum etiketleri ortak yardımcıdan alınıyor.
 
+- 2026-11-07: Görev 14 `randevu: liste, ekleme, duzenleme, durum`
+  - **Kullanıcı kararı (plan onayı):** randevu danışmanın ajandasıdır, "Herkese Açık / Sadece Ben" seçimi yok. Önceki "görünürlük bağlı kayıttan türetilsin" notunun yerine bu kural geçerli; bağlı kaydın bilgisi ayrıca kendi görünürlüğüyle korunuyor.
+    - Görme ve düzenleme: yönetici, sorumlu danışman ya da randevuyu oluşturan (`VisibilityRules.VisibleTo(Appointment)`).
+    - Danışman sadece kendi adına ekler; sorumluyu yönetici seçer (aktif ve rolü olan çalışan).
+    - Silme yok; randevu "İptal" yapılır.
+  - **Bağlı müşteri/portföy:** eklenirken görünür olmalı (değilse `Invalid`). Liste, ana ekran ve formda görüntüleyenin görünürlüğüyle **aynı sorguda** okunuyor (`EfAppointmentDal.ToRows`); görünmüyorsa sadece "Gizli kayıt" yazıyor (ad, telefon, id yok). Görmediği mevcut bağlantıyı kullanıcı değiştiremez ve kaldıramaz.
+  - Portföy adresi "Yer" alanına **kopyalanmıyor** (yetki denetimi): yönetici sorumluyu başka danışmana verirse portföy ona gizli olabilir. Kartta harita linki portföy görünürlüğünden canlı üretiliyor.
+  - `AppointmentController` (`[Staff]`):
+    - `Index`: Yaklaşan / Geçmiş / İptal sekmeleri, gün gün kartlar, 20'li sayfalama. Yönetici için "Sadece benim randevularım".
+    - `Create` (müşteri detayından "Randevu ekle", portföy detayından "Gösterim ekle"), `Edit`, POST `SetStatus` (Yapıldı / İptal / Tekrar planla).
+    - Önce yetki (404; düzenleme kuralı bugün görünürlükle aynı, kod ayrı tutuldu), sonra form doğrulaması. Tarih 2000 ile 2 yıl sonrası arasında, bitiş başlangıçtan sonra. Tarih ve saat `datetime-local`.
+  - "Yaklaşan" = Planlandı ve bugün 00:00'dan sonra (bugünün randevuları gün boyunca listede kalır). Tarihi geçmiş ama sonuçlanmamış randevu Geçmiş sekmesinde "Sonuçlanmadı" rozetiyle görünüyor; "Tekrar planla" bu durumda düzenleme ekranına gidiyor.
+  - `AppointmentScope` enum'u `EntityLayer/Enums`'ta (mimari test, controller action parametresinde DAL tipi istemiyor).
+  - Menü: "Randevular" sol menüde ve alt menüde aktif. Ana ekranda "Yaklaşan randevular" kartı: sayı ve en yakın 5 randevu (danışman kendi ajandası, yönetici tüm ofis).
+  - `TestDataSeeder`: 7 sahte randevu (yaklaşan, yapıldı, iptal; biri müdürden danışmana atanmış).
+  - Testler 341/341 yeşil (`AppointmentTests`): görünürlük matrisi, sekmeler, gizli bağlantının sızmaması ve korunması, sorumlu atama kuralları, korunan alanlar, tarih doğrulaması, controller 404 sırası, ana ekran sayısı, düzenleme kuralı sabitleme testi.
+  - Uçtan uca (LocalDB + curl) denendi: danisman1 3/1/0, danisman2 1/0/1, mudur1 5/1/1 (yaklaşan/geçmiş/iptal), seed'le birebir. Başkasının randevusunda Edit ve SetStatus 404; token'sız POST 400; gizli müşteriyle ekleme form hatası veriyor; başka danışman adına ekleme ekleyenin kendi adına kaydediliyor. Sorgu SQL Server'da tek sorguya çevriliyor. 375px'te yatay kaydırma yok, butonlar ≥44px.
+  - Denemede eklenen bir randevu (id 8, "deneme-ajan") uygulamadan iptal edildi; silme özelliği olmadığı için geliştirme veritabanında İptal sekmesinde duruyor.
+  - `kod-inceleyici` ve `yetki-denetcisi` bulguları kapatıldı (adres kopyalama, geçmiş tarihli "Tekrar planla", "Sonuçlanmadı" rozeti, filtrenin korunması, dokunma alanları).
+
 ## Sıradaki küçük görev
-- Görev 14 `randevu: liste ve ekleme`. Ana ekrandaki "Yaklaşan randevular" kartı da bu görevde dolacak. Randevu görünürlüğü bağlı müşteri/portföyün görünürlüğünden türetilmeli; sayım `VisibleTo` üzerinden SQL'de yapılmalı (yetki denetçisi notu).
+- Görev 16 `pwa: manifest ve service worker` (ikonlar `wwwroot/images/brand/altinkule-ikon-*.png` hazır).
+- Görev listesine eklendi (2026-11-07, kullanıcı isteği): 16b `arayuz: not alanlari icin bas-konus mikrofon dugmesi` (MVP, formlardan sonra). Ayrıntılar `docs/MIMARI_PLAN.md` bölüm 6'da. Randevu notu alanı da artık var.
 - Görev 6b (.NET 10 yükseltme) .NET 10 SDK kurulunca yapılacak.
 
 ## Açık kararlar / notlar
@@ -335,3 +356,9 @@
 - Bellek açıldıktan sonra (2026-11-06, kullanıcı programları kapattı) sanal bellekte 7,8 GB boş yer vardı. Sayfa dosyası hâlâ 2 GB'a sabit; sorun tekrar ederse büyütülmesi önerilir.
 - Derleme bellek yetmezliği yaşarsa: `dotnet build -m:1 -nodeReuse:false -p:UseSharedCompilation=false` daha az bellekle çalışıyor.
 - `.gitignore`: fotoğraflar `App_Data/uploads` altında saklanacak, görev 13'te bu klasör eklenecek.
+- Randevu bilinçli kabulleri (görev 14 denetimi):
+  - Randevuyu oluşturan kişi, randevu yöneticiyle başkasına verildikten sonra da görür, düzenler ve iptal eder (portföydeki "oluşturan yetkisini korur" kuralıyla aynı); notları da okur.
+  - "Yer" ve "Not" serbest metindir; kullanıcı elle gizli bir kaydın bilgisini yazarsa randevuyu görenler okur.
+  - Liste satırına bağlı müşteri/portföyün tam entity'si alınıyor (view'a sadece gereken alanlar gidiyor). `AppointmentRow` kullanan yeni ekranda gizli bağlantı için `row.Appointment.ContactId` doğrudan gösterilmemeli.
+  - Geçmiş sekmesi tarihe göre (yeni üstte) sıralı; ileri tarihli olup "Yapıldı" işaretlenen randevu listenin başında çıkar.
+  - Çakışan randevu uyarısı, "Yapıldı" olunca görüşme geçmişine otomatik not, hatırlatma ve takvim görünümü sonraya bırakıldı.

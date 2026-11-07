@@ -1,0 +1,116 @@
+@using EmlakOfisi.EntityLayer.Enums
+@model AppointmentFormViewModel
+@{
+    var options = (AppointmentFormOptions)ViewBag.Options;
+    var isEdit = options.AppointmentId != null;
+}
+
+@* Ekleme ve düzenleme formunun ortak alanları. Mobilde tek sütun; tarih/saat telefonun kendi seçicisiyle. *@
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+<div class="row g-3">
+    <div class="col-12">
+        <div class="form-label">Tür</div>
+        <div class="form-selectgroup form-selectgroup-boxes d-flex flex-row gap-2">
+            <label class="form-selectgroup-item flex-fill">
+                <input type="radio" asp-for="Type" value="@AppointmentType.Meeting" class="form-selectgroup-input" />
+                <span class="form-selectgroup-label d-flex align-items-center gap-2 p-3">
+                    <i class="ti ti-messages fs-2"></i> Görüşme
+                </span>
+            </label>
+            <label class="form-selectgroup-item flex-fill">
+                <input type="radio" asp-for="Type" value="@AppointmentType.Showing" class="form-selectgroup-input" />
+                <span class="form-selectgroup-label d-flex align-items-center gap-2 p-3">
+                    <i class="ti ti-home-search fs-2"></i> Gösterim
+                </span>
+            </label>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6">
+        <label asp-for="StartAt" class="form-label required"></label>
+        <input asp-for="StartAt" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" class="form-control form-control-lg" />
+        <span asp-validation-for="StartAt" class="text-danger small"></span>
+    </div>
+    <div class="col-12 col-md-6">
+        <label asp-for="EndAt" class="form-label"></label>
+        <input asp-for="EndAt" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" class="form-control form-control-lg" />
+        <span asp-validation-for="EndAt" class="text-danger small"></span>
+    </div>
+
+    <div class="col-12 col-md-6">
+        <label asp-for="ContactId" class="form-label"></label>
+        @if (options.ContactHidden)
+        {
+            @* Mevcut müşteri bu kullanıcıya görünmüyor: değiştirilemez, id forma konmaz *@
+            <div class="form-control form-control-lg bg-light text-secondary"><i class="ti ti-lock me-1"></i>Gizli kayıt (değiştirilemez)</div>
+        }
+        else
+        {
+            <select asp-for="ContactId" class="form-select form-select-lg">
+                <option value="">Seçilmedi</option>
+                @foreach (var c in options.Contacts)
+                {
+                    <option value="@c.Id">@c.Name</option>
+                }
+            </select>
+            <div class="form-hint">Görebildiğiniz müşteriler listelenir.</div>
+        }
+    </div>
+    <div class="col-12 col-md-6">
+        <label asp-for="PropertyId" class="form-label"></label>
+        @if (options.PropertyHidden)
+        {
+            <div class="form-control form-control-lg bg-light text-secondary"><i class="ti ti-lock me-1"></i>Gizli kayıt (değiştirilemez)</div>
+        }
+        else
+        {
+            <select asp-for="PropertyId" class="form-select form-select-lg">
+                <option value="">Seçilmedi</option>
+                @foreach (var p in options.Properties)
+                {
+                    <option value="@p.Id">@p.Name</option>
+                }
+            </select>
+            <div class="form-hint">Görebildiğiniz aktif portföyler listelenir.</div>
+        }
+    </div>
+
+    <div class="col-12">
+        <label asp-for="Location" class="form-label"></label>
+        <input asp-for="Location" class="form-control form-control-lg" placeholder="Ör. ofis, portföy adresi" autocomplete="off" />
+        <span asp-validation-for="Location" class="text-danger small"></span>
+    </div>
+
+    @if (options.CanChooseAgent)
+    {
+        <div class="col-12 col-md-6">
+            <label asp-for="AgentUserId" class="form-label"></label>
+            <select asp-for="AgentUserId" class="form-select form-select-lg">
+                @foreach (var a in options.Agents)
+                {
+                    <option value="@a.Id">@a.Name</option>
+                }
+            </select>
+        </div>
+    }
+
+    @if (isEdit)
+    {
+        <div class="col-12 col-md-6">
+            <label asp-for="Status" class="form-label"></label>
+            <select asp-for="Status" class="form-select form-select-lg">
+                @foreach (var s in new[] { AppointmentStatus.Planned, AppointmentStatus.Done, AppointmentStatus.Cancelled })
+                {
+                    <option value="@s">@AppointmentLabels.Status(s)</option>
+                }
+            </select>
+        </div>
+    }
+
+    <div class="col-12">
+        <label asp-for="Notes" class="form-label"></label>
+        <textarea asp-for="Notes" rows="4" class="form-control"></textarea>
+        <span asp-validation-for="Notes" class="text-danger small"></span>
+    </div>
+</div>

@@ -12,6 +12,14 @@
         <div class="text-secondary"><i class="ti ti-map-pin me-1"></i>@(Model.Neighborhood != null ? Model.Neighborhood + ", " : "")@Model.Summary.Location</div>
     </div>
 
+    <div class="col-12 d-flex flex-column flex-md-row gap-2">
+        @* Portföyü gören herkes kendi ajandasına gösterim ekleyebilir (id serviste tekrar kontrol edilir) *@
+        <a asp-controller="Appointment" asp-action="Create" asp-route-propertyId="@Model.Summary.PropertyId"
+           asp-route-type="@EmlakOfisi.EntityLayer.Enums.AppointmentType.Showing" class="btn btn-outline-primary contact-action">
+            <i class="ti ti-calendar-plus me-1"></i> Gösterim ekle
+        </a>
+    </div>
+
     @if (Model.MapLink != null || Model.ListingUrl != null)
     {
         <div class="col-12 d-flex flex-column flex-md-row gap-2">

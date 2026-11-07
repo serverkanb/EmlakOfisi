@@ -196,3 +196,8 @@ aside.navbar-vertical .navbar-nav .nav-item.active > .nav-link .nav-link-icon {
 
 /* Ana ekran durum satırları: dokunmatik hedef en az 44px */
 .dashboard-row { min-height: 44px; }
+
+/* Randevular: sekmeler, gün başlıkları ve "sadece benim" anahtarı (dokunmatik hedef en az 44px) */
+.appointment-tab { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+.appointment-day { font-size: 1rem; font-weight: 600; }
+.appointment-mine { min-height: 44px; display: flex; align-items: center; }

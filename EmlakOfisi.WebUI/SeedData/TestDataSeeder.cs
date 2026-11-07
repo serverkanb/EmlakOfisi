@@ -27,6 +27,7 @@ namespace EmlakOfisi.WebUI.SeedData
             UserManager<AppUser> userManager,
             IContactService contactService,
             IPropertyService propertyService,
+            IAppointmentService appointmentService,
             IConfiguration configuration,
             IHostEnvironment environment,
             ILogger logger)
@@ -81,6 +82,7 @@ namespace EmlakOfisi.WebUI.SeedData
             if (existing > 0)
             {
                 SeedProperties(propertyService, contactService, ids, logger);
+                SeedAppointments(appointmentService, propertyService, contactService, ids, logger);
                 return;
             }
 
@@ -140,6 +142,7 @@ namespace EmlakOfisi.WebUI.SeedData
             logger.LogInformation("{Count} sahte müşteri oluşturuldu.", n);
 
             SeedProperties(propertyService, contactService, ids, logger);
+            SeedAppointments(appointmentService, propertyService, contactService, ids, logger);
         }
 
         // Sahte portföyler: sadece hiç (silinmemiş) portföy yoksa. Sahipler yukarıdaki sahte müşterilerden seçilir;
@@ -201,6 +204,68 @@ namespace EmlakOfisi.WebUI.SeedData
                 "Bursa", "Nilüfer", null, Visibility.Public, null, PropertyStatus.Passive, "5+2", 320);
 
             logger.LogInformation("{Count} sahte portföy oluşturuldu.", count);
+        }
+
+        // Sahte randevular: sadece hiç randevu yoksa. Tarihler bugüne göre (yaklaşan, geçmiş, iptal) üretilir.
+        private static void SeedAppointments(IAppointmentService appointmentService, IPropertyService propertyService,
+            IContactService contactService, Dictionary<string, int> ids, ILogger logger)
+        {
+            var m = ids["mudur1"];
+            var (_, existing) = appointmentService.TGetVisibleList(m, true, new AppointmentFilter(), 1, 1);
+            if (existing > 0)
+                return;
+
+            var a1 = ids["danisman1"];
+            var a2 = ids["danisman2"];
+
+            // Bağlı kayıtlar, randevuyu ekleyenin gözünden bulunur (servis görünmeyen kaydı kabul etmez)
+            int? Contact(int viewer, string fullName) =>
+                contactService.TGetVisibleList(viewer, viewer == m, fullName, null, 1, 1).Items.FirstOrDefault()?.ContactId;
+            int? Prop(int viewer, string title) =>
+                propertyService.TGetVisibleList(viewer, viewer == m, new PropertyFilter { Search = title }, 1, 1).Items.FirstOrDefault()?.PropertyId;
+
+            var today = DateTime.Today;
+            var count = 0;
+            void Add(int creator, AppointmentType type, DateTime start, int? contactId, int? propertyId,
+                string? location, string? notes, AppointmentStatus status = AppointmentStatus.Planned, int agent = 0)
+            {
+                var a = new Appointment
+                {
+                    Type = type, StartAt = start, EndAt = start.AddHours(1), ContactId = contactId, PropertyId = propertyId,
+                    Location = location, Notes = notes, AgentUserId = agent
+                };
+                var result = appointmentService.TCreate(a, creator, canSeeAll: creator == m);
+                if (result != OperationResult.Success)
+                {
+                    logger.LogWarning("Sahte randevu eklenemedi: {Start} ({Result})", start, result);
+                    return;
+                }
+                count++;
+                if (status != AppointmentStatus.Planned)
+                    appointmentService.TSetStatus(a.AppointmentId, status, creator, creator == m);
+            }
+
+            // danisman1
+            Add(a1, AppointmentType.Showing, today.AddDays(1).AddHours(11), Contact(a1, "Ayşe Çelik"), Prop(a1, "Moda 3+1"),
+                "Moda, Kadıköy", "Sahte deneme kaydıdır. Anahtar ofiste.");
+            Add(a1, AppointmentType.Meeting, today.AddDays(3).AddHours(15), Contact(a1, "Deniz Arslan"), null,
+                "Ofis", "Sahte deneme kaydıdır.");
+            Add(a1, AppointmentType.Meeting, today.AddDays(-2).AddHours(10), Contact(a1, "Fatma Kılıç"), Prop(a1, "Ataşehir"),
+                "Ofis", "Sahte deneme kaydıdır.", AppointmentStatus.Done);
+
+            // danisman2
+            Add(a2, AppointmentType.Showing, today.AddDays(2).AddHours(14), Contact(a2, "Murat Polat"), Prop(a2, "Urla"),
+                "Urla", "Sahte deneme kaydıdır.");
+            Add(a2, AppointmentType.Meeting, today.AddDays(5).AddHours(9).AddMinutes(30), null, null,
+                "Ofis", "Sahte deneme kaydıdır.", AppointmentStatus.Cancelled);
+
+            // mudur1: danışmana atanan gösterim ve kendi görüşmesi
+            Add(m, AppointmentType.Showing, today.AddDays(1).AddHours(16), Contact(m, "Sibel Acar"), Prop(m, "Çankaya"),
+                "Kızılay, Çankaya", "Sahte deneme kaydıdır.", agent: a1);
+            Add(m, AppointmentType.Meeting, today.AddDays(4).AddHours(13), Contact(m, "Zafer Ateş"), null,
+                "Ofis", "Sahte deneme kaydıdır.");
+
+            logger.LogInformation("{Count} sahte randevu oluşturuldu.", count);
         }
     }
 }

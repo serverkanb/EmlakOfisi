@@ -83,9 +83,36 @@
     </div>
     <div class="col-12 col-lg-6">
         <div class="card h-100">
-            <div class="card-header"><h3 class="card-title">Yaklaşan randevular</h3></div>
-            <div class="card-body text-secondary">
-                <i class="ti ti-calendar-event me-1"></i> Randevu modülü yakında eklenecek.
+            <div class="card-header">
+                <h3 class="card-title">Yaklaşan randevular</h3>
+                <span class="badge bg-primary-lt ms-auto">@Model.UpcomingCount</span>
+            </div>
+            @if (Model.Upcoming.Count == 0)
+            {
+                <div class="card-body text-secondary">
+                    <i class="ti ti-calendar-event me-1"></i> Yaklaşan randevu yok.
+                </div>
+            }
+            else
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var a in Model.Upcoming)
+                    {
+                        @* Bağlı kayıt görünmüyorsa adı gösterilmez *@
+                        <a asp-controller="Appointment" asp-action="Index" class="list-group-item list-group-item-action dashboard-row">
+                            <div class="d-flex justify-content-between gap-2">
+                                <span class="fw-bold text-nowrap">@a.StartAt.ToString("dd.MM ddd HH:mm", PropertyLabels.Tr)</span>
+                                <span class="text-secondary small text-end">@AppointmentLabels.Type(a.Type)@(a.IsMine ? "" : " · " + a.AgentName)</span>
+                            </div>
+                            <div class="text-secondary small text-truncate">
+                                @a.LinkSummary
+                            </div>
+                        </a>
+                    }
+                </div>
+            }
+            <div class="card-footer">
+                <a asp-controller="Appointment" asp-action="Index" class="btn btn-link px-0">Tüm randevular <i class="ti ti-chevron-right"></i></a>
             </div>
         </div>
     </div>

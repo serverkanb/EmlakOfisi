@@ -26,4 +26,13 @@ internal static class TestControllers
 
     public static PropertyController Property(AppDbContext db, IPropertyService properties, IContactService contacts) =>
         new(properties, contacts, Interests(db, properties, contacts), Photos(db, properties));
+
+    public static AppointmentManager Appointments(AppDbContext db, IContactService contacts, IPropertyService properties) =>
+        new(new EfAppointmentDal(db), contacts, properties);
+
+    public static AppointmentController Appointment(AppDbContext db, IContactService contacts, IPropertyService properties) =>
+        new(Appointments(db, contacts, properties), contacts, properties);
+
+    public static DashboardController Dashboard(AppDbContext db, IPropertyService properties, IContactService contacts) =>
+        new(properties, contacts, Appointments(db, contacts, properties));
 }
