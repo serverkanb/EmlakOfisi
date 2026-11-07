@@ -5,3 +5,6 @@ obj/
 appsettings.*.local.json
 wwwroot/uploads/
 .claude/settings.local.json
+
+# Yüklenen portföy fotoğrafları (gerçek veri olabilir, depoya girmez)
+**/App_Data/uploads/

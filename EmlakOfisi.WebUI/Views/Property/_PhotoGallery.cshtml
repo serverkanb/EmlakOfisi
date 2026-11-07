@@ -1,0 +1,86 @@
+@model PropertyDetailViewModel
+@using EmlakOfisi.BusinessLayer.Abstract
+@using EmlakOfisi.WebUI.Controllers
+
+@* Fotoğraflar: portföyü gören herkes görür; yükleme/silme/kapak butonları sadece düzenleyebilene.
+   Resimler yetki kontrollü PropertyPhoto/Show ucundan gelir (dosyalar wwwroot dışında).
+   Asıl kontrol PropertyPhotoController'da (serviste) yapılır. *@
+<div class="card" id="fotograflar">
+    <div class="card-header">
+        <h3 class="card-title"><i class="ti ti-photo me-1"></i> Fotoğraflar</h3>
+        <span class="badge bg-secondary-lt ms-2">@Model.Photos.Count</span>
+    </div>
+
+    @if (Model.CanEdit && Model.Photos.Count < IPropertyPhotoService.MaxPerProperty)
+    {
+        <div class="card-body border-bottom">
+            @* Seçilen fotoğraflar site.js'te telefonda küçültülür (en fazla 1600 px JPEG) ve tek seferde gönderilir *@
+            <form method="post" asp-controller="PropertyPhoto" asp-action="Upload" asp-route-propertyId="@Model.Summary.PropertyId"
+                  enctype="multipart/form-data" data-photo-upload data-max-files="@PropertyPhotoController.MaxFilesPerUpload">
+                <input type="file" id="PhotoCamera" accept="image/*" capture="environment" class="d-none" data-photo-picker />
+                <input type="file" id="PhotoGallery" accept="image/*" multiple class="d-none" data-photo-picker />
+                <input type="file" name="files" multiple class="d-none" data-photo-target />
+                <div class="d-flex flex-column flex-sm-row gap-2">
+                    <label for="PhotoCamera" class="btn btn-primary contact-action">
+                        <i class="ti ti-camera me-1"></i> Kamera
+                    </label>
+                    <label for="PhotoGallery" class="btn btn-outline-primary contact-action">
+                        <i class="ti ti-photo-plus me-1"></i> Galeriden seç
+                    </label>
+                </div>
+                <div class="form-hint mt-2" data-photo-status>
+                    Fotoğraflar yüklenmeden önce küçültülür. Tek seferde en fazla @PropertyPhotoController.MaxFilesPerUpload,
+                    portföy başına en fazla @IPropertyPhotoService.MaxPerProperty fotoğraf.
+                </div>
+            </form>
+        </div>
+    }
+
+    @if (Model.Photos.Count == 0)
+    {
+        <div class="card-body text-secondary">Henüz fotoğraf eklenmedi.</div>
+    }
+    else
+    {
+        <div class="card-body">
+            <div class="row g-2">
+                @foreach (var photo in Model.Photos)
+                {
+                    <div class="col-6 col-md-4">
+                        <a asp-controller="PropertyPhoto" asp-action="Show" asp-route-id="@photo.PropertyPhotoId" target="_blank" rel="noopener"
+                           class="d-block ratio ratio-4x3 rounded overflow-hidden bg-secondary-lt">
+                            <img src="@Url.Action("Show", "PropertyPhoto", new { id = photo.PropertyPhotoId })" alt="@Model.Summary.Title fotoğrafı"
+                                 loading="lazy" class="w-100 h-100" style="object-fit: cover;" />
+                        </a>
+                        @if (photo.IsCover || Model.CanEdit)
+                        {
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                @if (photo.IsCover)
+                                {
+                                    <span class="badge bg-primary-lt"><i class="ti ti-star me-1"></i>Kapak</span>
+                                }
+                                else if (Model.CanEdit)
+                                {
+                                    <form method="post" asp-controller="PropertyPhoto" asp-action="SetCover" asp-route-id="@photo.PropertyPhotoId">
+                                        <button type="submit" class="btn btn-ghost-primary btn-sm icon-touch" aria-label="Kapak yap" title="Kapak yap">
+                                            <i class="ti ti-star"></i>
+                                        </button>
+                                    </form>
+                                }
+                                @if (Model.CanEdit)
+                                {
+                                    <form method="post" asp-controller="PropertyPhoto" asp-action="Delete" asp-route-id="@photo.PropertyPhotoId"
+                                          onsubmit="return confirm('Bu fotoğraf silinsin mi? Geri alınamaz.');">
+                                        <button type="submit" class="btn btn-ghost-danger btn-sm icon-touch" aria-label="Fotoğrafı sil" title="Sil">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

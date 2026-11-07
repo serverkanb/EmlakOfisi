@@ -246,13 +246,36 @@
     - Mesaj metni düzeltildi.
     - Ortak `icon-touch` sınıfı eklendi.
 
+- 2026-11-07: Görev 13 `portfoy: fotograf yukleme ve guvenli gosterim`
+  - Kurallar: fotoğrafı portföyü gören herkes görür. Yükleme, silme ve kapak seçme portföyü düzenleyebilene açık (oluşturan, sorumlu, yönetici). Görmeyen 404, düzenleyemeyen 403; yetki dosya kontrolünden önce.
+  - `IPropertyPhotoDal`/`EfPropertyPhotoDal`, `IPropertyPhotoService`/`PropertyPhotoManager`. Portföy başına en fazla 30 fotoğraf. İlk fotoğraf kapak olur; kapak silinirse sıradaki kapak olur. Yeni migration yok (tablo görev 3'te kurulmuştu).
+  - Saklama: `WebUI/Helpers/PhotoFileStore`. Varsayılan `ContentRoot/App_Data/uploads`; `Uploads:Root` ayarıyla değiştirilebilir. Dosya adı `{portföyId}/{guid}.jpg`, kök dışına çıkan yol reddediliyor. Klasör `.gitignore`'da.
+  - Dosya tipi içerikten anlaşılıyor (`BusinessLayer/Helpers/ImageFileValidator`): JPEG, PNG, WebP. Dosya başına 5 MB, tek seferde 10 dosya.
+  - Gösterim: `PropertyPhoto/Show/{id}` (`[Staff]`, görünürlük kontrollü). Başlıklar: `private, max-age=3600`, `nosniff`, `Content-Security-Policy: default-src 'none'; sandbox`. View'a sadece fotoğraf id'si gidiyor.
+  - **Telefonda küçültme** (`site.js`, ek paket yok):
+    - Fotoğraflar sırayla en fazla 1600 px JPEG'e küçültülüyor (kalite 0,82); saydam PNG beyaz zeminli oluyor.
+    - Yeniden kodlama konum (GPS) bilgisini siliyor.
+    - Toplam 28 MB'ı aşarsa Türkçe uyarı çıkıyor.
+    - Küçültme başarısız olursa orijinal dosya gidiyor; sunucu yine kontrol ediyor.
+  - Ekran: portföy detayında "Fotoğraflar" kartı. "Kamera" (`capture=environment`) ve "Galeriden seç" butonları; telefonda 2 sütun galeri, Kapak yap ve Sil butonları 44×44.
+  - Testler 304/304 yeşil (`PropertyPhotoTests`): yetki matrisi, gizli/silinmiş portföy, içerikle tip tespiti, path traversal, sonda ayraçlı kök yolu, sınırlar, kapak kuralları, controller 404/403, diske hiçbir şey yazılmaması.
+  - Uçtan uca denendi (tarayıcı + curl):
+    - 4000×3000, 2 MB'lık test resmi 1600×1200, 326 KB olarak yüklendi.
+    - Başka danışman herkese açık portföyün fotoğrafını görüyor ama yükleyemiyor/silemiyor (AccessDenied). Gizli portföyün fotoğrafı ve yüklemesi 404.
+    - `/App_Data/uploads/...` doğrudan açılmıyor (404). Token'sız yükleme 400. Sahte (HTML) ".jpg" reddediliyor.
+    - 375px'te yatay kaydırma yok. Deneme fotoğrafları silindi, diskte dosya kalmadı.
+  - `kod-inceleyici` ve `yetki-denetcisi` bulguları kapatıldı:
+    - Kök yolu sonda ayraçla verilince çökme düzeltildi.
+    - Küçültme sıralı ve hataya dayanıklı hâle getirildi.
+    - Disk yazma hatası Türkçe mesaj veriyor; yarım ya da sahipsiz dosya kalmıyor.
+    - Önbellek süresi 1 saate indirildi, CSP başlığı eklendi.
+
 ## Sıradaki küçük görev
-- Görev 13 `portfoy: fotograf yukleme ve guvenli gosterim`. Şartlar:
-  - Dosyalar `App_Data/uploads` altında (wwwroot dışında) saklanacak, klasör `.gitignore`'a eklenecek.
-  - Fotoğraf sadece portföyü görebilen kişiye, yetki kontrollü bir uçtan (`PropertyPhotoController`) verilecek. Yükleme ve silme, portföyü düzenleyebilen kişiye açık olacak.
-  - Uzantı, içerik tipi ve boyut sunucuda kontrol edilecek; dosya adı sunucuda üretilecek (kullanıcının verdiği ad yol olarak kullanılmayacak).
-  - Telefondan kamera ile yükleme (`accept="image/*" capture="environment"`).
-- Görev 15'te (Dashboard sayıları): `DashboardController`'a Staff şartı konacak ve sayılar sadece görünürlük filtreli sorgularla (`CountVisible`) alınacak.
+- Görev 15 (öne alındı, kullanıcı isteği) `dashboard: sayilar`:
+  - Ana ekranda aktif portföy sayısı, müşteri sayısı, satılık/kiralık dağılımı.
+  - `DashboardController`'a Staff şartı konacak. Sayılar sadece görünürlük filtreli sorgularla (`CountVisible`) alınacak: herkes sadece görebildiği kayıtları sayar.
+  - "Yaklaşan randevular" bölümü görev 14'ten (randevu) sonra dolacak.
+- Ardından görev 14 `randevu: liste ve ekleme`.
 - Görev 6b (.NET 10 yükseltme) .NET 10 SDK kurulunca yapılacak.
 
 ## Açık kararlar / notlar
@@ -284,6 +307,13 @@
   - Müşteri sayfasından müşterinin rolüne bakılmadan herhangi bir aktif portföy eklenebiliyor (satıcı rolündeki kişi de ilgilenen olabilir).
   - İlan linki girildiği biçimiyle saklanıyor. Kontrol `Uri` ile yapılıyor ve Razor linki kodluyor; istenirse `AbsoluteUri` saklanarak sıkılaştırılabilir.
   - Listelerde `Include(CreatedByUser)` tam kullanıcı satırını belleğe alıyor; view'a sadece ad gidiyor.
+- Fotoğraf bilinçli kabulleri (görev 13 denetimi):
+  - **Yayına alırken:** IIS uygulama havuzunun `App_Data/uploads` (ya da `Uploads:Root`) klasörüne yazma izni olmalı. Fotoğraflar yedeklemeye dahil edilmeli. IIS ve Kestrel'in istek sınırı ~30 MB; küçültme çalışmazsa 10 × 5 MB bu sınırı aşabilir ve kullanıcı ham 413 hatası görür (istemci normalde 28 MB'ta Türkçe uyarı veriyor).
+  - EXIF/GPS bilgisi sadece tarayıcıda küçültme başarılı olunca siliniyor. Sunucuda silmek için görüntü işleme paketi gerekir (yeni NuGet, önce onay).
+  - Soft-delete edilen portföyün fotoğrafları kimseye gösterilmiyor ama diskte kalıyor; kalıcı temizlik ileride kararlaştırılacak.
+  - Portföy başına 30 sınırında, aynı anda gelen iki yüklemede sınır birkaç fotoğraf aşılabilir.
+  - Liste kartlarında kapak fotoğrafı henüz yok.
+  - Galeri her fotoğraf için ayrı istek yapıyor (fotoğraf başına 2 sorgu); 10–50 kullanıcı için sorun değil.
 - Portföy ekranları bilinçli kabulleri (görev 12 denetimi):
   - Mülk sahibi listesi her rolden ilk 100 kişiyle sınırlı. Kayıt artınca görünür liste servisini kullanan bir arama alanı gerekecek.
   - Sahibi silinmiş (soft delete) portföyde yönetici de "Gizli kayıt" görüyor; sızıntı değil ama yanıltıcı. İleride ayrı bir "Silinmiş kişi" durumu eklenebilir.

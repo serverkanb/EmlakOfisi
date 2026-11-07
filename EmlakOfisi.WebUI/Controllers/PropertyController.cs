@@ -22,13 +22,15 @@ namespace EmlakOfisi.WebUI.Controllers
         private readonly IPropertyService _propertyService;
         private readonly IContactService _contactService;
         private readonly IPropertyInterestService _interestService;
+        private readonly IPropertyPhotoService _photoService;
 
         public PropertyController(IPropertyService propertyService, IContactService contactService,
-            IPropertyInterestService interestService)
+            IPropertyInterestService interestService, IPropertyPhotoService photoService)
         {
             _propertyService = propertyService;
             _contactService = contactService;
             _interestService = interestService;
+            _photoService = photoService;
         }
 
         // ---------------- Liste ----------------
@@ -96,7 +98,10 @@ namespace EmlakOfisi.WebUI.Controllers
                 OwnerTelLink = ownerPhoneOk ? $"tel:+90{owner!.PhoneNormalized}" : null,
                 CanEdit = _propertyService.TCanEdit(p, userId, canSeeAll),
                 CanDelete = _propertyService.TCanDelete(p, userId, canSeeAll),
-                Interests = BuildInterestPanel(p, userId, canSeeAll)
+                Interests = BuildInterestPanel(p, userId, canSeeAll),
+                Photos = (_photoService.TGetForProperty(p.PropertyId, userId, canSeeAll) ?? new List<PropertyPhoto>())
+                    .Select(ph => new PropertyPhotoItemViewModel { PropertyPhotoId = ph.PropertyPhotoId, IsCover = ph.IsCover })
+                    .ToList()
             });
         }
 

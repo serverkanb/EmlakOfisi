@@ -168,6 +168,16 @@ namespace EmlakOfisi.WebUI.Models
 
         // Görev 12c: ilgilenen müşteriler
         public InterestPanelViewModel Interests { get; set; } = new();
+
+        // Görev 13: fotoğraflar (kapak önce). Yükleme/silme/kapak butonları CanEdit olana gösterilir.
+        public List<PropertyPhotoItemViewModel> Photos { get; set; } = new();
+    }
+
+    // Fotoğraf: sadece id (dosya, yetki kontrollü PropertyPhoto/Show/{id} ucundan gelir; dosya adı/yolu view'a verilmez)
+    public class PropertyPhotoItemViewModel
+    {
+        public int PropertyPhotoId { get; set; }
+        public bool IsCover { get; set; }
     }
 
     // Etiketler, fiyat ve konum biçimleri tek yerde

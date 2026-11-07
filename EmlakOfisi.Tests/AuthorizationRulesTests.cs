@@ -102,6 +102,9 @@ public class AuthorizationRulesTests
             typeof(PropertyController).GetMethod(nameof(PropertyController.Delete))!,
             typeof(PropertyInterestController).GetMethod(nameof(PropertyInterestController.Add))!,
             typeof(PropertyInterestController).GetMethod(nameof(PropertyInterestController.Delete))!,
+            typeof(PropertyPhotoController).GetMethod(nameof(PropertyPhotoController.Upload))!,
+            typeof(PropertyPhotoController).GetMethod(nameof(PropertyPhotoController.Delete))!,
+            typeof(PropertyPhotoController).GetMethod(nameof(PropertyPhotoController.SetCover))!,
         };
 
         foreach (var action in actions)

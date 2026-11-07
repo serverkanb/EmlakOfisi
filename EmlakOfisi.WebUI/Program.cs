@@ -5,6 +5,7 @@ using EmlakOfisi.DataAccessLayer.Concrete;
 using EmlakOfisi.DataAccessLayer.Context;
 using EmlakOfisi.EntityLayer.Entities;
 using EmlakOfisi.WebUI.Extensions;
+using EmlakOfisi.WebUI.Helpers;
 using EmlakOfisi.WebUI.SeedData;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -39,6 +40,16 @@ builder.Services.AddScoped<IPropertyService, PropertyManager>();
 
 builder.Services.AddScoped<IPropertyInterestDal, EfPropertyInterestDal>();
 builder.Services.AddScoped<IPropertyInterestService, PropertyInterestManager>();
+
+builder.Services.AddScoped<IPropertyPhotoDal, EfPropertyPhotoDal>();
+builder.Services.AddScoped<IPropertyPhotoService, PropertyPhotoManager>();
+
+// Fotoğraflar wwwroot DIŞINDA saklanır (adresle doğrudan açılamaz). Sunucuda farklı bir klasör
+// gerekirse "Uploads:Root" ayarıyla değiştirilir; uygulama havuzunun bu klasöre yazma izni olmalı.
+var uploadsRoot = builder.Configuration["Uploads:Root"];
+if (string.IsNullOrWhiteSpace(uploadsRoot))
+    uploadsRoot = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "uploads");
+builder.Services.AddSingleton(new PhotoFileStore(uploadsRoot));
 
 // ---------------------------
 //  Identity Ayarları

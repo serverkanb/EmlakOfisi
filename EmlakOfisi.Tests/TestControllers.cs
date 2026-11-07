@@ -21,6 +21,9 @@ internal static class TestControllers
             Interests(db, properties, contacts), properties);
     }
 
+    public static PropertyPhotoManager Photos(AppDbContext db, IPropertyService properties) =>
+        new(new EfPropertyPhotoDal(db), properties);
+
     public static PropertyController Property(AppDbContext db, IPropertyService properties, IContactService contacts) =>
-        new(properties, contacts, Interests(db, properties, contacts));
+        new(properties, contacts, Interests(db, properties, contacts), Photos(db, properties));
 }
