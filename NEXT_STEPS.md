@@ -300,9 +300,29 @@
   - Denemede eklenen bir randevu (id 8, "deneme-ajan") uygulamadan iptal edildi; silme özelliği olmadığı için geliştirme veritabanında İptal sekmesinde duruyor.
   - `kod-inceleyici` ve `yetki-denetcisi` bulguları kapatıldı (adres kopyalama, geçmiş tarihli "Tekrar planla", "Sonuçlanmadı" rozeti, filtrenin korunması, dokunma alanları).
 
+- 2026-11-07: Görev 16 `pwa: manifest ve service worker`
+  - `wwwroot/manifest.webmanifest`: ad, kısa ad, `start_url` "/", `standalone`, antrasit tema rengi, 192 ve 512 px ikonlar. **Kullanıcı kararı:** ofis adı şimdilik dosyada sabit; marka ayarı görevinde yapılandırmadan okunacak.
+  - `_PwaHead` partial'ı (manifest linki, iPhone ana ekran etiketleri) `_Layout`, giriş ve hata sayfalarında. Kayıt `wwwroot/js/pwa.js` ile (Layout ve giriş sayfası); tarayıcı desteklemiyorsa sessizce atlanıyor.
+  - `wwwroot/sw.js`:
+    - **Sadece statik dosyalar** (`/lib`, `/css`, `/js`, `/images`) önbelleğe alınıyor: önbellekte varsa hemen veriliyor, arkada güncelleniyor. Sürümlü dosyanın (`?v=`) eski sürümü siliniyor.
+    - Sayfalar, formlar, fotoğraflar ve diğer uçlar hiç saklanmıyor. POST ve başka sitelere giden istekler service worker'a takılmıyor.
+    - Sayfa açılırken bağlantı yoksa `offline.html` ("İnternet bağlantısı yok", Tekrar dene).
+    - Önbellek adı sürümlü (`emlakofisi-statik-v3`); `sw.js` değişince sürüm artırılır, eski önbellek siliniyor.
+  - Testler 346/346 yeşil (`PwaTests`): manifest geçerli ve ikonlar var; önbelleğe alınan yollar sadece statik klasörler; önceden saklanan dosyalar var; sayfa açılışı dalında önbelleğe yazma yok; offline sayfası statik.
+  - Tarayıcıda denendi: service worker kök kapsamla kuruldu; Cache Storage'da sadece statik dosyalar var (müşteri listesi açılmışken bile sayfa yok). Sunucu durdurulunca portföy listesi yerine stilli uyarı sayfası geldi. Dosyalar girişsiz açılıyor (`application/manifest+json`, `no-cache`).
+  - Denemede bulunan hata düzeltildi: sürüm temizliği, uyarı sayfasının kullandığı sürümsüz CSS'i de siliyordu.
+  - Telefonda kurulum ve service worker için **HTTPS gerekir** (localhost hariç). iPhone'da Safari > Paylaş > "Ana Ekrana Ekle".
+  - `yetki-denetcisi` bulgusu (görev 13'ten kalan) düzeltildi: fotoğraf yanıtı `private, max-age=3600` yerine `private, no-cache`. Tarayıcı her açılışta sunucuya soruyor, yetki her seferinde kontrol ediliyor (değişmediyse 304). Böylece çıkıştan sonra aynı telefonda giren başka kullanıcı fotoğrafı önbellekten yetkisiz göremiyor. Testi eklendi.
+  - Çıkışta `Clear-Site-Data: "cache"` gönderiliyor (tarayıcı önbelleği silinir; service worker kaydı kalır). curl ile doğrulandı.
+  - `kod-inceleyici` bulguları kapatıldı: önbelleğe yazma hatası yanıtı bozmuyor (try/catch, sadece 200 saklanıyor), `theme-color` ortak partial'da.
+  - Bilinçli kabuller:
+    - Uygulama sitenin **kökünde** çalışır varsayımıyla yazıldı (`/sw.js`, manifest yolları). IIS'te alt dizine kurulursa PWA yolları uygulama adresine göre yazılmalı (marka görevinde bakılabilir).
+    - Sayfaların tarayıcıda saklanmaması şu an antiforgery'nin eklediği `no-cache, no-store` başlığına dayanıyor (her sayfada çıkış formu var). Formu olmayan, kişisel veri döndüren yeni bir uç (JSON vb.) eklenirse kimliği doğrulanmış yanıtlara genel bir `no-store` kuralı eklenmeli.
+
 ## Sıradaki küçük görev
-- Görev 16 `pwa: manifest ve service worker` (ikonlar `wwwroot/images/brand/altinkule-ikon-*.png` hazır).
+- Ara görev `arayuz: ofis adi ve logosu ayardan` (görev 16'da kararlaştırıldı): ofis adı ve logo yolları `appsettings.json`'daki bir ayardan okunsun (sayfa başlıkları, menü logosu, giriş/hata sayfaları, manifest, offline sayfası). Manifest ve offline sayfası şu an statik dosya; ayardan okunmaları için girişsiz bir uçtan üretilmeleri gerekecek.
 - Görev listesine eklendi (2026-11-07, kullanıcı isteği): 16b `arayuz: not alanlari icin bas-konus mikrofon dugmesi` (MVP, formlardan sonra). Ayrıntılar `docs/MIMARI_PLAN.md` bölüm 6'da. Randevu notu alanı da artık var.
+- Ardından Faz 2: görev 17 `talep: musteri talepleri`.
 - Görev 6b (.NET 10 yükseltme) .NET 10 SDK kurulunca yapılacak.
 
 ## Açık kararlar / notlar

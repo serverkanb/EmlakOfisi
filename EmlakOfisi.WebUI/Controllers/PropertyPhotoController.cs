@@ -38,8 +38,9 @@ namespace EmlakOfisi.WebUI.Controllers
             if (path == null)
                 return NotFound();
 
-            // Tarayıcı en fazla 1 saat önbellekte tutar (ortak bilgisayarda uzun kalmasın); proxy önbellekleri tutmaz
-            Response.Headers.CacheControl = "private, max-age=3600";
+            // Tarayıcı saklayabilir ama HER açılışta sunucuya sorar (no-cache): yetki her seferinde kontrol edilir,
+            // dosya değişmediyse sadece 304 döner. Çıkıştan sonra aynı telefonda başka kullanıcı yetkisiz göremesin.
+            Response.Headers.CacheControl = "private, no-cache";
             Response.Headers.XContentTypeOptions = "nosniff";
             // Dosya doğrudan açılsa bile içinde betik çalışamasın (ek savunma)
             Response.Headers.ContentSecurityPolicy = "default-src 'none'; sandbox";

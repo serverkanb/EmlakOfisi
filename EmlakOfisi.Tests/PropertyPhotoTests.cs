@@ -293,8 +293,11 @@ public class PropertyPhotoTests
         await f.Controller(f.Ayse).Upload(hidden.PropertyId, new List<IFormFile> { Fixture.File(Jpeg) });
         var photo = f.Identity.Db.PropertyPhotos.Single();
 
-        var file = Assert.IsType<PhysicalFileResult>(f.Controller(f.Ayse).Show(photo.PropertyPhotoId));
+        var ayse = f.Controller(f.Ayse);
+        var file = Assert.IsType<PhysicalFileResult>(ayse.Show(photo.PropertyPhotoId));
         Assert.Equal("image/jpeg", file.ContentType);
+        // Her açılışta sunucuya sorulmalı (çıkıştan sonra başka kullanıcı önbellekten yetkisiz göremesin)
+        Assert.Equal("private, no-cache", ayse.Response.Headers.CacheControl.ToString());
 
         Assert.IsType<NotFoundResult>(f.Controller(f.Bora).Show(photo.PropertyPhotoId));
         Assert.IsType<NotFoundResult>(f.Controller(f.Ayse).Show(9999));

@@ -78,6 +78,9 @@ namespace EmlakOfisi.WebUI.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
+            // Telefondaki tarayıcı önbelleği de silinsin (ortak ya da kaybolan cihazda veri kalmasın).
+            // "storage" eklenmez: service worker kaydını da siler.
+            Response.Headers["Clear-Site-Data"] = "\"cache\"";
             return RedirectToAction("Index");
         }
 

@@ -1,0 +1,27 @@
+{
+  "name": "Altınkule Gayrimenkul",
+  "short_name": "Altınkule",
+  "description": "Emlak ofisi müşteri, portföy ve randevu yönetimi",
+  "lang": "tr",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#2C2928",
+  "icons": [
+    {
+      "src": "/images/brand/altinkule-ikon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/brand/altinkule-ikon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
