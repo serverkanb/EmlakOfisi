@@ -11,6 +11,12 @@ Oturum takibi: @NEXT_STEPS.md
 - ASP.NET Core Identity
 - Modüler monolit, tek solution. Gereksiz katman/proje açma.
 
+## Ölçek
+- Uygulama yaklaşık 10 kullanıcılı tek bir emlak ofisi için.
+- Windows paylaşımlı hosting (IIS + MSSQL) üzerinde çalışacak.
+- Cache, kuyruk, arka plan servisi, harici depolama gibi büyük ölçek çözümleri önerilmez.
+- Telefon fotoğrafları yüklenirken küçültülür.
+
 ## Mutlak kurallar
 1. **Görünürlük güvenliği sunucu tarafındadır.** Listeleme, arama, detay, güncelleme, silme ve API uçlarının hepsinde yetki kontrolü yapılır. Sadece frontend'de gizlemek yetki kontrolü sayılmaz.
 2. Müşteri/portföy kayıtlarında varsayılan görünürlük **"Sadece Ben"**dir.
