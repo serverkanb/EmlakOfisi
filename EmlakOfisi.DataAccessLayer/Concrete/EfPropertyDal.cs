@@ -61,6 +61,16 @@ namespace EmlakOfisi.DataAccessLayer.Concrete
             return Filtered(userId, canSeeAll, filter).Count();
         }
 
+        public List<(PropertyStatus Status, ListingType ListingType, int Count)> CountVisibleByStatus(int userId, bool canSeeAll)
+        {
+            return Visible(userId, canSeeAll)
+                .GroupBy(p => new { p.Status, p.ListingType })
+                .Select(g => new { g.Key.Status, g.Key.ListingType, Count = g.Count() })
+                .ToList()
+                .Select(x => (x.Status, x.ListingType, x.Count))
+                .ToList();
+        }
+
         public Property? GetVisibleById(int id, int userId, bool canSeeAll)
         {
             // Mülk sahibi (OwnerContact) burada YÜKLENMEZ: o kişinin görünürlüğü ayrıca kontrol edilir (servis).

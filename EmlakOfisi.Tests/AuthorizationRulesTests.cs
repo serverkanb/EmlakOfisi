@@ -57,7 +57,7 @@ public class AuthorizationRulesTests
     // ya Admin ya da Staff (ofis çalışanı) rolü istemeli; rolsüz kullanıcı iş verisine erişemesin.
     private static readonly HashSet<string> NoRoleRequired = new()
     {
-        "LoginController", "ErrorController", "DashboardController", "ProfileController"
+        "LoginController", "ErrorController", "ProfileController"
     };
 
     [Fact]

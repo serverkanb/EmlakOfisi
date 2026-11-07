@@ -34,6 +34,26 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             return _propertyDal.GetVisibleById(id, userId, canSeeAll);
         }
 
+        public PropertyCounts TGetVisibleCounts(int userId, bool canSeeAll)
+        {
+            var counts = new PropertyCounts();
+            foreach (var (status, listingType, count) in _propertyDal.CountVisibleByStatus(userId, canSeeAll))
+            {
+                switch (status)
+                {
+                    case PropertyStatus.Active:
+                        counts.Active += count;
+                        if (listingType == ListingType.Sale) counts.ActiveSale += count;
+                        else if (listingType == ListingType.Rent) counts.ActiveRent += count;
+                        break;
+                    case PropertyStatus.Passive: counts.Passive += count; break;
+                    case PropertyStatus.Sold: counts.Sold += count; break;
+                    case PropertyStatus.Rented: counts.Rented += count; break;
+                }
+            }
+            return counts;
+        }
+
         public bool TCanEdit(Property property, int userId, bool canSeeAll)
         {
             return !property.IsDeleted &&

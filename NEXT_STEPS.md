@@ -270,12 +270,18 @@
     - Disk yazma hatası Türkçe mesaj veriyor; yarım ya da sahipsiz dosya kalmıyor.
     - Önbellek süresi 1 saate indirildi, CSP başlığı eklendi.
 
+- 2026-11-07: Görev 15 `dashboard: sayilar` (öne alındı, kullanıcı isteği)
+  - `DashboardController` artık `[Authorize(Roles = RoleNames.Staff)]`; rol gerektirmeyen sayfalar listesinden çıkarıldı. Rolü olmayan kullanıcı ana sayfada AccessDenied görür (arayüz rolsüz kullanıcı oluşturmaya izin vermediği için pratikte olmaz).
+  - Sayılar sadece görünürlük filtreli sorgulardan geliyor (`VisibilityRules.VisibleTo`), silinmiş kayıtlar sayılmıyor:
+    - `EfPropertyDal.CountVisibleByStatus`: durum ve satılık/kiralığa göre tek sorgu (GROUP BY). `PropertyManager.TGetVisibleCounts` → `PropertyCounts`.
+    - `ContactManager.TCountVisible`: mevcut `CountVisible` filtresiz çağrılıyor.
+  - Ekran: Aktif portföy, Müşteri, Satılık (aktif), Kiralık (aktif) kartları; dokununca ilgili liste filtreli açılıyor. Altında durum özeti (Aktif/Pasif/Satıldı/Kiralandı; etiketler `PropertyLabels.Status`). "Yaklaşan randevular" görev 14'e kadar "yakında" yazıyor; "Bu ay işlem" kartı Faz 2'ye kaldı.
+  - Testler 311/311 yeşil (`DashboardTests`): rol × görünürlük matrisi, sorumlu danışman, durum/ilan tipi dağılımı, silinmiş kayıtlar, boş veritabanı, Staff şartı.
+  - Uçtan uca denendi: danisman1 18 müşteri / 6 portföy (3 aktif), danisman2 17 / 6 (4 aktif), mudur1 25 / 8 (5 aktif). Kart sayıları filtreli listelerle birebir tuttu. 375px'te yatay kaydırma yok, durum satırları 60px.
+  - `kod-inceleyici` ve `yetki-denetcisi`: engelleyici bulgu yok. Kullanılmayan `Total` silindi, durum etiketleri ortak yardımcıdan alınıyor.
+
 ## Sıradaki küçük görev
-- Görev 15 (öne alındı, kullanıcı isteği) `dashboard: sayilar`:
-  - Ana ekranda aktif portföy sayısı, müşteri sayısı, satılık/kiralık dağılımı.
-  - `DashboardController`'a Staff şartı konacak. Sayılar sadece görünürlük filtreli sorgularla (`CountVisible`) alınacak: herkes sadece görebildiği kayıtları sayar.
-  - "Yaklaşan randevular" bölümü görev 14'ten (randevu) sonra dolacak.
-- Ardından görev 14 `randevu: liste ve ekleme`.
+- Görev 14 `randevu: liste ve ekleme`. Ana ekrandaki "Yaklaşan randevular" kartı da bu görevde dolacak. Randevu görünürlüğü bağlı müşteri/portföyün görünürlüğünden türetilmeli; sayım `VisibleTo` üzerinden SQL'de yapılmalı (yetki denetçisi notu).
 - Görev 6b (.NET 10 yükseltme) .NET 10 SDK kurulunca yapılacak.
 
 ## Açık kararlar / notlar

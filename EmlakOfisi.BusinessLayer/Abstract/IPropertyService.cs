@@ -3,6 +3,17 @@ using EmlakOfisi.EntityLayer.Entities;
 
 namespace EmlakOfisi.BusinessLayer.Abstract
 {
+    // Ana ekran portföy sayıları (sadece kullanıcının görebildiği, silinmemiş kayıtlar)
+    public class PropertyCounts
+    {
+        public int Active { get; set; }
+        public int ActiveSale { get; set; }
+        public int ActiveRent { get; set; }
+        public int Passive { get; set; }
+        public int Sold { get; set; }
+        public int Rented { get; set; }
+    }
+
     // Portföy servisi. IContactService gibi IGenericService'ten TÜREMEZ (filtresiz okuma yok).
     // Kurallar (docs/MIMARI_PLAN.md bölüm 3):
     // - Görme : yönetici, herkese açık, kaydı oluşturan veya sorumlu danışman
@@ -20,6 +31,9 @@ namespace EmlakOfisi.BusinessLayer.Abstract
             PropertyFilter filter, int page, int pageSize);
 
         Property? TGetVisibleById(int id, int userId, bool canSeeAll);
+
+        // Ana ekran sayıları (görünürlük filtreli)
+        PropertyCounts TGetVisibleCounts(int userId, bool canSeeAll);
 
         bool TCanEdit(Property property, int userId, bool canSeeAll);
         bool TCanDelete(Property property, int userId, bool canSeeAll);

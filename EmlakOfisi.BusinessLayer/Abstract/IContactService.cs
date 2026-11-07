@@ -23,6 +23,9 @@ namespace EmlakOfisi.BusinessLayer.Abstract
         // Görünmüyorsa veya silinmişse null (controller 404 döner)
         Contact? TGetVisibleById(int id, int userId, bool canSeeAll);
 
+        // Ana ekran: kullanıcının görebildiği, silinmemiş müşteri sayısı
+        int TCountVisible(int userId, bool canSeeAll);
+
         // Görünürlükten ayrı kurallar: düzenleme ve silme (ekranda buton göstermek için de kullanılır)
         bool TCanEdit(Contact contact, int userId, bool canSeeAll);
         bool TCanDelete(Contact contact, int userId, bool canSeeAll);

@@ -1,57 +1,98 @@
+@using EmlakOfisi.EntityLayer.Enums
+@model DashboardViewModel
 @{
     ViewData["Title"] = "Ana sayfa";
 }
 
-@* Kartlardaki sayılar görev 15'te (dashboard: sayilar) gerçek veriden gelecek. *@
+@* Sayılar kullanıcının görebildiği kayıtlardan gelir. Kartlar ilgili listeyi filtreli açar. *@
 <div class="row row-cards">
     <div class="col-6 col-lg-3">
-        <div class="card card-sm">
+        <a class="card card-sm card-link text-reset text-decoration-none h-100"
+           asp-controller="Property" asp-action="Index" asp-route-status="@PropertyStatus.Active">
             <div class="card-body d-flex align-items-center gap-3">
                 <span class="avatar bg-primary-lt"><i class="ti ti-building-community"></i></span>
                 <div>
                     <div class="text-secondary small">Aktif portföy</div>
-                    <div class="h3 m-0">–</div>
+                    <div class="h2 m-0">@Model.ActiveProperties</div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-6 col-lg-3">
-        <div class="card card-sm">
+        <a class="card card-sm card-link text-reset text-decoration-none h-100"
+           asp-controller="Contact" asp-action="Index">
             <div class="card-body d-flex align-items-center gap-3">
                 <span class="avatar bg-green-lt"><i class="ti ti-users"></i></span>
                 <div>
                     <div class="text-secondary small">Müşteri</div>
-                    <div class="h3 m-0">–</div>
+                    <div class="h2 m-0">@Model.Contacts</div>
                 </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3">
+        <a class="card card-sm card-link text-reset text-decoration-none h-100"
+           asp-controller="Property" asp-action="Index" asp-route-status="@PropertyStatus.Active" asp-route-listingType="@ListingType.Sale">
+            <div class="card-body d-flex align-items-center gap-3">
+                <span class="avatar bg-orange-lt"><i class="ti ti-home-dollar"></i></span>
+                <div>
+                    <div class="text-secondary small">Satılık (aktif)</div>
+                    <div class="h2 m-0">@Model.ActiveSale</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3">
+        <a class="card card-sm card-link text-reset text-decoration-none h-100"
+           asp-controller="Property" asp-action="Index" asp-route-status="@PropertyStatus.Active" asp-route-listingType="@ListingType.Rent">
+            <div class="card-body d-flex align-items-center gap-3">
+                <span class="avatar bg-purple-lt"><i class="ti ti-key"></i></span>
+                <div>
+                    <div class="text-secondary small">Kiralık (aktif)</div>
+                    <div class="h2 m-0">@Model.ActiveRent</div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row row-cards mt-1">
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><h3 class="card-title">Portföy durumları</h3></div>
+            <div class="list-group list-group-flush">
+                @{
+                    var rows = new (PropertyStatus Status, int Count)[]
+                    {
+                        (PropertyStatus.Active, Model.ActiveProperties),
+                        (PropertyStatus.Passive, Model.PassiveProperties),
+                        (PropertyStatus.Sold, Model.SoldProperties),
+                        (PropertyStatus.Rented, Model.RentedProperties)
+                    };
+                }
+                @foreach (var r in rows)
+                {
+                    <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center dashboard-row"
+                       asp-controller="Property" asp-action="Index" asp-route-status="@r.Status">
+                        <span>@PropertyLabels.Status(r.Status)</span>
+                        <span class="fw-bold">@r.Count</span>
+                    </a>
+                }
             </div>
         </div>
     </div>
-    <div class="col-6 col-lg-3">
-        <div class="card card-sm">
-            <div class="card-body d-flex align-items-center gap-3">
-                <span class="avatar bg-orange-lt"><i class="ti ti-calendar-event"></i></span>
-                <div>
-                    <div class="text-secondary small">Yaklaşan randevu</div>
-                    <div class="h3 m-0">–</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-6 col-lg-3">
-        <div class="card card-sm">
-            <div class="card-body d-flex align-items-center gap-3">
-                <span class="avatar bg-purple-lt"><i class="ti ti-receipt"></i></span>
-                <div>
-                    <div class="text-secondary small">Bu ay işlem</div>
-                    <div class="h3 m-0">–</div>
-                </div>
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-header"><h3 class="card-title">Yaklaşan randevular</h3></div>
+            <div class="card-body text-secondary">
+                <i class="ti ti-calendar-event me-1"></i> Randevu modülü yakında eklenecek.
             </div>
         </div>
     </div>
 </div>
 
-<div class="card mt-3">
-    <div class="card-body text-secondary">
-        Hoş geldiniz. Müşteri ve portföy modülleri sırayla eklenecek; menüde "Yakında" yazan bölümler henüz hazır değil.
-    </div>
+<div class="text-secondary small mt-3">
+    @(Model.CanSeeAll
+        ? "Sayılar ofisteki tüm kayıtları içerir."
+        : "Sayılar sizin kayıtlarınızı ve herkese açık kayıtları içerir.")
 </div>

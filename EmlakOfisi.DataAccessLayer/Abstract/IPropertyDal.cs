@@ -1,4 +1,5 @@
 using EmlakOfisi.EntityLayer.Entities;
+using EmlakOfisi.EntityLayer.Enums;
 
 namespace EmlakOfisi.DataAccessLayer.Abstract
 {
@@ -10,6 +11,9 @@ namespace EmlakOfisi.DataAccessLayer.Abstract
         List<Property> GetVisibleList(int userId, bool canSeeAll, PropertyFilter filter, int skip, int take);
 
         int CountVisible(int userId, bool canSeeAll, PropertyFilter filter);
+
+        // Ana ekran için: görünür portföylerin durum ve ilan tipine göre sayıları (tek sorgu, GROUP BY)
+        List<(PropertyStatus Status, ListingType ListingType, int Count)> CountVisibleByStatus(int userId, bool canSeeAll);
 
         // Görünmüyorsa veya silinmişse null. Salt okunur; sorumlu danışman bilgisiyle.
         // Mülk sahibi (OwnerContact) YÜKLENMEZ: sahibin görünürlüğü ayrıca kontrol edilir (IPropertyService.TGetVisibleOwner).

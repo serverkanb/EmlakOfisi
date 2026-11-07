@@ -44,6 +44,11 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             return _contactDal.GetVisibleById(id, userId, canSeeAll);
         }
 
+        public int TCountVisible(int userId, bool canSeeAll)
+        {
+            return _contactDal.CountVisible(userId, canSeeAll, null, null, null);
+        }
+
         // Düzenleme: yönetici veya kaydı oluşturan kişi
         public bool TCanEdit(Contact contact, int userId, bool canSeeAll)
         {
