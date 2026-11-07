@@ -49,6 +49,9 @@
                         <a class="btn btn-outline-secondary" asp-controller="RoleAssign" asp-action="AssignRole" asp-route-id="@user.Id">
                             <i class="ti ti-key me-1"></i> Roller
                         </a>
+                        <a class="btn btn-outline-secondary" asp-controller="UserPermission" asp-action="Edit" asp-route-id="@user.Id">
+                            <i class="ti ti-shield-check me-1"></i> İzinler
+                        </a>
                         @if (!user.IsCurrentUser)
                         {
                             <form method="post" asp-action="ToggleActive" asp-route-id="@user.Id"

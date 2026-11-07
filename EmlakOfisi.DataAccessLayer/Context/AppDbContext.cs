@@ -43,6 +43,8 @@ namespace EmlakOfisi.DataAccessLayer.Context
             modelBuilder.Entity<Property>().Property(p => p.City).UseCollation(TurkishCollation);
             modelBuilder.Entity<Property>().Property(p => p.District).UseCollation(TurkishCollation);
             modelBuilder.Entity<Property>().Property(p => p.Neighborhood).UseCollation(TurkishCollation);
+            modelBuilder.Entity<CustomerRequest>().Property(r => r.City).UseCollation(TurkishCollation);
+            modelBuilder.Entity<CustomerRequest>().Property(r => r.District).UseCollation(TurkishCollation);
         }
 
         public const string TurkishCollation = "Turkish_CI_AS";

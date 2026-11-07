@@ -109,6 +109,10 @@ public class AuthorizationRulesTests
             typeof(AppointmentController).GetMethods().Single(m => m.Name == nameof(AppointmentController.Create) && m.GetParameters().Length == 1),
             typeof(AppointmentController).GetMethods().Single(m => m.Name == nameof(AppointmentController.Edit) && m.GetParameters().Length == 2),
             typeof(AppointmentController).GetMethod(nameof(AppointmentController.SetStatus))!,
+            typeof(CustomerRequestController).GetMethods().Single(m => m.Name == nameof(CustomerRequestController.Create) && m.GetParameters().Length == 2),
+            typeof(CustomerRequestController).GetMethods().Single(m => m.Name == nameof(CustomerRequestController.Edit) && m.GetParameters().Length == 2),
+            typeof(CustomerRequestController).GetMethod(nameof(CustomerRequestController.SetStatus))!,
+            typeof(UserPermissionController).GetMethods().Single(m => m.Name == nameof(UserPermissionController.Edit) && m.GetParameters().Length == 2),
         };
 
         foreach (var action in actions)

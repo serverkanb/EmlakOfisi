@@ -65,6 +65,23 @@ namespace EmlakOfisi.WebUI.Models
         public List<RoleAssignViewModel> Roles { get; set; } = new();
     }
 
+    // Kullanıcının ek izinleri (görev 17). Sadece Admin görür.
+    public class UserPermissionItemViewModel
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Label { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public bool Granted { get; set; }
+    }
+
+    public class UserPermissionPageViewModel
+    {
+        public int UserId { get; set; }
+        public string FullName { get; set; } = string.Empty;
+        public bool CanSeeAll { get; set; }   // yönetici: izin olmadan da her şeyi düzenleyebilir
+        public List<UserPermissionItemViewModel> Permissions { get; set; } = new();
+    }
+
     public class ChangePasswordViewModel
     {
         [Required(ErrorMessage = "Mevcut şifre zorunludur.")]

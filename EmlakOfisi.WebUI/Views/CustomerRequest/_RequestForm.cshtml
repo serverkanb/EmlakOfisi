@@ -1,0 +1,65 @@
+@using EmlakOfisi.EntityLayer.Enums
+@model CustomerRequestFormViewModel
+
+@* Talep ekleme/düzenleme alanları. Mobilde tek sütun. Fiyat sadece rakam. *@
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+<div class="row g-3">
+    <div class="col-6 col-md-4">
+        <label asp-for="ListingType" class="form-label"></label>
+        <select asp-for="ListingType" class="form-select form-select-lg">
+            <option value="Sale">Satılık</option>
+            <option value="Rent">Kiralık</option>
+        </select>
+    </div>
+    <div class="col-6 col-md-4">
+        <label asp-for="PropertyType" class="form-label"></label>
+        <select asp-for="PropertyType" class="form-select form-select-lg">
+            <option value="">Farketmez</option>
+            @foreach (var t in new[] { PropertyType.Residence, PropertyType.Land, PropertyType.Commercial, PropertyType.Other })
+            {
+                <option value="@t">@PropertyLabels.Type(t)</option>
+            }
+        </select>
+    </div>
+    <div class="col-12 col-md-4">
+        <label asp-for="RoomCount" class="form-label"></label>
+        <input asp-for="RoomCount" class="form-control form-control-lg" placeholder="3+1" autocomplete="off" />
+        <span asp-validation-for="RoomCount" class="text-danger small"></span>
+    </div>
+
+    <div class="col-6">
+        <label asp-for="City" class="form-label"></label>
+        <input asp-for="City" class="form-control form-control-lg" placeholder="İstanbul" autocomplete="off" />
+        <span asp-validation-for="City" class="text-danger small"></span>
+    </div>
+    <div class="col-6">
+        <label asp-for="District" class="form-label"></label>
+        <input asp-for="District" class="form-control form-control-lg" placeholder="Kadıköy" autocomplete="off" />
+        <span asp-validation-for="District" class="text-danger small"></span>
+    </div>
+
+    <div class="col-6">
+        <label asp-for="MinPriceText" class="form-label"></label>
+        <div class="input-group input-group-lg">
+            <input asp-for="MinPriceText" type="text" inputmode="numeric" data-digits-only class="form-control" placeholder="5000000" autocomplete="off" />
+            <span class="input-group-text">₺</span>
+        </div>
+        <span asp-validation-for="MinPriceText" class="text-danger small"></span>
+    </div>
+    <div class="col-6">
+        <label asp-for="MaxPriceText" class="form-label"></label>
+        <div class="input-group input-group-lg">
+            <input asp-for="MaxPriceText" type="text" inputmode="numeric" data-digits-only class="form-control" placeholder="8000000" autocomplete="off" />
+            <span class="input-group-text">₺</span>
+        </div>
+        <span asp-validation-for="MaxPriceText" class="text-danger small"></span>
+    </div>
+    <div class="col-12 form-hint mt-0">Fiyatlar tam TL, kiralıkta aylık. Boş bırakılabilir.</div>
+
+    <div class="col-12">
+        <label asp-for="Notes" class="form-label"></label>
+        <textarea asp-for="Notes" rows="4" class="form-control" data-mic placeholder="Ör. okula yakın, otoparklı, en az 2. kat"></textarea>
+        <span asp-validation-for="Notes" class="text-danger small"></span>
+    </div>
+</div>

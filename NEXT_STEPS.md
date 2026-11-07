@@ -351,8 +351,24 @@
   - **Açık not (gerçek cihaz):** Android Chrome ve iPhone Safari'de gerçek mikrofonla denenmedi (HTTPS gerekiyor). Android'de `continuous` modunda metin tekrarı görülürse `continuous = false` ya da sadece son sonucu alma denenecek. iPhone'da ana ekrandan açılan PWA'da tanıma desteklenmeyebilir; o durumda "Bu cihazda sesle yazma kullanılamıyor" mesajı çıkar.
   - **Kullanıcı kararı (KVKK):** sesle yazma kabul edildi (iç kullanım, görüşme notları; birçok uygulamada aynı özellik var). Ses metne çevrilirken Google/Apple sunucularına gider; kimlik numarası, banka bilgisi gibi hassas veriler sesle yazılmamalı. Kapatma ayarı şimdilik gerekmiyor.
 
+- 2026-11-07: Görev 17 `talep: musteri talepleri` (Faz 2'nin ilki)
+  - **Kullanıcı kararı:** talebi müşterinin sahibi ve yöneticiler ekleyip düzenler; ayrıca **admin kişi bazında izin verebilir** ("Başkasının müşterisine talep ekleyip düzenleyebilir"). İzin görünürlüğü değiştirmez.
+  - Kişi bazlı izin altyapısı:
+    - `EntityLayer/Constants/Permissions` (şimdilik tek izin: `request.edit-any`). Identity'nin kullanıcı claim tablosunda (`permission`) saklanıyor; yeni tablo/paket yok. `User.HasPermission(...)` sadece tanımlı izinleri sayıyor.
+    - `UserPermissionController` (sadece Admin): kullanıcı listesinde "İzinler" butonu, onay kutulu sayfa. Değişiklik varsa security stamp yenileniyor; admin kendi iznini değiştirirse hemen, başkasının oturumunda en geç 5 dk içinde geçerli oluyor (rollerle aynı).
+  - `ICustomerRequestDal`/`EfCustomerRequestDal`: görünürlük bağlı müşterinin `VisibleTo` kuralıyla sorgunun içinde; arama (şehir/ilçe), satılık/kiralık, tür, durum filtresi, sayfalama, açıklar üstte. Generic'ten türemiyor, gerçek silme yok.
+  - `CustomerRequestManager`: müşteri, oluşturan, tarih ve durum serviste atanıyor; düzenlemede müşteri değişmiyor; negatif fiyat ve en az > en çok `Invalid`.
+  - `CustomerRequestController` (`[Staff]`): `Index` (menüde "Talepler"; durum `Open`/`Closed`/`all`), `Create`/`Edit` (müşteri görünmüyorsa 404, düzenleyemiyorsa 403, doğrulamadan önce), POST `SetStatus` (Kapat / Yeniden aç).
+  - Müşteri detayında "Talepleri" bölümü (özet, fiyat aralığı, not, Düzenle, Kapat). **"Uygun portföyler"** butonu portföy listesini talep ölçütleriyle açıyor (satılık/kiralık, tür, fiyat aralığı, ilçe ya da şehir, aktifler). Not alanında mikrofon düğmesi var.
+  - `CustomerRequestTurkishCollation` migration'ı kullanıcı onayıyla uygulandı (sadece City/District collation, veri kaybı yok).
+  - Testler 387/387 yeşil (`CustomerRequestTests`): görünürlük, arama sızıntısı, silinmiş müşteri, 404/403 matrisi, izinli/izinsiz danışman, gizli müşteride izinli danışman 404, korunan alanlar, talebi başka müşteriye taşıyamama, fiyat doğrulaması, durum filtresi, "Uygun portföyler" linki, izin sayfası (sadece Admin, tanımsız izin yok sayılıyor, stamp yenileniyor).
+  - Uçtan uca (LocalDB + curl + tarayıcı) denendi: danisman1 kendi müşterisine talep ekledi; danisman2 başkasının herkese açık müşterisinde 403, gizli müşterisinde 404; admin izin verince danisman2 (yeni oturumla) ekleyebildi, gizli müşteride yine 404; izin kaldırılınca yeni oturumda 403. Türkçe arama "izmir"/"İZMİR"/"İzmir" eşleşiyor. Token'sız POST 400. 375px'te yatay kaydırma yok, butonlar en az 44px.
+  - Deneme talepleri (id 1–3) uygulamadan kapatıldı (silme yok). Admin'in şifresi user-secrets'takiyle eşleşmiyor (uygulamadan değiştirilmiş olabilir); izin adımları panelde açık olan yönetici oturumuyla yapıldı.
+  - `kod-inceleyici` ve `yetki-denetcisi`: engelleyici bulgu yok; küçük düzeltmeler uygulandı.
+  - Bilinçli kabuller: izni kaldırılan kişi açık oturumunda en fazla 5 dk daha düzenleyebilir; "Uygun portföyler" ilçe varsa ilçeyle arıyor (portföy listesinde ayrı şehir filtresi yok); müşteri detayında en fazla 100 talep gösteriliyor; bir role elle `permission` claim'i eklenirse o roldeki herkes izni alır (bunun ekranı yok).
+
 ## Sıradaki küçük görev
-- Faz 2: görev 17 `talep: musteri talepleri` (talep açıklamasına `data-mic` eklenecek).
+- Görev 18 `islem: satis/kiralama ve komisyon` (Faz 2). Dashboard'da satış/kira ve komisyon özetleri de bu görevle gelir.
 - Görev 6b (.NET 10 yükseltme) .NET 10 SDK kurulunca yapılacak.
 
 ## Açık kararlar / notlar

@@ -1,0 +1,29 @@
+@model CustomerRequestPanelViewModel
+
+@* Müşterinin talepleri (görev 17). Müşteriyi görebilen okur; ekleme/düzenleme müşteriyi düzenleyebilene
+   ya da admin'in izin verdiği kişiye açık. Asıl kontrol CustomerRequestController'da (serviste). *@
+<div class="card" id="talepler">
+    <div class="card-header">
+        <h3 class="card-title"><i class="ti ti-home-search me-1"></i> Talepleri</h3>
+        <span class="badge bg-secondary-lt ms-2">@Model.Items.Count</span>
+        @if (Model.CanEdit)
+        {
+            <a asp-controller="CustomerRequest" asp-action="Create" asp-route-contactId="@Model.ContactId" class="btn btn-primary btn-sm ms-auto">
+                <i class="ti ti-plus me-1"></i> Talep ekle
+            </a>
+        }
+    </div>
+    @if (Model.Items.Count == 0)
+    {
+        <div class="card-body text-secondary">Henüz talep yok.</div>
+    }
+    else
+    {
+        <div class="list-group list-group-flush">
+            @foreach (var item in Model.Items)
+            {
+                <partial name="~/Views/CustomerRequest/_RequestCard.cshtml" model="item" />
+            }
+        </div>
+    }
+</div>

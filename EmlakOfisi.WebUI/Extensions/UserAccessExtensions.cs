@@ -21,5 +21,11 @@ namespace EmlakOfisi.WebUI.Extensions
         {
             return user.IsInRole(RoleNames.Admin) || user.IsInRole(RoleNames.Manager);
         }
+
+        // Admin'in verdiği ek izin (Permissions). Sadece tanımlı izinler sayılır.
+        public static bool HasPermission(this ClaimsPrincipal user, string permission)
+        {
+            return Permissions.All.Contains(permission) && user.HasClaim(Permissions.ClaimType, permission);
+        }
     }
 }

@@ -31,7 +31,7 @@ public class MicButtonTests
     public void DataMic_IsOnExpectedFreeTextFields()
     {
         var files = MicTags().Select(t => t.File).OrderBy(f => f).ToList();
-        Assert.Equal(new[] { "_ActivityHistory.cshtml", "_AppointmentForm.cshtml", "_PropertyForm.cshtml" }, files);
+        Assert.Equal(new[] { "_ActivityHistory.cshtml", "_AppointmentForm.cshtml", "_PropertyForm.cshtml", "_RequestForm.cshtml" }, files);
 
         // Portföy formunda sadece açıklama (adres alanı yapılandırılmış sayılır)
         var property = File.ReadAllText(Path.Combine(WebRoot(), "Views", "Property", "_PropertyForm.cshtml"));

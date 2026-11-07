@@ -34,6 +34,15 @@
     }
     @if (isStaff)
     {
+        <li class="nav-item @Active("CustomerRequest")">
+            <a class="nav-link" asp-controller="CustomerRequest" asp-action="Index">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-home-search fs-2"></i></span>
+                <span class="nav-link-title">Talepler</span>
+            </a>
+        </li>
+    }
+    @if (isStaff)
+    {
         <li class="nav-item @Active("Appointment")">
             <a class="nav-link" asp-controller="Appointment" asp-action="Index">
                 <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-calendar-event fs-2"></i></span>

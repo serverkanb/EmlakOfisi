@@ -1,5 +1,6 @@
 using EmlakOfisi.BusinessLayer.Abstract;
 using EmlakOfisi.BusinessLayer.Helpers;
+using EmlakOfisi.DataAccessLayer.Abstract;
 using EmlakOfisi.EntityLayer.Constants;
 using EmlakOfisi.EntityLayer.Entities;
 using EmlakOfisi.EntityLayer.Enums;
@@ -23,10 +24,13 @@ namespace EmlakOfisi.WebUI.Controllers
         private readonly IActivityService _activityService;
         private readonly IPropertyInterestService _interestService;
         private readonly IPropertyService _propertyService;
+        private readonly ICustomerRequestService _requestService;
 
         public ContactController(IContactService contactService, IActivityService activityService,
-            IPropertyInterestService interestService, IPropertyService propertyService)
+            IPropertyInterestService interestService, IPropertyService propertyService,
+            ICustomerRequestService requestService)
         {
+            _requestService = requestService;
             _contactService = contactService;
             _activityService = activityService;
             _interestService = interestService;
@@ -89,10 +93,25 @@ namespace EmlakOfisi.WebUI.Controllers
                         CanDelete = _activityService.TCanDelete(a, userId, canSeeAll)
                     })
                     .ToList(),
-                Interests = BuildInterestPanel(id, userId, canSeeAll)
+                Interests = BuildInterestPanel(id, userId, canSeeAll),
+                Requests = BuildRequestPanel(contact, userId, canSeeAll)
             };
 
             return View(model);
+        }
+
+        // Talepleri (görev 17): müşteriyi gören okur; ekleme/düzenleme müşteriyi düzenleyebilene ya da izinli kişiye
+        private CustomerRequestPanelViewModel BuildRequestPanel(Contact contact, int userId, bool canSeeAll)
+        {
+            var canEdit = _requestService.TCanEdit(contact, userId, canSeeAll, User.HasPermission(Permissions.RequestEditAny));
+            var filter = new CustomerRequestFilter { ContactId = contact.ContactId };
+            var (items, _) = _requestService.TGetVisibleList(userId, canSeeAll, filter, 1, 100);
+            return new CustomerRequestPanelViewModel
+            {
+                ContactId = contact.ContactId,
+                CanEdit = canEdit,
+                Items = items.Select(r => CustomerRequestItemViewModel.From(r, canEdit)).ToList()
+            };
         }
 
         // "İlgilendiği portföyler": sadece kullanıcının görebildiği portföyler (sorguda filtrelenir).

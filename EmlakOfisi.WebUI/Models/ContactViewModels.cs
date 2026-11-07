@@ -93,5 +93,8 @@ namespace EmlakOfisi.WebUI.Models
 
         // Görev 12c: ilgilendiği portföyler
         public InterestPanelViewModel Interests { get; set; } = new();
+
+        // Görev 17: talepleri
+        public CustomerRequestPanelViewModel Requests { get; set; } = new();
     }
 }

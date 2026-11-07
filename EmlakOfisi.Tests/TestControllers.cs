@@ -18,8 +18,14 @@ internal static class TestControllers
         var properties = new PropertyManager(new EfPropertyDal(db), contacts);
         return new ContactController(contacts,
             activities ?? new ActivityManager(new EfActivityDal(db), contacts),
-            Interests(db, properties, contacts), properties);
+            Interests(db, properties, contacts), properties, Requests(db, contacts));
     }
+
+    public static CustomerRequestManager Requests(AppDbContext db, IContactService contacts) =>
+        new(new EfCustomerRequestDal(db), contacts);
+
+    public static CustomerRequestController Request(AppDbContext db, IContactService contacts) =>
+        new(Requests(db, contacts), contacts);
 
     public static PropertyPhotoManager Photos(AppDbContext db, IPropertyService properties) =>
         new(new EfPropertyPhotoDal(db), properties);

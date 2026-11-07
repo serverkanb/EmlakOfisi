@@ -321,7 +321,8 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
 
                     b.Property<string>("City")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .UseCollation("Turkish_CI_AS");
 
                     b.Property<int>("ContactId")
                         .HasColumnType("int");
@@ -334,7 +335,8 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
 
                     b.Property<string>("District")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .UseCollation("Turkish_CI_AS");
 
                     b.Property<int>("ListingType")
                         .HasColumnType("int");
