@@ -12,8 +12,10 @@ Oturum takibi: @NEXT_STEPS.md
 - Modüler monolit, tek solution. Gereksiz katman/proje açma.
 
 ## Ölçek
-- Uygulama yaklaşık 10 kullanıcılı tek bir emlak ofisi için.
+- Hedef: tek bir emlak ofisi, 10–50 kullanıcı.
 - Windows paylaşımlı hosting (IIS + MSSQL) üzerinde çalışacak.
+- İleride başka ofislere satılabilir: her ofis için ayrı kurulum ve ayrı veritabanı (multi-tenant yapılmaz).
+  Ofise özel bilgiler (ad, logo) koda sabit yazılmaz, ayarlardan okunur.
 - Cache, kuyruk, arka plan servisi, harici depolama gibi büyük ölçek çözümleri önerilmez.
 - Telefon fotoğrafları yüklenirken küçültülür.
 

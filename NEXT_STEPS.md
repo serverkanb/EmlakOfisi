@@ -265,7 +265,8 @@
 - AppUser'da ters yönde koleksiyon navigation'ı yok, bilerek eklenmedi: aynı tabloya birden çok FK olduğunda EF'in ilişkileri karıştırmaması için.
 - Bu bilgisayarda HTTPS geliştirme sertifikası yok. `https` profili sertifika olmadığı için açılmıyor, bu yüzden yerel denemeler `http` profiliyle yapılıyor (`.claude/launch.json`). HTTPS ile çalıştırmak için kullanıcının şu komutu kendisinin çalıştırması gerekiyor: `dotnet dev-certs https --trust`.
 - Cookie `Secure` olarak işaretli. Bu yüzden telefondan LAN IP'si üzerinden http ile girilirse giriş yapılamaz. Telefonda deneme için HTTPS gerekiyor.
-- Production'da ilk admin kullanıcı nasıl oluşturulacak, henüz kararı verilmedi (seed sadece Development'ta çalışıyor). Yayına almadan önce karar verilmeli.
+- Production'da ilk admin kullanıcı nasıl oluşturulacak, henüz kararı verilmedi (seed sadece Development'ta çalışıyor). Yayına almadan önce karar verilmeli. Uygulama başka ofislere satılırsa bu her kurulumda gerekecek.
+- **Kullanıcı kararı (2026-11-07):** hedef 10–50 kullanıcılı tek ofis. Başka ofislere satılırsa her ofise ayrı kurulum ve ayrı veritabanı (multi-tenant yok). Ayrı küçük görev: ofis adı ve logosu şu an koda sabit (Altınkule; `_Layout`, giriş ve hata sayfaları, `wwwroot/images/brand`). Bunlar yapılandırmadan okunacak.
 - Giriş akışının otomatik testi yok, şimdilik elle denendi. Uçtan uca HTTP testleri gerekirse `Microsoft.AspNetCore.Mvc.Testing` paketi önerilecek; görünürlük testleri için görev 7'de değerlendirilecek.
 - Seed admin şifresini görmek için: `dotnet user-secrets list --project EmlakOfisi.WebUI`. Kullanıcı adı `admin`.
 - Dikkat: seed sadece kullanıcı **yoksa** oluşturur. user-secrets'taki şifreyi değiştirmek var olan admin'i etkilemez. Yeni şifrenin geçerli olması için ya geliştirme veritabanındaki admin silinir (sonraki açılışta yeniden oluşur) ya da şifre değiştirme ekranı kullanılır (görev 6).
