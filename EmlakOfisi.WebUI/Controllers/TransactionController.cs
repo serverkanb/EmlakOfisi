@@ -52,7 +52,7 @@ namespace EmlakOfisi.WebUI.Controllers
             return View(new TransactionListViewModel
             {
                 Items = items.Select(r => TransactionItemViewModel.From(r, userId,
-                    _transactionService.TCanEdit(r.Transaction, userId, canSeeAll))).ToList(),
+                    _transactionService.TCanEdit(r.Transaction, userId, canSeeAll), canSeeAll)).ToList(),
                 Scope = scope, Mine = mine, CanSeeAll = canSeeAll,
                 Page = page, PageSize = PageSize, TotalCount = total
             });
@@ -130,8 +130,9 @@ namespace EmlakOfisi.WebUI.Controllers
                 Status = t.Status,
                 OfferPriceText = t.OfferPrice?.ToString("0"),
                 AgreedPriceText = t.AgreedPrice?.ToString("0"),
-                CommissionRateText = t.CommissionRate?.ToString("0.##", CultureInfo.InvariantCulture).Replace('.', ','),
+                CommissionRateText = PropertyLabels.PercentText(t.CommissionRate),
                 CommissionAmountText = t.CommissionAmount?.ToString("0"),
+                AgentShareRateText = canSeeAll ? PropertyLabels.PercentText(t.AgentShareRate) : null,   // oran sadece yöneticiye
                 AgentUserId = t.AgentUserId,
                 Notes = t.Notes
             });
@@ -219,16 +220,17 @@ namespace EmlakOfisi.WebUI.Controllers
             var agreed = Money(m.AgreedPriceText, nameof(m.AgreedPriceText));
             var amount = Money(m.CommissionAmountText, nameof(m.CommissionAmountText));
 
-            decimal? rate = null;
-            if (!string.IsNullOrWhiteSpace(m.CommissionRateText))
+            decimal? Percent(string? text, string field)
             {
-                var text = m.CommissionRateText.Trim().Replace(',', '.');
-                if (Regex.IsMatch(text, @"^\d{1,3}(\.\d{1,2})?$") &&
-                    decimal.TryParse(text, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var r) && r <= 100)
-                    rate = r;
-                else
-                    ModelState.AddModelError(nameof(m.CommissionRateText), "Oranı 0 ile 100 arasında girin (ör. 2 ya da 2,5).");
+                if (string.IsNullOrWhiteSpace(text)) return null;
+                if (PropertyLabels.TryParsePercent(text, out var v)) return v;
+                ModelState.AddModelError(field, "Oranı 0 ile 100 arasında girin (ör. 2 ya da 2,5).");
+                return null;
             }
+
+            var rate = Percent(m.CommissionRateText, nameof(m.CommissionRateText));
+            // Prim oranını elle sadece yönetici yazar (danışmanın gönderdiği değer serviste de yok sayılır)
+            var shareRate = User.CanSeeAll() ? Percent(m.AgentShareRateText, nameof(m.AgentShareRateText)) : null;
 
             if (requireCustomer && m.CustomerContactId <= 0)
                 ModelState.AddModelError(nameof(m.CustomerContactId), "Müşteri seçin.");
@@ -245,6 +247,7 @@ namespace EmlakOfisi.WebUI.Controllers
                 OfferPrice = offer,
                 AgreedPrice = agreed,
                 CommissionRate = rate,
+                AgentShareRate = shareRate,
                 CommissionAmount = amount,
                 AgentUserId = m.AgentUserId,
                 Notes = string.IsNullOrWhiteSpace(m.Notes) ? null : m.Notes.Trim()

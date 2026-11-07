@@ -78,18 +78,35 @@ namespace EmlakOfisi.DataAccessLayer.Concrete
 
         public TransactionSummary GetCompletedSummary(int userId, bool canSeeAll, DateTime from, DateTime to)
         {
+            // Danışmanın özeti sadece sorumlusu olduğu işlemlerden (oluşturup başkasına devrettikleri sayılmaz);
+            // yönetici tüm ofisi görür.
             var groups = Visible(userId, canSeeAll)
+                .Where(t => canSeeAll || t.AgentUserId == userId)
                 .Where(t => t.Status == TransactionStatus.Completed && t.CompletedAt >= from && t.CompletedAt < to)
                 .GroupBy(t => t.Type)
-                .Select(g => new { Type = g.Key, Count = g.Count(), Commission = g.Sum(t => t.CommissionAmount ?? 0) })
+                .Select(g => new
+                {
+                    Type = g.Key,
+                    Count = g.Count(),
+                    Commission = g.Sum(t => t.CommissionAmount ?? 0),
+                    Share = g.Sum(t => t.AgentShareAmount ?? 0),
+                    MyShare = g.Sum(t => t.AgentUserId == userId ? (t.AgentShareAmount ?? 0) : 0)
+                })
                 .ToList();
 
             return new TransactionSummary
             {
                 SaleCount = groups.Where(g => g.Type == ListingType.Sale).Sum(g => g.Count),
                 RentCount = groups.Where(g => g.Type == ListingType.Rent).Sum(g => g.Count),
-                Commission = groups.Sum(g => g.Commission)
+                Commission = groups.Sum(g => g.Commission),
+                AgentShare = groups.Sum(g => g.Share),
+                MyAgentShare = groups.Sum(g => g.MyShare)
             };
+        }
+
+        public decimal? GetAgentShareRate(int agentUserId)
+        {
+            return _context.Users.Where(u => u.Id == agentUserId).Select(u => u.CommissionSharePercent).FirstOrDefault();
         }
 
         public void Create(Transaction transaction)

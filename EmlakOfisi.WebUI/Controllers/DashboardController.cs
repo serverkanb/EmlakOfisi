@@ -54,6 +54,7 @@ namespace EmlakOfisi.WebUI.Controllers
                 MonthSaleCount = month.SaleCount,
                 MonthRentCount = month.RentCount,
                 MonthCommission = month.Commission,
+                MonthAgentShare = canSeeAll ? month.AgentShare : month.MyAgentShare,
                 Upcoming = upcoming.Select(r => AppointmentItemViewModel.From(r, userId, false)).ToList()
             });
         }

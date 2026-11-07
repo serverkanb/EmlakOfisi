@@ -83,6 +83,16 @@
 
     @if (options.CanChooseAgent)
     {
+        @* Prim oranı sadece yöneticiye görünür; boşsa danışmanın tanımlı oranı kullanılır *@
+        <div class="col-12 col-md-6">
+            <label asp-for="AgentShareRateText" class="form-label"></label>
+            <div class="input-group input-group-lg">
+                <span class="input-group-text">%</span>
+                <input asp-for="AgentShareRateText" type="text" inputmode="decimal" class="form-control" placeholder="Danışmanın oranı" autocomplete="off" />
+            </div>
+            <div class="form-hint">Boş bırakılırsa danışmanın tanımlı prim oranı kullanılır. Prim, işlem tamamlanınca hesaplanır. Sorumlu danışman değiştirilirse oran yeni danışmanınkiyle değişir.</div>
+            <span asp-validation-for="AgentShareRateText" class="text-danger small"></span>
+        </div>
         <div class="col-12 col-md-6">
             <label asp-for="AgentUserId" class="form-label"></label>
             <select asp-for="AgentUserId" class="form-select form-select-lg">

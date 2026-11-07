@@ -101,7 +101,7 @@ namespace EmlakOfisi.WebUI.Controllers
                 {
                     ShowProperty = true,
                     Items = _transactionService.TGetVisibleList(userId, canSeeAll, new TransactionFilter { ContactId = id }, 1, 100).Items
-                        .Select(r => TransactionItemViewModel.From(r, userId, _transactionService.TCanEdit(r.Transaction, userId, canSeeAll))).ToList()
+                        .Select(r => TransactionItemViewModel.From(r, userId, _transactionService.TCanEdit(r.Transaction, userId, canSeeAll), canSeeAll)).ToList()
                 }
             };
 

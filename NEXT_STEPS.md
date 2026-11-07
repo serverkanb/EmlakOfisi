@@ -387,6 +387,19 @@
   - `kod-inceleyici` ve `yetki-denetcisi` bulguları kapatıldı.
   - Bilinçli kabuller: işlemi oluşturan kişi, sorumlu başkasına verilse ya da rolü düşürülse de işlemi ve komisyonu görmeye devam eder; bir danışmana başkasının gizli portföyünde işlem atanırsa portföy "gizli kayıt" görünür ama fiyat ve not görünür; portföyün sorumlusu başka danışmanların o portföydeki işlemlerini görmez; işlem ve portföy durumu iki ayrı kayıtla güncellenir (atomik değil); "Bu ay" sisteme girildiği güne göre sayar; düzenleme formunda komisyon tam TL gösterilir.
 
+- 2026-11-07: Görev 18b `islem: danisman primi` (kullanıcı isteği)
+  - Admin, "İzin / prim" sayfasından her kullanıcıya **prim oranı (%)** yazar (`AppUser.CommissionSharePercent`, decimal(5,2)). Geçersiz değerde hiçbir şey kaydedilmez; boşsa prim hesaplanmaz.
+  - İşlem tamamlanınca danışmanın o anki oranı işleme kopyalanır (`AgentShareRate`), prim = komisyon x oran / 100 (`AgentShareAmount`, `CommissionCalculator`). Admin oranı sonradan değiştirirse eski işlemler değişmez; komisyon aynı gün düzeltilirse kayıtlı oranla yeniden hesaplanır; tamamlanmışlıktan çıkınca tutar silinir.
+  - İşlemdeki oranı elle sadece yönetici (Admin ya da Ofis yöneticisi) değiştirebilir; danışmanın gönderdiği oran controller ve serviste yok sayılır. Sorumlu değişir ve oran elle değişmezse yeni danışmanın oranı alınır.
+  - Prim tutarı ve oranı sadece sorumlu danışmana ve yöneticiye gösterilir (işlemi açıp devreden kişi görmez). Danışmanın düzenleme formuna oran gönderilmez.
+  - Ana ekran "Bu ay": danışman için **Primim**, yönetici için **Ödenecek primler**. Danışmanın özeti artık sadece sorumlusu olduğu işlemleri sayıyor (yetki denetimi bulgusu).
+  - `AgentCommissionShare` migration'ı kullanıcı onayıyla uygulandı (3 nullable kolon, veri kaybı yok).
+  - Testler 424/424 yeşil (`AgentShareTests`).
+  - Uçtan uca (LocalDB + curl + tarayıcı) denendi: admin ekranından danisman1'e %40 girildi; danisman1 oran 99 göndererek tamamlanmış işlem açtı, oran 40 kaldı, prim 170.000 x %40 = 68.000 ₺. Ana ekran: danisman1 Primim 68.000 ₺, müdür Ödenecek primler 68.000 ₺, danisman2 0. Danışmanın düzenleme formunda oran alanı yok, müdürde 40. Ana ekran sorgusu SQL Server'da sorunsuz çalıştı.
+  - Deneme işlemi (id 2) iptal edildi; Moda portföyünün durumu ve danisman1'in prim oranı geliştirme veritabanında SQL ile eski hâline getirildi (sahte veri).
+  - Bilinçli kabuller: oranı tanımlı olmayan danışmanın tamamlanmış işlemi, Admin sonradan oran tanımlarsa ve işlem tekrar kaydedilirse yeni oranla hesaplanır; yönetici elle yazdığı oranı, sorumluyu değiştirirken yeni danışmanınkiyle değişmiş bulur (formda yazıyor); ofis varsayılan oranı yok (istenirse eklenir).
+  - Not: geliştirme veritabanında `sqlcmd` ile güncelleme yaparken `-I` (QUOTED_IDENTIFIER) gerekiyor (AspNetUsers'ta filtreli indeks var).
+
 ## Sıradaki küçük görev
 - MVP (Faz 1 ve 2) tamamlandı. Yayına hazırlık için öneriler (kullanıcıyla önceliklendirilecek):
   - Production'da ilk admin kullanıcının nasıl oluşturulacağı (açık karar).

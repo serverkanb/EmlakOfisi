@@ -122,7 +122,7 @@ public class TransactionTests
         var row = Assert.Single(f.List(f.Ayse));
         Assert.True(row.PropertyHidden);
         Assert.True(row.ContactHidden);
-        var item = TransactionItemViewModel.From(row, f.Ayse.Id, true);
+        var item = TransactionItemViewModel.From(row, f.Ayse.Id, true, false);
         Assert.Null(item.PropertyId);
         Assert.Null(item.PropertyTitle);
         Assert.Null(item.ContactId);

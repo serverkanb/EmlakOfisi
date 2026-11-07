@@ -34,6 +34,14 @@ namespace EmlakOfisi.EntityLayer.Entities
         [Column(TypeName = "decimal(18,2)")]
         public decimal? CommissionAmount { get; set; }
 
+        // Danışman primi (görev 18b): tamamlanınca danışmanın o anki oranı kopyalanır (yönetici elle değiştirebilir);
+        // tutar = komisyon x oran / 100. Tamamlanmamış işlemde tutar boş.
+        [Column(TypeName = "decimal(5,2)")]
+        public decimal? AgentShareRate { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? AgentShareAmount { get; set; }
+
         public int AgentUserId { get; set; }
         public AppUser? AgentUser { get; set; }
 

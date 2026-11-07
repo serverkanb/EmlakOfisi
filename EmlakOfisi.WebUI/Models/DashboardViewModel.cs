@@ -16,10 +16,11 @@ namespace EmlakOfisi.WebUI.Models
         public int UpcomingCount { get; set; }
         public List<AppointmentItemViewModel> Upcoming { get; set; } = new();
 
-        // Bu ay tamamlanan işlemler ve komisyon (görev 18): danışman sorumlusu olduğu ya da oluşturduğu işlemleri,
+        // Bu ay tamamlanan işlemler ve komisyon (görev 18): danışman sorumlusu olduğu işlemleri,
         // yönetici tüm ofisi görür
         public int MonthSaleCount { get; set; }
         public int MonthRentCount { get; set; }
         public decimal MonthCommission { get; set; }
+        public decimal MonthAgentShare { get; set; }   // danışman: primim, yönetici: ödenecek primler
     }
 }

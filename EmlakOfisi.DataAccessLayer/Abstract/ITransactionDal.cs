@@ -15,8 +15,11 @@ namespace EmlakOfisi.DataAccessLayer.Abstract
 
         Transaction? GetVisibleByIdForUpdate(int id, int userId, bool canSeeAll);
 
-        // [from, to) aralığında tamamlanan, görünür işlemlerin özeti (tek sorgu)
+        // [from, to) aralığında tamamlanan işlemlerin özeti (tek sorgu). Danışman: sorumlusu olduğu işlemler; yönetici: hepsi
         TransactionSummary GetCompletedSummary(int userId, bool canSeeAll, DateTime from, DateTime to);
+
+        // Danışmanın güncel prim oranı (Admin'in yazdığı); yoksa null
+        decimal? GetAgentShareRate(int agentUserId);
 
         void Create(Transaction transaction);
 

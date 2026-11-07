@@ -220,6 +220,20 @@ namespace EmlakOfisi.WebUI.Models
         public static string Price(decimal price, ListingType listing) =>
             price.ToString("N0", Tr) + " ₺" + (listing == ListingType.Rent ? " / ay" : "");
 
+        // Yüzde: "2", "2,5" ya da "2.5"; 0–100 arası, en fazla 2 ondalık (decimal(5,2) ile uyumlu)
+        public static bool TryParsePercent(string? text, out decimal value)
+        {
+            value = 0;
+            if (string.IsNullOrWhiteSpace(text)) return false;
+            var t = text.Trim().Replace(',', '.');
+            return Regex.IsMatch(t, @"^\d{1,3}(\.\d{1,2})?$") &&
+                   decimal.TryParse(t, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out value) &&
+                   value <= 100;
+        }
+
+        // Forma geri yazmak için: 2.50 -> "2,5"
+        public static string? PercentText(decimal? value) => value?.ToString("0.##", Tr);
+
         // Sadece rakam (ve okunurluk için boşluk/nokta) kabul eder: "5.000.000" -> 5000000
         public static bool TryParsePrice(string? text, out decimal price)
         {

@@ -79,6 +79,9 @@ namespace EmlakOfisi.WebUI.Models
         public int UserId { get; set; }
         public string FullName { get; set; } = string.Empty;
         public bool CanSeeAll { get; set; }   // yönetici: izin olmadan da her şeyi düzenleyebilir
+
+        // Danışman primi (görev 18b): ofisin aldığı komisyondan danışmana düşen yüzde; boşsa prim hesaplanmaz
+        public string? CommissionShareText { get; set; }
         public List<UserPermissionItemViewModel> Permissions { get; set; } = new();
     }
 

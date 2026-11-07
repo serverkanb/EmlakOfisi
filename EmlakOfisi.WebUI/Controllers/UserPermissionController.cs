@@ -39,6 +39,7 @@ namespace EmlakOfisi.WebUI.Controllers
                 UserId = user.Id,
                 FullName = $"{user.Name} {user.Surname}",
                 CanSeeAll = roles.Contains(RoleNames.Admin) || roles.Contains(RoleNames.Manager),
+                CommissionShareText = PropertyLabels.PercentText(user.CommissionSharePercent),
                 Permissions = Permissions.All.Select(p => new UserPermissionItemViewModel
                 {
                     Name = p,
@@ -49,13 +50,33 @@ namespace EmlakOfisi.WebUI.Controllers
             });
         }
 
-        // permissions: işaretli izin adları. Tanımlı olmayan değerler yok sayılır.
+        // permissions: işaretli izin adları (tanımlı olmayanlar yok sayılır).
+        // commissionShare: danışman prim oranı (%), boşsa kaldırılır. Geçersizse hiçbir şey kaydedilmez.
         [HttpPost]
-        public async Task<IActionResult> Edit(int id, List<string>? permissions)
+        public async Task<IActionResult> Edit(int id, List<string>? permissions, string? commissionShare = null)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
                 return NotFound();
+
+            decimal? share = null;
+            if (!string.IsNullOrWhiteSpace(commissionShare))
+            {
+                if (!PropertyLabels.TryParsePercent(commissionShare, out var parsed))
+                {
+                    TempData["Error"] = "Prim oranını 0 ile 100 arasında girin (ör. 40 ya da 37,5). Değişiklik yapılmadı.";
+                    return RedirectToAction(nameof(Edit), new { id });
+                }
+                share = parsed;
+            }
+
+            // Prim oranı: sadece yeni tamamlanacak işlemleri etkiler (tamamlanmış işlemlerde oran kayıtlı)
+            var shareFailed = false;
+            if (user.CommissionSharePercent != share)
+            {
+                user.CommissionSharePercent = share;
+                shareFailed = !(await _userManager.UpdateAsync(user)).Succeeded;
+            }
 
             var wanted = (permissions ?? new()).Where(p => Permissions.All.Contains(p)).ToHashSet();
             var current = (await _userManager.GetClaimsAsync(user)).Where(c => c.Type == Permissions.ClaimType).ToList();
@@ -80,10 +101,10 @@ namespace EmlakOfisi.WebUI.Controllers
                     await _signInManager.RefreshSignInAsync(user);
             }
 
-            if (failed)
-                TempData["Error"] = "İzinler kaydedilemedi. Lütfen tekrar deneyin.";
+            if (failed || shareFailed)
+                TempData["Error"] = "İzinler ya da prim oranı kaydedilemedi. Lütfen tekrar deneyin.";
             else
-                TempData["Success"] = $"{user.Name} {user.Surname} için izinler güncellendi.";
+                TempData["Success"] = $"{user.Name} {user.Surname} için izinler ve prim oranı güncellendi.";
 
             return RedirectToAction("Index", "AdminUser");
         }

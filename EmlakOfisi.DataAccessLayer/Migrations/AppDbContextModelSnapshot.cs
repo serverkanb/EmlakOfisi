@@ -105,6 +105,9 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<decimal?>("CommissionSharePercent")
+                        .HasColumnType("decimal(5,2)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -572,6 +575,12 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransactionId"));
+
+                    b.Property<decimal?>("AgentShareAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("AgentShareRate")
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<int>("AgentUserId")
                         .HasColumnType("int");

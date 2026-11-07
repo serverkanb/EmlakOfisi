@@ -31,5 +31,7 @@ namespace EmlakOfisi.DataAccessLayer.Abstract
         public int SaleCount { get; set; }
         public int RentCount { get; set; }
         public decimal Commission { get; set; }
+        public decimal AgentShare { get; set; }      // görünür işlemlerin prim toplamı (yönetici: ödenecek primler)
+        public decimal MyAgentShare { get; set; }    // sorumlusu kullanıcı olan işlemlerin primi (danışman: primim)
     }
 }

@@ -341,7 +341,7 @@ namespace EmlakOfisi.WebUI.Controllers
             {
                 PropertyId = propertyId,
                 ShowProperty = false,
-                Items = items.Select(r => TransactionItemViewModel.From(r, userId, _transactionService.TCanEdit(r.Transaction, userId, canSeeAll))).ToList()
+                Items = items.Select(r => TransactionItemViewModel.From(r, userId, _transactionService.TCanEdit(r.Transaction, userId, canSeeAll), canSeeAll)).ToList()
             };
         }
 

@@ -43,6 +43,9 @@ namespace EmlakOfisi.WebUI.Models
         public decimal? AgreedPrice { get; set; }
         public decimal? CommissionRate { get; set; }
         public decimal? CommissionAmount { get; set; }
+        public bool ShowShare { get; set; }
+        public decimal? AgentShareRate { get; set; }
+        public decimal? AgentShareAmount { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
         public string AgentName { get; set; } = string.Empty;
@@ -60,9 +63,12 @@ namespace EmlakOfisi.WebUI.Models
 
         public bool CanEdit { get; set; }
 
-        public static TransactionItemViewModel From(TransactionRow row, int userId, bool canEdit)
+        // Prim (tutar ve danışmanın kişisel oranı) sadece yöneticiye ve işlemin sorumlu danışmanına gösterilir;
+        // işlemi açıp sorumluyu başkasına devreden kişi o danışmanın primini görmez.
+        public static TransactionItemViewModel From(TransactionRow row, int userId, bool canEdit, bool canSeeAll)
         {
             var t = row.Transaction;
+            var showShare = canSeeAll || t.AgentUserId == userId;
             var c = row.Contact;
             var phoneOk = c != null && c.PhoneNormalized.Length == 10 && c.PhoneNormalized.All(char.IsAsciiDigit);
             return new TransactionItemViewModel
@@ -74,6 +80,9 @@ namespace EmlakOfisi.WebUI.Models
                 AgreedPrice = t.AgreedPrice,
                 CommissionRate = t.CommissionRate,
                 CommissionAmount = t.CommissionAmount,
+                ShowShare = showShare,
+                AgentShareRate = showShare ? t.AgentShareRate : null,
+                AgentShareAmount = showShare ? t.AgentShareAmount : null,
                 CreatedAt = t.CreatedAt,
                 CompletedAt = t.CompletedAt,
                 AgentName = row.AgentName,
@@ -132,6 +141,10 @@ namespace EmlakOfisi.WebUI.Models
 
         [Display(Name = "Komisyon tutarı")]
         public string? CommissionAmountText { get; set; }
+
+        // Sadece yönetici yazar; boşsa danışmanın (Admin'in tanımladığı) oranı kullanılır
+        [Display(Name = "Danışman prim oranı (%)")]
+        public string? AgentShareRateText { get; set; }
 
         [Display(Name = "Sorumlu danışman")]
         public int AgentUserId { get; set; }

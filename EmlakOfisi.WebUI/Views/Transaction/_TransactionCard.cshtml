@@ -75,6 +75,21 @@
                 }
             </dd>
         }
+        @if (Model.AgentShareAmount != null)
+        {
+            <dt class="col-6 col-md-3 text-secondary fw-normal">Danışman primi</dt>
+            <dd class="col-6 col-md-3 mb-1 fw-bold">
+                @TransactionLabels.Money(Model.AgentShareAmount)
+                <span class="text-secondary fw-normal">(%@PropertyLabels.PercentText(Model.AgentShareRate))</span>
+            </dd>
+        }
+        else if (Model.ShowShare && Model.Status == TransactionStatus.Completed)
+        {
+            <dt class="col-6 col-md-3 text-secondary fw-normal">Danışman primi</dt>
+            <dd class="col-6 col-md-3 mb-1 text-secondary">
+                @(Model.AgentShareRate == null ? "Prim oranı tanımlı değil" : "Komisyon girilmediği için hesaplanmadı")
+            </dd>
+        }
         <dt class="col-6 col-md-3 text-secondary fw-normal">@(Model.CompletedAt != null ? "Tamamlandı" : "Başlangıç")</dt>
         <dd class="col-6 col-md-3 mb-1">@((Model.CompletedAt ?? Model.CreatedAt).ToString("dd.MM.yyyy"))</dd>
     </dl>

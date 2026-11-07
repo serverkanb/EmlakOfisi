@@ -80,6 +80,8 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             ApplyCommission(t, t.CommissionAmount);
             t.CompletedAt = t.Status == TransactionStatus.Completed ? DateTime.Now : null;
             t.ClosedAt = IsClosed(t.Status) ? DateTime.Now : null;
+            if (!canSeeAll) t.AgentShareRate = null;   // prim oranını elle sadece yönetici yazar
+            ApplyAgentShare(t);
 
             _transactionDal.Create(t);
             if (t.Status == TransactionStatus.Completed)
@@ -111,11 +113,13 @@ namespace EmlakOfisi.BusinessLayer.Concrete
 
             // Sorumlu sadece yönetici tarafından ve aktif bir çalışana değişir; aynı değer gelirse dokunulmaz
             var agentId = t.AgentUserId;
+            var agentChanged = false;
             if (canSeeAll && changes.AgentUserId != 0 && changes.AgentUserId != t.AgentUserId)
             {
                 if (!IsAssignable(changes.AgentUserId))
                     return OperationResult.Invalid;
                 agentId = changes.AgentUserId;
+                agentChanged = true;
             }
 
             var previous = t.Status;
@@ -129,6 +133,14 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             ApplyCommission(t, changes.CommissionAmount);
             if (Enum.IsDefined(changes.Status)) t.Status = changes.Status;
             UpdateCompletion(t, previous);
+            if (canSeeAll)
+            {
+                // Yönetici oranı elle yazabilir; boş bırakırsa danışmanın oranı kullanılır.
+                // Sorumlu değiştiyse ve oran elle değiştirilmediyse yeni danışmanın oranı alınır.
+                var rateUntouched = changes.AgentShareRate == t.AgentShareRate;
+                t.AgentShareRate = agentChanged && rateUntouched ? null : changes.AgentShareRate;
+            }
+            ApplyAgentShare(t);
 
             _transactionDal.Update(t);
             propertyUpdate = AfterStatusChange(t, wasCompleted, userId, canSeeAll);
@@ -150,6 +162,7 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             var previous = t.Status;
             t.Status = status;
             UpdateCompletion(t, previous);
+            ApplyAgentShare(t);
             _transactionDal.Update(t);
 
             propertyUpdate = AfterStatusChange(t, previous == TransactionStatus.Completed, userId, canSeeAll);
@@ -163,12 +176,26 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             (t.AgreedPrice == null || t.AgreedPrice >= 0) &&
             (t.CommissionRate == null || (t.CommissionRate >= 0 && t.CommissionRate <= 100)) &&
             (t.CommissionAmount == null || t.CommissionAmount >= 0) &&
+            (t.AgentShareRate == null || (t.AgentShareRate >= 0 && t.AgentShareRate <= 100)) &&
             (t.Notes == null || t.Notes.Length <= 2000);
 
         // Oran ve anlaşılan fiyat varsa tutar hesaplanır; yoksa elle girilen tutar kullanılır
         private static void ApplyCommission(Transaction t, decimal? enteredAmount)
         {
             t.CommissionAmount = CommissionCalculator.Calculate(t.AgreedPrice, t.CommissionRate) ?? enteredAmount;
+        }
+
+        // Danışman primi: tamamlanmış işlemde oran yoksa danışmanın güncel oranı kopyalanır (sonradan değişmez);
+        // tutar = komisyon x oran / 100. Tamamlanmamış işlemde tutar boş.
+        private void ApplyAgentShare(Transaction t)
+        {
+            if (t.Status != TransactionStatus.Completed)
+            {
+                t.AgentShareAmount = null;
+                return;
+            }
+            t.AgentShareRate ??= _transactionDal.GetAgentShareRate(t.AgentUserId);
+            t.AgentShareAmount = CommissionCalculator.Calculate(t.CommissionAmount, t.AgentShareRate);
         }
 
         // Tamamlanma ve kapanış tarihleri: duruma ilk girildiğinde yazılır, durumdan çıkınca silinir

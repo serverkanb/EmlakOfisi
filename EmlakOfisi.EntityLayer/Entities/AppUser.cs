@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EmlakOfisi.EntityLayer.Entities
 {
@@ -15,5 +16,10 @@ namespace EmlakOfisi.EntityLayer.Entities
         public string Surname { get; set; } = string.Empty;
 
         public bool IsActive { get; set; } = true;
+
+        // Danışman primi (görev 18b): ofisin aldığı komisyondan danışmana düşen yüzde (ör. 40). Sadece Admin yazar.
+        // Boşsa prim hesaplanmaz. İşlem tamamlanınca o anki oran işleme kopyalanır.
+        [Column(TypeName = "decimal(5,2)")]
+        public decimal? CommissionSharePercent { get; set; }
     }
 }
