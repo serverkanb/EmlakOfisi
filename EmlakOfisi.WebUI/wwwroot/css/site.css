@@ -213,3 +213,54 @@ aside.navbar-vertical .navbar-nav .nav-item.active > .nav-link .nav-link-icon {
     font-weight: 700;
     letter-spacing: .02em;
 }
+
+/* Bas-konuş mikrofon düğmesi (görev 16b, wwwroot/js/mic.js). Dokunmatik hedef 48px; dinlerken kırmızı ve yanıp söner. */
+.mic-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .5rem;
+    margin-top: .375rem;
+}
+.mic-status {
+    flex: 1;
+    text-align: right;
+}
+.mic-button {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: var(--ak-gold-text);
+    border: 1px solid var(--ak-gold-text);
+    background: var(--tblr-bg-surface);
+    touch-action: none;              /* basılı tutarken sayfa kaymasın */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;     /* iPhone uzun basış menüsü açılmasın */
+}
+/* Hazırlanıyor: mikrofon henüz açılmadı (konuşmaya başlamayın) */
+.mic-button.mic-preparing,
+.mic-button.mic-processing {
+    color: var(--ak-charcoal);
+    background: var(--ak-gold-light);
+    border-color: var(--ak-gold);
+}
+.mic-button.mic-listening {
+    color: #fff;
+    background: var(--tblr-danger);
+    border-color: var(--tblr-danger);
+    animation: mic-pulse 1s ease-in-out infinite;
+}
+@keyframes mic-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(214, 57, 57, .55); }
+    50% { box-shadow: 0 0 0 10px rgba(214, 57, 57, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .mic-button.mic-listening { animation: none; }
+}

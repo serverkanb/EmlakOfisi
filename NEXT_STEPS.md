@@ -332,9 +332,27 @@
   - Yayına alma notu: yollar köke göre (`/images/...`); IIS alt dizininde çalıştırılırsa logo, manifest ve PWA yolları uyarlanmalı. Ayar açılışta okunur; ad/logo değişince uygulama yeniden başlar (IIS appsettings değişince zaten yeniden başlatır).
   - Kapsam dışı: kurumsal renkler (altın, antrasit, zemin) `site.css`'te sabit. İleride gerekirse ayardan CSS değişkeni olarak verilebilir. Logo dosyaları (`altinkule-*.png`) depoda duruyor; dosya adları ayardan geldiği için başka ofiste yeniden adlandırma gerekmez.
 
+- 2026-11-07: Görev 16b `arayuz: not alanlari icin bas-konus mikrofon dugmesi`
+  - `wwwroot/js/mic.js` (tek ortak dosya, `_Layout`'ta): Web Speech API, `tr-TR`, harici paket yok. Sadece `data-mic` işaretli **textarea**'lara 48 px yuvarlak düğme ekliyor.
+  - Basılı tutunca dinliyor, bırakınca duruyor (pointer olayları; parmak kayarsa ya da sistem iptal ederse de duruyor). Klavyede Boşluk/Enter basılı tutularak da çalışıyor. Tanınan metin alanın sonuna ekleniyor (gerekirse araya boşluk); `maxlength` ya da form doğrulama sınırı (`data-val-length-max`) aşılmıyor. Aynı anda tek alan dinleniyor; sayfa arka plana giderse dinleme duruyor.
+  - Dinlerken düğme kırmızı ve yanıp sönüyor ("hareketi azalt" açıksa sadece kırmızı), altta "Dinleniyor…" (ekran okuyucu duyurur). Hatalar Türkçe: "Mikrofon izni verilmedi", "Ses algılanamadı". Kısa dokunuşta "Konuşmak için basılı tutun".
+  - Tarayıcı desteklemiyorsa (ör. Firefox) ya da bağlantı güvenli değilse (HTTPS/localhost değil) düğme hiç eklenmiyor.
+  - Eklenen alanlar: görüşme notu (`_ActivityHistory`), randevu notu, portföy açıklaması. Müşteri talep açıklamasına görev 17'de eklenecek. Portföy adresi ve müşteri kartındaki "Not" alanına eklenmedi (kullanıcı listesinde yok).
+  - Testler 364/364 yeşil (`MicButtonTests`): `data-mic` sadece textarea'larda; beklenen üç alanda var, adreste yok; script layout'ta ve destek yoksa düğme eklemiyor.
+  - Tarayıcıda sahte konuşma tanıma nesnesiyle denendi: basılı tutunca kırmızı + "Dinleniyor…", bırakınca metin sona eklendi, kısa dokunuş ipucu, izin hatası kırmızı mesaj, 2000 karakter sınırı, destek yokken düğme yok. Düğme 48×48. **Gerçek mikrofonla deneme telefonda HTTPS ile yapılmalı.**
+  - `kod-inceleyici` bulguları kapatıldı:
+    - Durumlar ayrıldı: "Hazırlanıyor…" (mikrofon açılana kadar, açık altın), "Dinleniyor…" (`onstart` gelince, kırmızı), "İşleniyor…". İlk kelimeler kaybolmasın diye kırmızı görünüm mikrofon gerçekten açılınca geliyor.
+    - İşlenirken tekrar basılırsa basış kaybolmuyor, oturum bitince yeniden dinliyor. `onend` 3 sn içinde gelmezse oturum kapatılıyor (düğme kilitlenmiyor).
+    - Sonuç listesi her olayda baştan okunuyor (birikerek gelen listede metin iki kez eklenmesin).
+    - Hata mesajları ayrıldı: Dikte kapalı / sesle yazma desteklenmiyor (`service-not-allowed`), internet yok, mikrofon yok. Karakter sınırında "Karakter sınırına ulaşıldı." uyarısı.
+    - Ekran okuyucu ve klavye tıklaması aç/kapa gibi çalışıyor; `aria-pressed` kaldırıldı, düğme etiketi alan adını söylüyor.
+    - Bu senaryoların hepsi sahte tanıma nesnesiyle tarayıcıda denendi.
+  - Not: Chrome ve Safari sesi metne çevirmek için Google/Apple sunucularına gönderir (uygulama ek servis kullanmaz).
+  - **Açık not (gerçek cihaz):** Android Chrome ve iPhone Safari'de gerçek mikrofonla denenmedi (HTTPS gerekiyor). Android'de `continuous` modunda metin tekrarı görülürse `continuous = false` ya da sadece son sonucu alma denenecek. iPhone'da ana ekrandan açılan PWA'da tanıma desteklenmeyebilir; o durumda "Bu cihazda sesle yazma kullanılamıyor" mesajı çıkar.
+  - **Kullanıcı kararı (KVKK):** sesle yazma kabul edildi (iç kullanım, görüşme notları; birçok uygulamada aynı özellik var). Ses metne çevrilirken Google/Apple sunucularına gider; kimlik numarası, banka bilgisi gibi hassas veriler sesle yazılmamalı. Kapatma ayarı şimdilik gerekmiyor.
+
 ## Sıradaki küçük görev
-- Görev 16b `arayuz: not alanlari icin bas-konus mikrofon dugmesi` (MVP, kullanıcı isteği 2026-11-07; formlar hazır). Ayrıntılar `docs/MIMARI_PLAN.md` bölüm 6'da. Randevu notu alanı da artık var.
-- Ardından Faz 2: görev 17 `talep: musteri talepleri`.
+- Faz 2: görev 17 `talep: musteri talepleri` (talep açıklamasına `data-mic` eklenecek).
 - Görev 6b (.NET 10 yükseltme) .NET 10 SDK kurulunca yapılacak.
 
 ## Açık kararlar / notlar
