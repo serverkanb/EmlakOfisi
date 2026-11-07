@@ -18,6 +18,11 @@
     --tblr-link-color: var(--ak-gold-text);
     --tblr-link-color-rgb: 138, 106, 30;
     --tblr-link-hover-color: #6E5418;
+
+    /* Sayfa zemini (kartların arkası): logodaki altının çok açık, sıcak tonu. Kartlar beyaz kalır.
+       Gri yazı (text-secondary) bu zeminde de okunur; altın üzerine beyaz yazı kuralı değişmez. */
+    --ak-page-bg: #F7F3EA;
+    --tblr-body-bg: var(--ak-page-bg);
 }
 
 /* Çerçeveli altın butonlar (ör. "Ara"): beyaz zeminde yazı ve çerçeve koyu altın (5,0:1);
@@ -201,3 +206,10 @@ aside.navbar-vertical .navbar-nav .nav-item.active > .nav-link .nav-link-icon {
 .appointment-tab { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
 .appointment-day { font-size: 1rem; font-weight: 600; }
 .appointment-mine { min-height: 44px; display: flex; align-items: center; }
+
+/* Logo tanımlı değilse menüde ve giriş sayfasında ofis adı yazı olarak (OfficeSettings) */
+.ak-brand-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+}

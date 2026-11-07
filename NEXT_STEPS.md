@@ -319,9 +319,21 @@
     - Uygulama sitenin **kökünde** çalışır varsayımıyla yazıldı (`/sw.js`, manifest yolları). IIS'te alt dizine kurulursa PWA yolları uygulama adresine göre yazılmalı (marka görevinde bakılabilir).
     - Sayfaların tarayıcıda saklanmaması şu an antiforgery'nin eklediği `no-cache, no-store` başlığına dayanıyor (her sayfada çıkış formu var). Formu olmayan, kişisel veri döndüren yeni bir uç (JSON vb.) eklenirse kimliği doğrulanmış yanıtlara genel bir `no-store` kuralı eklenmeli.
 
+- 2026-11-07: Ara görev `arayuz: ofis adi ve logosu ayardan, sayfa zemini`
+  - `appsettings.json` "Office" bölümü (sır değil): `Name`, `ShortName`, `LogoPath`, `LogoWhitePath`, `Icon64Path`, `Icon192Path`, `Icon512Path`. Başka bir ofise kurulumda sadece bu bölüm ve `wwwroot/images/brand` dosyaları değişir.
+  - `WebUI/Helpers/OfficeSettings`: açılışta okunup `Normalize` ediliyor (ad boşsa "Emlak Ofisi", kısa ad boşsa ad). Yollar sadece site içinden (`/...`, `~/...`); dış adres, `//host`, `javascript:` ve göreli yol yok sayılıyor. Logo yoksa menüde ve giriş/hata sayfasında ofis adı yazı olarak çıkıyor (`_OfficeLogo` partial).
+  - Görünümler ayarı `_ViewImports`'taki `@inject OfficeSettings Office` ile alıyor: sayfa başlıkları, menü logosu, giriş ve hata sayfaları, ikonlar ve iPhone ana ekran adı (`_PwaHead`).
+  - Manifest artık `ManifestController` (`[AllowAnonymous]`, sadece `GET /manifest.webmanifest`) ile ayardan üretiliyor; statik dosya silindi. Girişsiz ve rolsüz sayfa listelerine bilinçli eklendi.
+  - `offline.html` ofisten bağımsız (ad/logo yok, SVG ikon). Service worker logoyu önceden saklamıyor, önbellek `emlakofisi-statik-v4`.
+  - **Kullanıcı isteği:** sayfa zemini (kartların arkası) logodaki altının çok açık tonu `#F7F3EA`; kartlar beyaz. Gri yazının bu zemindeki kontrastı yaklaşık 5,4:1.
+  - Testler 361/361 yeşil: manifest ayardan ve ikon/logo dosyaları var; `Normalize` ve `LocalPath` (dış adres, `javascript:` vb.); manifest ucu girişsiz ve tek action; **"Altınkule" görünümlerde, controller'larda ve wwwroot html/js'de geçmiyor** (koruyucu test).
+  - Elle denendi: ayar geçici olarak "Deneme Emlak" ve dış adresli logo yapıldı; başlık, menü, giriş sayfası, iPhone adı ve manifest yeni adı gösterdi, dış logo reddedilip ad yazıldı. Ayar geri alındı.
+  - İnceleme düzeltmeleri: koyu menüde beyaz logo yoksa renkli logoya düşülmüyor, ad yazılıyor; logo yolunda boşluk/kontrol karakteri reddediliyor (sekmeli "/<sekme>/host" tarayıcıda dış adrese dönüşebiliyordu); koruyucu test Helpers ve Program.cs'i de tarıyor.
+  - Yayına alma notu: yollar köke göre (`/images/...`); IIS alt dizininde çalıştırılırsa logo, manifest ve PWA yolları uyarlanmalı. Ayar açılışta okunur; ad/logo değişince uygulama yeniden başlar (IIS appsettings değişince zaten yeniden başlatır).
+  - Kapsam dışı: kurumsal renkler (altın, antrasit, zemin) `site.css`'te sabit. İleride gerekirse ayardan CSS değişkeni olarak verilebilir. Logo dosyaları (`altinkule-*.png`) depoda duruyor; dosya adları ayardan geldiği için başka ofiste yeniden adlandırma gerekmez.
+
 ## Sıradaki küçük görev
-- Ara görev `arayuz: ofis adi ve logosu ayardan` (görev 16'da kararlaştırıldı): ofis adı ve logo yolları `appsettings.json`'daki bir ayardan okunsun (sayfa başlıkları, menü logosu, giriş/hata sayfaları, manifest, offline sayfası). Manifest ve offline sayfası şu an statik dosya; ayardan okunmaları için girişsiz bir uçtan üretilmeleri gerekecek.
-- Görev listesine eklendi (2026-11-07, kullanıcı isteği): 16b `arayuz: not alanlari icin bas-konus mikrofon dugmesi` (MVP, formlardan sonra). Ayrıntılar `docs/MIMARI_PLAN.md` bölüm 6'da. Randevu notu alanı da artık var.
+- Görev 16b `arayuz: not alanlari icin bas-konus mikrofon dugmesi` (MVP, kullanıcı isteği 2026-11-07; formlar hazır). Ayrıntılar `docs/MIMARI_PLAN.md` bölüm 6'da. Randevu notu alanı da artık var.
 - Ardından Faz 2: görev 17 `talep: musteri talepleri`.
 - Görev 6b (.NET 10 yükseltme) .NET 10 SDK kurulunca yapılacak.
 
@@ -336,7 +348,7 @@
 - Bu bilgisayarda HTTPS geliştirme sertifikası yok. `https` profili sertifika olmadığı için açılmıyor, bu yüzden yerel denemeler `http` profiliyle yapılıyor (`.claude/launch.json`). HTTPS ile çalıştırmak için kullanıcının şu komutu kendisinin çalıştırması gerekiyor: `dotnet dev-certs https --trust`.
 - Cookie `Secure` olarak işaretli. Bu yüzden telefondan LAN IP'si üzerinden http ile girilirse giriş yapılamaz. Telefonda deneme için HTTPS gerekiyor.
 - Production'da ilk admin kullanıcı nasıl oluşturulacak, henüz kararı verilmedi (seed sadece Development'ta çalışıyor). Yayına almadan önce karar verilmeli. Uygulama başka ofislere satılırsa bu her kurulumda gerekecek.
-- **Kullanıcı kararı (2026-11-07):** hedef 10–50 kullanıcılı tek ofis. Başka ofislere satılırsa her ofise ayrı kurulum ve ayrı veritabanı (multi-tenant yok). Ayrı küçük görev: ofis adı ve logosu şu an koda sabit (Altınkule; `_Layout`, giriş ve hata sayfaları, `wwwroot/images/brand`). Bunlar yapılandırmadan okunacak.
+- **Kullanıcı kararı (2026-11-07):** hedef 10–50 kullanıcılı tek ofis. Başka ofislere satılırsa her ofise ayrı kurulum ve ayrı veritabanı (multi-tenant yok). Ofis adı ve logosu artık `appsettings.json` "Office" bölümünden okunuyor (2026-11-07).
 - Giriş akışının otomatik testi yok, şimdilik elle denendi. Uçtan uca HTTP testleri gerekirse `Microsoft.AspNetCore.Mvc.Testing` paketi önerilecek; görünürlük testleri için görev 7'de değerlendirilecek.
 - Seed admin şifresini görmek için: `dotnet user-secrets list --project EmlakOfisi.WebUI`. Kullanıcı adı `admin`.
 - Dikkat: seed sadece kullanıcı **yoksa** oluşturur. user-secrets'taki şifreyi değiştirmek var olan admin'i etkilemez. Yeni şifrenin geçerli olması için ya geliştirme veritabanındaki admin silinir (sonraki açılışta yeniden oluşur) ya da şifre değiştirme ekranı kullanılır (görev 6).

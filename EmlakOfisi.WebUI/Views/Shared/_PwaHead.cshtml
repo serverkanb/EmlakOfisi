@@ -1,7 +1,15 @@
-@* PWA (görev 16): ana ekrana ekleme bilgileri. Ofis adı şimdilik sabit; marka ayarı görevinde yapılandırmadan okunacak. *@
+@* Ofis ikonları ve PWA (görev 16) bilgileri. Ad ve ikon yolları ayardan (OfficeSettings, appsettings.json "Office"). *@
+@if (Office.Icon64Path != null)
+{
+    <link rel="icon" type="image/png" href="@Office.Icon64Path" />
+}
+@if (Office.Icon192Path != null)
+{
+    <link rel="apple-touch-icon" href="@Office.Icon192Path" />
+}
 <link rel="manifest" href="~/manifest.webmanifest" />
 <meta name="theme-color" content="#2C2928" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-<meta name="apple-mobile-web-app-title" content="Altınkule" />
+<meta name="apple-mobile-web-app-title" content="@Office.ShortName" />

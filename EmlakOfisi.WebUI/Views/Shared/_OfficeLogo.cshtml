@@ -1,0 +1,15 @@
+@model string
+@* Ofis logosu ya da (logo tanımlı değilse) ofis adı. Model: CSS sınıfı. ViewData["White"] = true: koyu menü için beyaz sürüm. *@
+@{
+    var white = ViewData["White"] as bool? == true;
+    // Koyu menüde renkli logoya düşülmez (yazıları koyu olabilir, okunmaz): beyaz logo yoksa ad yazılır
+    var path = white ? Office.LogoWhitePath : Office.LogoPath;
+}
+@if (path != null)
+{
+    <img src="@path" alt="@Office.Name" class="@Model" />
+}
+else
+{
+    <span class="ak-brand-text @(white ? "text-white" : "")">@Office.Name</span>
+}

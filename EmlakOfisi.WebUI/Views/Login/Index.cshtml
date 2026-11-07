@@ -8,9 +8,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>@ViewData["Title"] - Altınkule Gayrimenkul</title>
-    <link rel="icon" type="image/png" href="~/images/brand/altinkule-ikon-64.png" />
-    <link rel="apple-touch-icon" href="~/images/brand/altinkule-ikon-192.png" />
+    <title>@ViewData["Title"] - @Office.Name</title>
     <partial name="_PwaHead" />
     <link rel="stylesheet" href="~/lib/tabler/css/tabler.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/lib/tabler-icons/tabler-icons.min.css" asp-append-version="true" />
@@ -20,7 +18,7 @@
     <div class="page page-center">
         <div class="container container-tight py-4">
             <div class="text-center mb-4">
-                <img src="~/images/brand/altinkule-logo.png" alt="Altınkule Gayrimenkul" class="ak-logo-login" />
+                <partial name="_OfficeLogo" model='"ak-logo-login"' />
             </div>
 
             <div class="card card-md">

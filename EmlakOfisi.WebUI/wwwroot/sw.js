@@ -2,10 +2,10 @@
 // GÜVENLİK KURALI: önbelleğe SADECE statik dosyalar (/lib, /css, /js, /images) alınır.
 // Sayfalar, formlar, fotoğraflar (/PropertyPhoto/Show) ve diğer tüm uçlar HİÇ saklanmaz; her seferinde sunucudan gelir.
 // Böylece ortak ya da kaybolan bir telefonda müşteri/portföy bilgisi kalmaz. Offline çalışma yoktur.
-// Bu dosya, site.css ya da logo değişince CACHE_NAME sürümü artırılır (uyarı sayfası sürümsüz kopyaları kullanır);
+// Bu dosya ya da site.css değişince CACHE_NAME sürümü artırılır (uyarı sayfası sürümsüz kopyaları kullanır);
 // eski önbellek "activate" adımında silinir. Uygulama sitenin KÖKÜNDE çalışır varsayımıyla yazıldı (/sw.js, /lib/ ...).
 
-const CACHE_NAME = 'emlakofisi-statik-v3';
+const CACHE_NAME = 'emlakofisi-statik-v4';
 const OFFLINE_URL = '/offline.html';
 const STATIC_PREFIXES = ['/lib/', '/css/', '/js/', '/images/'];
 
@@ -13,8 +13,7 @@ const STATIC_PREFIXES = ['/lib/', '/css/', '/js/', '/images/'];
 const PRECACHE_URLS = [
     OFFLINE_URL,
     '/lib/tabler/css/tabler.min.css',
-    '/css/site.css',
-    '/images/brand/altinkule-logo.png'
+    '/css/site.css'
 ];
 
 function isStatic(url) {

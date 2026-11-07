@@ -17,6 +17,7 @@ public class AuthorizationRulesTests
     {
         "LoginController",              // giriş, çıkış, yetkisiz erişim sayfası
         "ErrorController",              // hata sayfası
+        "ManifestController",           // PWA manifest'i (tarayıcı çerezsiz ister; sadece ad, renk, ikon)
     };
 
     [Fact]
@@ -57,7 +58,7 @@ public class AuthorizationRulesTests
     // ya Admin ya da Staff (ofis çalışanı) rolü istemeli; rolsüz kullanıcı iş verisine erişemesin.
     private static readonly HashSet<string> NoRoleRequired = new()
     {
-        "LoginController", "ErrorController", "ProfileController"
+        "LoginController", "ErrorController", "ProfileController", "ManifestController"
     };
 
     [Fact]

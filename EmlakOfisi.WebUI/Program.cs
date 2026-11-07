@@ -26,6 +26,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
+// Ofis adı ve logo (sır değil; appsettings.json "Office"). Eksik/geçersiz değerler Normalize ile güvenli hale gelir.
+builder.Services.AddSingleton((builder.Configuration.GetSection(OfficeSettings.SectionName).Get<OfficeSettings>() ?? new OfficeSettings()).Normalize());
+
 // ---------------------------
 //  Katmanlı Servisler (InstrumentTrade'deki gibi: Dal + Service çiftleri)
 // ---------------------------

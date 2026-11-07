@@ -3,9 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>@ViewData["Title"] - Altınkule Gayrimenkul</title>
-    <link rel="icon" type="image/png" href="~/images/brand/altinkule-ikon-64.png" />
-    <link rel="apple-touch-icon" href="~/images/brand/altinkule-ikon-192.png" />
+    <title>@ViewData["Title"] - @Office.Name</title>
     <partial name="_PwaHead" />
     <link rel="stylesheet" href="~/lib/tabler/css/tabler.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/lib/tabler-icons/tabler-icons.min.css" asp-append-version="true" />
@@ -22,8 +20,8 @@
                 </button>
                 @* navbar-brand-autodark kullanılmaz: Tabler o sınıfta logoyu beyaza çeviren filtre uyguluyor *@
                 <div class="navbar-brand">
-                    <a asp-controller="Dashboard" asp-action="Index" class="ak-brand" aria-label="Altınkule Gayrimenkul - Ana sayfa">
-                        <img src="~/images/brand/altinkule-logo-beyaz.png" alt="Altınkule Gayrimenkul" class="ak-logo-sidebar" />
+                    <a asp-controller="Dashboard" asp-action="Index" class="ak-brand" aria-label="@Office.Name - Ana sayfa">
+                        <partial name="_OfficeLogo" model='"ak-logo-sidebar"' view-data='new ViewDataDictionary(ViewData) { ["White"] = true }' />
                     </a>
                 </div>
                 <div class="navbar-nav flex-row d-lg-none">
