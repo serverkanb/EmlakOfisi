@@ -53,6 +53,9 @@ builder.Services.AddScoped<IAppointmentService, AppointmentManager>();
 builder.Services.AddScoped<ICustomerRequestDal, EfCustomerRequestDal>();
 builder.Services.AddScoped<ICustomerRequestService, CustomerRequestManager>();
 
+builder.Services.AddScoped<ITransactionDal, EfTransactionDal>();
+builder.Services.AddScoped<ITransactionService, TransactionManager>();
+
 // Fotoğraflar wwwroot DIŞINDA saklanır (adresle doğrudan açılamaz). Sunucuda farklı bir klasör
 // gerekirse "Uploads:Root" ayarıyla değiştirilir; uygulama havuzunun bu klasöre yazma izni olmalı.
 var uploadsRoot = builder.Configuration["Uploads:Root"];

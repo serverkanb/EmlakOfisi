@@ -165,6 +165,22 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             return OperationResult.Success;
         }
 
+        public OperationResult TSetStatus(int id, PropertyStatus status, int userId, bool canSeeAll)
+        {
+            var property = _propertyDal.GetVisibleByIdForUpdate(id, userId, canSeeAll);
+            if (property == null)
+                return OperationResult.NotFound;
+            if (!TCanEdit(property, userId, canSeeAll))
+                return OperationResult.Forbidden;
+            if (!Enum.IsDefined(status))
+                return OperationResult.Invalid;
+
+            property.Status = status;
+            property.UpdatedAt = DateTime.Now;
+            _propertyDal.Update(property);
+            return OperationResult.Success;
+        }
+
         public OperationResult TSoftDelete(int id, int userId, bool canSeeAll)
         {
             var property = _propertyDal.GetVisibleByIdForUpdate(id, userId, canSeeAll);

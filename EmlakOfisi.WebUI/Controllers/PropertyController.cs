@@ -23,10 +23,13 @@ namespace EmlakOfisi.WebUI.Controllers
         private readonly IContactService _contactService;
         private readonly IPropertyInterestService _interestService;
         private readonly IPropertyPhotoService _photoService;
+        private readonly ITransactionService _transactionService;
 
         public PropertyController(IPropertyService propertyService, IContactService contactService,
-            IPropertyInterestService interestService, IPropertyPhotoService photoService)
+            IPropertyInterestService interestService, IPropertyPhotoService photoService,
+            ITransactionService transactionService)
         {
+            _transactionService = transactionService;
             _propertyService = propertyService;
             _contactService = contactService;
             _interestService = interestService;
@@ -101,7 +104,8 @@ namespace EmlakOfisi.WebUI.Controllers
                 Interests = BuildInterestPanel(p, userId, canSeeAll),
                 Photos = (_photoService.TGetForProperty(p.PropertyId, userId, canSeeAll) ?? new List<PropertyPhoto>())
                     .Select(ph => new PropertyPhotoItemViewModel { PropertyPhotoId = ph.PropertyPhotoId, IsCover = ph.IsCover })
-                    .ToList()
+                    .ToList(),
+                Transactions = BuildTransactionPanel(new TransactionFilter { PropertyId = p.PropertyId }, userId, canSeeAll, p.PropertyId)
             });
         }
 
@@ -326,6 +330,18 @@ namespace EmlakOfisi.WebUI.Controllers
                                .Select(o => (o.Key, o.Value)).ToList(),
                 CanChooseAgent = canSeeAll,
                 Agents = agents
+            };
+        }
+
+        // İşlemler (görev 18): sadece kullanıcının görebildiği işlemler (kendi; yönetici hepsi)
+        private TransactionPanelViewModel BuildTransactionPanel(TransactionFilter filter, int userId, bool canSeeAll, int propertyId)
+        {
+            var (items, _) = _transactionService.TGetVisibleList(userId, canSeeAll, filter, 1, 100);
+            return new TransactionPanelViewModel
+            {
+                PropertyId = propertyId,
+                ShowProperty = false,
+                Items = items.Select(r => TransactionItemViewModel.From(r, userId, _transactionService.TCanEdit(r.Transaction, userId, canSeeAll))).ToList()
             };
         }
 

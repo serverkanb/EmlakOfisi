@@ -1,0 +1,30 @@
+@model TransactionPanelViewModel
+
+@* Portföy ve müşteri detayındaki işlemler (görev 18). Sadece kullanıcının görebildiği işlemler listelenir
+   (kendi işlemleri; yönetici hepsini). Başka danışmanın işlemi ve komisyonu burada görünmez. *@
+<div class="card" id="islemler">
+    <div class="card-header">
+        <h3 class="card-title"><i class="ti ti-receipt me-1"></i> Satış / kiralama işlemleri</h3>
+        <span class="badge bg-secondary-lt ms-2">@Model.Items.Count</span>
+        @if (Model.PropertyId != null)
+        {
+            <a asp-controller="Transaction" asp-action="Create" asp-route-propertyId="@Model.PropertyId" class="btn btn-primary btn-sm ms-auto">
+                <i class="ti ti-plus me-1"></i> İşlem başlat
+            </a>
+        }
+    </div>
+    @if (Model.Items.Count == 0)
+    {
+        <div class="card-body text-secondary">Görebildiğiniz işlem yok.</div>
+    }
+    else
+    {
+        <div class="list-group list-group-flush">
+            @foreach (var item in Model.Items)
+            {
+                <partial name="~/Views/Transaction/_TransactionCard.cshtml" model="item"
+                         view-data='new ViewDataDictionary(ViewData) { ["ShowProperty"] = Model.ShowProperty, ["ShowContact"] = !Model.ShowProperty }' />
+            }
+        </div>
+    }
+</div>

@@ -96,5 +96,8 @@ namespace EmlakOfisi.WebUI.Models
 
         // Görev 17: talepleri
         public CustomerRequestPanelViewModel Requests { get; set; } = new();
+
+        // Görev 18: satış/kiralama işlemleri (sadece görebildiği)
+        public TransactionPanelViewModel Transactions { get; set; } = new();
     }
 }

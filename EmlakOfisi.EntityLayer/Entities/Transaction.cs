@@ -1,10 +1,14 @@
 using EmlakOfisi.EntityLayer.Enums;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EmlakOfisi.EntityLayer.Entities
 {
     // Satış / kiralama işlemi. Pazarlık adımları Activity (Type = Offer) olarak tutulur.
+    // Görünürlük (görev 18): yönetici, sorumlu danışman ya da işlemi oluşturan (komisyon içerdiği için).
+    [Index(nameof(AgentUserId), nameof(Status))]
+    [Index(nameof(CreatedByUserId))]
     public class Transaction
     {
         public int TransactionId { get; set; }
@@ -34,6 +38,12 @@ namespace EmlakOfisi.EntityLayer.Entities
         public AppUser? AgentUser { get; set; }
 
         public DateTime? CompletedAt { get; set; }
+
+        // Tamamlandı ya da İptal olduğu an (görev 18). Danışman kapanmış işlemi sadece bu gün içinde değiştirebilir.
+        public DateTime? ClosedAt { get; set; }
+
+        public int CreatedByUserId { get; set; }
+        public AppUser? CreatedByUser { get; set; }
 
         [StringLength(2000)]
         public string? Notes { get; set; }

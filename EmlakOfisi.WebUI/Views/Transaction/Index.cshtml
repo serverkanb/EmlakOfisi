@@ -1,0 +1,79 @@
+@using EmlakOfisi.EntityLayer.Enums
+@model TransactionListViewModel
+@{
+    ViewData["Title"] = "İşlemler";
+    var tabs = new (TransactionScope Scope, string Label)[]
+    {
+        (TransactionScope.Open, "Devam eden"),
+        (TransactionScope.Completed, "Tamamlanan"),
+        (TransactionScope.Cancelled, "İptal")
+    };
+}
+
+@* Satış/kiralama işlemleri. Danışman kendi işlemlerini, yönetici tüm ofisi görür (komisyon içerdiği için).
+   Yeni işlem portföy detayındaki "İşlem başlat" ile açılır. *@
+<div class="btn-group w-100 mb-2" role="group" aria-label="İşlem listesi">
+    @foreach (var t in tabs)
+    {
+        <a asp-action="Index" asp-route-scope="@t.Scope" asp-route-mine="@(Model.Mine ? true : null)"
+           class="btn @(Model.Scope == t.Scope ? "btn-primary" : "btn-outline-primary") appointment-tab">@t.Label</a>
+    }
+</div>
+
+@if (Model.CanSeeAll)
+{
+    <form method="get" asp-action="Index" class="mb-2">
+        <input type="hidden" name="scope" value="@Model.Scope" />
+        <label class="form-check form-switch m-0 py-2 appointment-mine">
+            <input class="form-check-input" type="checkbox" name="mine" value="true" @(Model.Mine ? "checked" : "") onchange="this.form.submit()" />
+            <span class="form-check-label">Sadece benim işlemlerim</span>
+        </label>
+    </form>
+}
+
+<div class="text-secondary small mb-2">@Model.TotalCount işlem · Yeni işlem portföy detayından başlatılır.</div>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="empty">
+        <div class="empty-icon"><i class="ti ti-receipt fs-1"></i></div>
+        <p class="empty-title">İşlem yok</p>
+        <p class="empty-subtitle text-secondary">Portföy detayındaki "İşlem başlat" ile yeni işlem açabilirsiniz.</p>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="list-group list-group-flush">
+            @foreach (var item in Model.Items)
+            {
+                <partial name="_TransactionCard" model="item" view-data='new ViewDataDictionary(ViewData) { ["Scope"] = Model.Scope }' />
+            }
+        </div>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Sayfalar">
+            @if (Model.Page > 1)
+            {
+                <a asp-action="Index" asp-route-scope="@Model.Scope" asp-route-mine="@(Model.Mine ? true : null)"
+                   asp-route-page="@(Model.Page - 1)" class="btn btn-outline-secondary"><i class="ti ti-chevron-left me-1"></i> Önceki</a>
+            }
+            else
+            {
+                <span></span>
+            }
+            <span class="text-secondary">Sayfa @Model.Page / @Model.TotalPages</span>
+            @if (Model.Page < Model.TotalPages)
+            {
+                <a asp-action="Index" asp-route-scope="@Model.Scope" asp-route-mine="@(Model.Mine ? true : null)"
+                   asp-route-page="@(Model.Page + 1)" class="btn btn-outline-secondary">Sonraki <i class="ti ti-chevron-right ms-1"></i></a>
+            }
+            else
+            {
+                <span></span>
+            }
+        </nav>
+    }
+}

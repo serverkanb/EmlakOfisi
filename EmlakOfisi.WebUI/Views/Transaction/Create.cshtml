@@ -1,0 +1,24 @@
+@model TransactionFormViewModel
+@{
+    ViewData["Title"] = "İşlem başlat";
+    var options = (TransactionFormOptions)ViewBag.Options;
+}
+
+<div class="card" style="max-width: 900px;">
+    <div class="card-body">
+        <form method="post" asp-action="Create" asp-route-propertyId="@options.PropertyId">
+            <partial name="_TransactionForm" model="Model" />
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary btn-lg flex-fill flex-sm-grow-0">
+                    <i class="ti ti-device-floppy me-1"></i> Kaydet
+                </button>
+                <a asp-controller="Property" asp-action="Detail" asp-route-id="@options.PropertyId" class="btn btn-link btn-lg">Vazgeç</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

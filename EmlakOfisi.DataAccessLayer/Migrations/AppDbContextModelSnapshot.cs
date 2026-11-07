@@ -579,6 +579,9 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                     b.Property<decimal?>("AgreedPrice")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<decimal?>("CommissionAmount")
                         .HasColumnType("decimal(18,2)");
 
@@ -590,6 +593,9 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("CreatedByUserId")
+                        .HasColumnType("int");
 
                     b.Property<int>("CustomerContactId")
                         .HasColumnType("int");
@@ -612,11 +618,13 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
 
                     b.HasKey("TransactionId");
 
-                    b.HasIndex("AgentUserId");
+                    b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("CustomerContactId");
 
                     b.HasIndex("PropertyId");
+
+                    b.HasIndex("AgentUserId", "Status");
 
                     b.ToTable("Transactions");
                 });
@@ -893,6 +901,12 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("EmlakOfisi.EntityLayer.Entities.AppUser", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("EmlakOfisi.EntityLayer.Entities.Contact", "CustomerContact")
                         .WithMany()
                         .HasForeignKey("CustomerContactId")
@@ -906,6 +920,8 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                         .IsRequired();
 
                     b.Navigation("AgentUser");
+
+                    b.Navigation("CreatedByUser");
 
                     b.Navigation("CustomerContact");
 

@@ -18,8 +18,14 @@ internal static class TestControllers
         var properties = new PropertyManager(new EfPropertyDal(db), contacts);
         return new ContactController(contacts,
             activities ?? new ActivityManager(new EfActivityDal(db), contacts),
-            Interests(db, properties, contacts), properties, Requests(db, contacts));
+            Interests(db, properties, contacts), properties, Requests(db, contacts), Transactions(db, contacts, properties));
     }
+
+    public static TransactionManager Transactions(AppDbContext db, IContactService contacts, IPropertyService properties) =>
+        new(new EfTransactionDal(db), contacts, properties);
+
+    public static TransactionController Transaction(AppDbContext db, IContactService contacts, IPropertyService properties) =>
+        new(Transactions(db, contacts, properties), properties, contacts);
 
     public static CustomerRequestManager Requests(AppDbContext db, IContactService contacts) =>
         new(new EfCustomerRequestDal(db), contacts);
@@ -31,7 +37,7 @@ internal static class TestControllers
         new(new EfPropertyPhotoDal(db), properties);
 
     public static PropertyController Property(AppDbContext db, IPropertyService properties, IContactService contacts) =>
-        new(properties, contacts, Interests(db, properties, contacts), Photos(db, properties));
+        new(properties, contacts, Interests(db, properties, contacts), Photos(db, properties), Transactions(db, contacts, properties));
 
     public static AppointmentManager Appointments(AppDbContext db, IContactService contacts, IPropertyService properties) =>
         new(new EfAppointmentDal(db), contacts, properties);
@@ -40,5 +46,5 @@ internal static class TestControllers
         new(Appointments(db, contacts, properties), contacts, properties);
 
     public static DashboardController Dashboard(AppDbContext db, IPropertyService properties, IContactService contacts) =>
-        new(properties, contacts, Appointments(db, contacts, properties));
+        new(properties, contacts, Appointments(db, contacts, properties), Transactions(db, contacts, properties));
 }

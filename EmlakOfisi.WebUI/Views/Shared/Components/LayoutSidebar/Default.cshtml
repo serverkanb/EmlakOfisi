@@ -40,6 +40,12 @@
                 <span class="nav-link-title">Talepler</span>
             </a>
         </li>
+        <li class="nav-item @Active("Transaction")">
+            <a class="nav-link" asp-controller="Transaction" asp-action="Index">
+                <span class="nav-link-icon d-md-none d-lg-inline-block"><i class="ti ti-receipt fs-2"></i></span>
+                <span class="nav-link-title">İşlemler</span>
+            </a>
+        </li>
     }
     @if (isStaff)
     {

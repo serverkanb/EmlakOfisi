@@ -19,10 +19,12 @@ namespace EmlakOfisi.WebUI.Controllers
         private readonly IPropertyService _propertyService;
         private readonly IContactService _contactService;
         private readonly IAppointmentService _appointmentService;
+        private readonly ITransactionService _transactionService;
 
         public DashboardController(IPropertyService propertyService, IContactService contactService,
-            IAppointmentService appointmentService)
+            IAppointmentService appointmentService, ITransactionService transactionService)
         {
+            _transactionService = transactionService;
             _appointmentService = appointmentService;
             _propertyService = propertyService;
             _contactService = contactService;
@@ -33,6 +35,8 @@ namespace EmlakOfisi.WebUI.Controllers
             var userId = User.GetUserId();
             var canSeeAll = User.CanSeeAll();
             var propertyCounts = _propertyService.TGetVisibleCounts(userId, canSeeAll);
+            var monthStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            var month = _transactionService.TGetCompletedSummary(userId, canSeeAll, monthStart, monthStart.AddMonths(1));
             var (upcoming, upcomingCount) = _appointmentService.TGetVisibleList(userId, canSeeAll,
                 new AppointmentFilter { Scope = AppointmentScope.Upcoming }, 1, UpcomingShown);
 
@@ -47,6 +51,9 @@ namespace EmlakOfisi.WebUI.Controllers
                 Contacts = _contactService.TCountVisible(userId, canSeeAll),
                 CanSeeAll = canSeeAll,
                 UpcomingCount = upcomingCount,
+                MonthSaleCount = month.SaleCount,
+                MonthRentCount = month.RentCount,
+                MonthCommission = month.Commission,
                 Upcoming = upcoming.Select(r => AppointmentItemViewModel.From(r, userId, false)).ToList()
             });
         }

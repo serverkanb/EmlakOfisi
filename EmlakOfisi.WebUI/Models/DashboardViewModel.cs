@@ -15,5 +15,11 @@ namespace EmlakOfisi.WebUI.Models
         // Yaklaşan randevular: danışman kendi ajandasını, yönetici tüm ofisi görür (en yakın 5)
         public int UpcomingCount { get; set; }
         public List<AppointmentItemViewModel> Upcoming { get; set; } = new();
+
+        // Bu ay tamamlanan işlemler ve komisyon (görev 18): danışman sorumlusu olduğu ya da oluşturduğu işlemleri,
+        // yönetici tüm ofisi görür
+        public int MonthSaleCount { get; set; }
+        public int MonthRentCount { get; set; }
+        public decimal MonthCommission { get; set; }
     }
 }

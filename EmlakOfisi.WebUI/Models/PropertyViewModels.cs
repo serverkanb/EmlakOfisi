@@ -171,6 +171,9 @@ namespace EmlakOfisi.WebUI.Models
 
         // Görev 13: fotoğraflar (kapak önce). Yükleme/silme/kapak butonları CanEdit olana gösterilir.
         public List<PropertyPhotoItemViewModel> Photos { get; set; } = new();
+
+        // Görev 18: satış/kiralama işlemleri (sadece görebildiği)
+        public TransactionPanelViewModel Transactions { get; set; } = new();
     }
 
     // Fotoğraf: sadece id (dosya, yetki kontrollü PropertyPhoto/Show/{id} ucundan gelir; dosya adı/yolu view'a verilmez)

@@ -25,11 +25,13 @@ namespace EmlakOfisi.WebUI.Controllers
         private readonly IPropertyInterestService _interestService;
         private readonly IPropertyService _propertyService;
         private readonly ICustomerRequestService _requestService;
+        private readonly ITransactionService _transactionService;
 
         public ContactController(IContactService contactService, IActivityService activityService,
             IPropertyInterestService interestService, IPropertyService propertyService,
-            ICustomerRequestService requestService)
+            ICustomerRequestService requestService, ITransactionService transactionService)
         {
+            _transactionService = transactionService;
             _requestService = requestService;
             _contactService = contactService;
             _activityService = activityService;
@@ -94,7 +96,13 @@ namespace EmlakOfisi.WebUI.Controllers
                     })
                     .ToList(),
                 Interests = BuildInterestPanel(id, userId, canSeeAll),
-                Requests = BuildRequestPanel(contact, userId, canSeeAll)
+                Requests = BuildRequestPanel(contact, userId, canSeeAll),
+                Transactions = new TransactionPanelViewModel
+                {
+                    ShowProperty = true,
+                    Items = _transactionService.TGetVisibleList(userId, canSeeAll, new TransactionFilter { ContactId = id }, 1, 100).Items
+                        .Select(r => TransactionItemViewModel.From(r, userId, _transactionService.TCanEdit(r.Transaction, userId, canSeeAll))).ToList()
+                }
             };
 
             return View(model);

@@ -1,0 +1,110 @@
+@using EmlakOfisi.EntityLayer.Enums
+@model TransactionItemViewModel
+@{
+    var scope = ViewData["Scope"] as TransactionScope? ?? TransactionScope.Open;
+    var showProperty = ViewData["ShowProperty"] as bool? ?? true;
+    var showContact = ViewData["ShowContact"] as bool? ?? true;
+}
+
+@* Bir işlem. Görünmeyen portföy/müşteri için sadece "Gizli kayıt" yazar (ad, telefon, id yok). *@
+<div class="list-group-item @(Model.Status == TransactionStatus.Cancelled ? "opacity-75" : "")">
+    <div class="d-flex justify-content-between align-items-start gap-2">
+        <div class="d-flex flex-wrap gap-1">
+            <span class="badge @TransactionLabels.StatusBadge(Model.Status)">@TransactionLabels.Status(Model.Status)</span>
+            <span class="badge bg-blue-lt">@PropertyLabels.Listing(Model.Type)</span>
+        </div>
+        <div class="text-secondary small text-end">
+            <i class="ti ti-user me-1"></i>@(Model.IsMine ? "Ben" : Model.AgentName)
+        </div>
+    </div>
+
+    @if (showProperty)
+    {
+        <div class="mt-2">
+            @if (Model.PropertyTitle != null)
+            {
+                <a asp-controller="Property" asp-action="Detail" asp-route-id="@Model.PropertyId" class="fw-bold text-break d-inline-block py-1">
+                    <i class="ti ti-building-community me-1"></i>@Model.PropertyTitle
+                </a>
+            }
+            else
+            {
+                <span class="text-secondary"><i class="ti ti-lock me-1"></i>Portföy: gizli kayıt</span>
+            }
+        </div>
+    }
+    @if (showContact)
+    {
+        <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
+            @if (Model.ContactName != null)
+            {
+                <a asp-controller="Contact" asp-action="Detail" asp-route-id="@Model.ContactId" class="d-inline-block py-1">
+                    <i class="ti ti-user-circle me-1"></i>@Model.ContactName
+                </a>
+                @if (Model.TelLink.Length > 0)
+                {
+                    <a href="@Model.TelLink" class="btn btn-outline-primary icon-touch" aria-label="Ara"><i class="ti ti-phone"></i></a>
+                }
+            }
+            else
+            {
+                <span class="text-secondary"><i class="ti ti-lock me-1"></i>Müşteri: gizli kayıt</span>
+            }
+        </div>
+    }
+
+    <dl class="row mb-0 mt-2 small">
+        @if (Model.OfferPrice != null)
+        {
+            <dt class="col-6 col-md-3 text-secondary fw-normal">Teklif</dt>
+            <dd class="col-6 col-md-3 mb-1">@TransactionLabels.Money(Model.OfferPrice)</dd>
+        }
+        @if (Model.AgreedPrice != null)
+        {
+            <dt class="col-6 col-md-3 text-secondary fw-normal">Anlaşılan</dt>
+            <dd class="col-6 col-md-3 mb-1 fw-bold">@TransactionLabels.Money(Model.AgreedPrice)</dd>
+        }
+        @if (Model.CommissionAmount != null)
+        {
+            <dt class="col-6 col-md-3 text-secondary fw-normal">Komisyon</dt>
+            <dd class="col-6 col-md-3 mb-1 fw-bold ak-price">
+                @TransactionLabels.Money(Model.CommissionAmount)
+                @if (Model.CommissionRate != null)
+                {
+                    <span class="text-secondary fw-normal">(%@Model.CommissionRate.Value.ToString("0.##", PropertyLabels.Tr))</span>
+                }
+            </dd>
+        }
+        <dt class="col-6 col-md-3 text-secondary fw-normal">@(Model.CompletedAt != null ? "Tamamlandı" : "Başlangıç")</dt>
+        <dd class="col-6 col-md-3 mb-1">@((Model.CompletedAt ?? Model.CreatedAt).ToString("dd.MM.yyyy"))</dd>
+    </dl>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Notes))
+    {
+        <div class="text-break small" style="white-space: pre-line;">@Model.Notes</div>
+    }
+
+    @if (Model.CanEdit)
+    {
+        <div class="d-flex flex-wrap gap-2 mt-2">
+            <a asp-controller="Transaction" asp-action="Edit" asp-route-id="@Model.TransactionId" class="btn btn-outline-primary">
+                <i class="ti ti-pencil me-1"></i> Düzenle
+            </a>
+            @if (Model.Status != TransactionStatus.Completed && Model.Status != TransactionStatus.Cancelled)
+            {
+                <form method="post" asp-controller="Transaction" asp-action="SetStatus" asp-route-id="@Model.TransactionId"
+                      onsubmit="return confirm('İşlem tamamlandı olarak işaretlensin mi? Portföy durumu da Satıldı/Kiralandı olur.');">
+                    <input type="hidden" name="status" value="@TransactionStatus.Completed" />
+                    <input type="hidden" name="scope" value="@scope" />
+                    <button type="submit" class="btn btn-outline-success"><i class="ti ti-check me-1"></i> Tamamlandı</button>
+                </form>
+                <form method="post" asp-controller="Transaction" asp-action="SetStatus" asp-route-id="@Model.TransactionId"
+                      onsubmit="return confirm('Bu işlem iptal edilsin mi?');">
+                    <input type="hidden" name="status" value="@TransactionStatus.Cancelled" />
+                    <input type="hidden" name="scope" value="@scope" />
+                    <button type="submit" class="btn btn-outline-danger"><i class="ti ti-x me-1"></i> İptal</button>
+                </form>
+            }
+        </div>
+    }
+</div>

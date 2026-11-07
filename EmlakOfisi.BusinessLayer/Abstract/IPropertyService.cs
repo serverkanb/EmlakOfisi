@@ -1,5 +1,6 @@
 using EmlakOfisi.DataAccessLayer.Abstract;
 using EmlakOfisi.EntityLayer.Entities;
+using EmlakOfisi.EntityLayer.Enums;
 
 namespace EmlakOfisi.BusinessLayer.Abstract
 {
@@ -53,5 +54,8 @@ namespace EmlakOfisi.BusinessLayer.Abstract
         OperationResult TUpdate(int id, Property changes, int userId, bool canSeeAll);
 
         OperationResult TSoftDelete(int id, int userId, bool canSeeAll);
+
+        // Sadece durum (ör. işlem tamamlanınca Satıldı/Kiralandı). Düzenleme yetkisi gerekir.
+        OperationResult TSetStatus(int id, PropertyStatus status, int userId, bool canSeeAll);
     }
 }

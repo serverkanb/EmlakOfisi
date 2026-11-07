@@ -22,5 +22,10 @@ namespace EmlakOfisi.DataAccessLayer.Concrete
         // Bağlı müşteri/portföy ayrıca kendi kuralıyla kontrol edilir; görünmüyorsa bilgisi verilmez.
         public static IQueryable<Appointment> VisibleTo(this IQueryable<Appointment> appointments, int userId, bool canSeeAll) =>
             appointments.Where(a => canSeeAll || a.AgentUserId == userId || a.CreatedByUserId == userId);
+
+        // Satış/kiralama işlemi (komisyon içerir): yönetici VEYA sorumlu danışman VEYA işlemi oluşturan.
+        // Bağlı portföy/müşteri ayrıca kendi kuralıyla kontrol edilir; görünmüyorsa bilgisi verilmez.
+        public static IQueryable<Transaction> VisibleTo(this IQueryable<Transaction> transactions, int userId, bool canSeeAll) =>
+            transactions.Where(t => canSeeAll || t.AgentUserId == userId || t.CreatedByUserId == userId);
     }
 }

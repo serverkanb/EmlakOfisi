@@ -112,6 +112,9 @@ public class AuthorizationRulesTests
             typeof(CustomerRequestController).GetMethods().Single(m => m.Name == nameof(CustomerRequestController.Create) && m.GetParameters().Length == 2),
             typeof(CustomerRequestController).GetMethods().Single(m => m.Name == nameof(CustomerRequestController.Edit) && m.GetParameters().Length == 2),
             typeof(CustomerRequestController).GetMethod(nameof(CustomerRequestController.SetStatus))!,
+            typeof(TransactionController).GetMethods().Single(m => m.Name == nameof(TransactionController.Create) && m.GetParameters().Length == 2 && m.GetParameters()[1].ParameterType == typeof(EmlakOfisi.WebUI.Models.TransactionFormViewModel)),
+            typeof(TransactionController).GetMethods().Single(m => m.Name == nameof(TransactionController.Edit) && m.GetParameters().Length == 2),
+            typeof(TransactionController).GetMethod(nameof(TransactionController.SetStatus))!,
             typeof(UserPermissionController).GetMethods().Single(m => m.Name == nameof(UserPermissionController.Edit) && m.GetParameters().Length == 2),
         };
 

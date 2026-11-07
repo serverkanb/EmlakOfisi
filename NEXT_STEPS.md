@@ -367,8 +367,31 @@
   - `kod-inceleyici` ve `yetki-denetcisi`: engelleyici bulgu yok; küçük düzeltmeler uygulandı.
   - Bilinçli kabuller: izni kaldırılan kişi açık oturumunda en fazla 5 dk daha düzenleyebilir; "Uygun portföyler" ilçe varsa ilçeyle arıyor (portföy listesinde ayrı şehir filtresi yok); müşteri detayında en fazla 100 talep gösteriliyor; bir role elle `permission` claim'i eklenirse o roldeki herkes izni alır (bunun ekranı yok).
 
+- 2026-11-07: Görev 18 `islem: satis/kiralama ve komisyon` (Faz 2)
+  - **Kullanıcı kararları:**
+    - İşlemi (komisyon içerdiği için) sadece sorumlu danışman, oluşturan ve yöneticiler görür (`VisibilityRules.VisibleTo(Transaction)`). Danışman sadece kendi adına başlatır; sorumluyu yönetici seçer.
+    - Komisyon tek tutar (alıcı + satıcı toplamı, KDV hariç). Oran ve anlaşılan fiyat varsa tutar sunucuda hesaplanır (`BusinessLayer/Helpers/CommissionCalculator`, 2 hane); oran yoksa elle girilir.
+    - "Tamamlandı" olunca tamamlanma tarihi yazılır; işlemi tamamlayan portföyü düzenleyebiliyorsa portföy Satıldı/Kiralandı olur, düzenleyemiyorsa uyarı çıkar.
+    - **Tamamlanan ya da iptal edilen işlemi danışman sadece kapandığı gün değiştirebilir** (`ClosedAt`); ertesi günden itibaren sadece yönetici. Tamamlanmışlıktan çıkan işlemde portföy geri alınmaz, "portföy durumunu kontrol edin" uyarısı çıkar.
+    - Aynı portföy tekrar satılabilir/kiralanabilir; ikinci işlem engellenmez.
+    - Silme yok; işlem "İptal" yapılır.
+  - `Transaction`'a `CreatedByUserId` ve `ClosedAt` eklendi, indeksler (AgentUserId, Status) ve CreatedByUserId. `TransactionCreatedByClosedAt` migration'ı kullanıcı onayıyla uygulandı (tablo boştu, veri kaybı yok).
+  - `ITransactionDal`/`EfTransactionDal`: bağlı portföy ve müşteri görüntüleyenin görünürlüğüyle aynı sorguda (`ToRows`); görünmüyorsa "Gizli kayıt". Ay özeti tek sorgu (GROUP BY + SUM).
+  - `TransactionManager`, `IPropertyService.TSetStatus` (sadece durum, düzenleme yetkisi şart).
+  - `TransactionController` (`[Staff]`): `Index` (Devam eden / Tamamlanan / İptal, yönetici için "Sadece benim"), `Create` (portföy detayından "İşlem başlat"; müşteri seçenekleri görünür alıcılar/kiracılar), `Edit`, POST `SetStatus`. Oran "2" ya da "2,5" yazılabiliyor.
+  - Portföy ve müşteri detayında "Satış / kiralama işlemleri" paneli (sadece görebildiği işlemler). Menüde "İşlemler". Ana ekranda "Bu ay" kartı: satış ve kiralama sayısı, komisyon toplamı (danışman kendi işlemleri, yönetici ofis).
+  - İşlem notuna mikrofon düğmesi konmadı (kullanıcının alan listesinde yok; istenirse eklenir).
+  - Testler 412/412 yeşil (`TransactionTests`): görünürlük matrisi, başka danışmanın komisyonunun sızmaması, gizli portföy/müşteri, ay özeti, korunan alanlar, sorumlu atama, komisyon hesabı ve yuvarlama, geçersiz tutarlar, Satıldı/Kiralandı geçişi, yetkisiz portföyde uyarı, aynı gün kuralı (danışman ertesi gün 403, yönetici serbest), tamamlanmışlıktan çıkınca uyarı, controller 404/403 sırası.
+  - Uçtan uca (LocalDB + curl) denendi: danisman1 Moda portföyünde işlem başlattı (8.500.000 × %2 = 170.000 ₺, gönderilen başka sorumlu yok sayıldı); danisman2 listede 0, Edit 404, portföy detayında işlemi ve komisyonu görmüyor; müdür görüyor. Tamamlanınca portföy Satıldı oldu; ana ekran danisman1 ve müdürde 1 satış / 170.000 ₺, danisman2'de 0. İptal edince "portföy durumunu kontrol edin" uyarısı çıktı. 375px'te yatay kaydırma yok, butonlar en az 44px.
+  - Deneme işlemi (id 1) iptal edildi (silme yok); Moda portföyünün durumu geliştirme veritabanında SQL ile Aktif'e geri alındı (sahte seed verisi).
+  - `kod-inceleyici` ve `yetki-denetcisi` bulguları kapatıldı.
+  - Bilinçli kabuller: işlemi oluşturan kişi, sorumlu başkasına verilse ya da rolü düşürülse de işlemi ve komisyonu görmeye devam eder; bir danışmana başkasının gizli portföyünde işlem atanırsa portföy "gizli kayıt" görünür ama fiyat ve not görünür; portföyün sorumlusu başka danışmanların o portföydeki işlemlerini görmez; işlem ve portföy durumu iki ayrı kayıtla güncellenir (atomik değil); "Bu ay" sisteme girildiği güne göre sayar; düzenleme formunda komisyon tam TL gösterilir.
+
 ## Sıradaki küçük görev
-- Görev 18 `islem: satis/kiralama ve komisyon` (Faz 2). Dashboard'da satış/kira ve komisyon özetleri de bu görevle gelir.
+- MVP (Faz 1 ve 2) tamamlandı. Yayına hazırlık için öneriler (kullanıcıyla önceliklendirilecek):
+  - Production'da ilk admin kullanıcının nasıl oluşturulacağı (açık karar).
+  - IIS'e yayın: HTTPS, `Uploads:Root` yazma izni, yedekleme, connection string ortam değişkeni.
+  - Form binder'ının İngilizce mesajlarını Türkçeleştirme (`ModelBindingMessageProvider`).
 - Görev 6b (.NET 10 yükseltme) .NET 10 SDK kurulunca yapılacak.
 
 ## Açık kararlar / notlar

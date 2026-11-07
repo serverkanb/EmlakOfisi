@@ -1,0 +1,102 @@
+@using EmlakOfisi.EntityLayer.Enums
+@model TransactionFormViewModel
+@{
+    var options = (TransactionFormOptions)ViewBag.Options;
+}
+
+@* İşlem formu. Komisyon: oran ve anlaşılan fiyat girilirse tutar sunucuda hesaplanır; oran boşsa tutar elle girilir. *@
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+<div class="mb-3">
+    <div class="text-secondary small">Portföy</div>
+    <div class="fw-bold text-break">@options.PropertyTitle</div>
+    <span class="badge bg-blue-lt">@PropertyLabels.Listing(options.Type)</span>
+</div>
+
+<div class="row g-3">
+    <div class="col-12 col-md-6">
+        <label asp-for="CustomerContactId" class="form-label required">@(options.Type == ListingType.Rent ? "Kiracı" : "Alıcı")</label>
+        @if (options.CustomerHidden)
+        {
+            <div class="form-control form-control-lg bg-light text-secondary"><i class="ti ti-lock me-1"></i>Gizli kayıt (değiştirilemez)</div>
+        }
+        else
+        {
+            <select asp-for="CustomerContactId" class="form-select form-select-lg">
+                <option value="0">Seçin…</option>
+                @foreach (var c in options.Customers)
+                {
+                    <option value="@c.Id">@c.Name</option>
+                }
+            </select>
+            <div class="form-hint">Görebildiğiniz @(options.Type == ListingType.Rent ? "kiracılar" : "alıcılar") listelenir.</div>
+            <span asp-validation-for="CustomerContactId" class="text-danger small"></span>
+        }
+    </div>
+    <div class="col-12 col-md-6">
+        <label asp-for="Status" class="form-label"></label>
+        <select asp-for="Status" class="form-select form-select-lg">
+            @foreach (var s in TransactionLabels.All)
+            {
+                <option value="@s">@TransactionLabels.Status(s)</option>
+            }
+        </select>
+        <div class="form-hint">"Tamamlandı" seçilince portföy Satıldı/Kiralandı olur.</div>
+    </div>
+
+    <div class="col-6">
+        <label asp-for="OfferPriceText" class="form-label"></label>
+        <div class="input-group input-group-lg">
+            <input asp-for="OfferPriceText" type="text" inputmode="numeric" data-digits-only class="form-control" autocomplete="off" />
+            <span class="input-group-text">₺</span>
+        </div>
+        <span asp-validation-for="OfferPriceText" class="text-danger small"></span>
+    </div>
+    <div class="col-6">
+        <label asp-for="AgreedPriceText" class="form-label"></label>
+        <div class="input-group input-group-lg">
+            <input asp-for="AgreedPriceText" type="text" inputmode="numeric" data-digits-only class="form-control" autocomplete="off" />
+            <span class="input-group-text">₺</span>
+        </div>
+        <span asp-validation-for="AgreedPriceText" class="text-danger small"></span>
+    </div>
+
+    <div class="col-6">
+        <label asp-for="CommissionRateText" class="form-label"></label>
+        <div class="input-group input-group-lg">
+            <span class="input-group-text">%</span>
+            <input asp-for="CommissionRateText" type="text" inputmode="decimal" class="form-control" placeholder="2" autocomplete="off" />
+        </div>
+        <span asp-validation-for="CommissionRateText" class="text-danger small"></span>
+    </div>
+    <div class="col-6">
+        <label asp-for="CommissionAmountText" class="form-label"></label>
+        <div class="input-group input-group-lg">
+            <input asp-for="CommissionAmountText" type="text" inputmode="numeric" data-digits-only class="form-control" autocomplete="off" />
+            <span class="input-group-text">₺</span>
+        </div>
+        <span asp-validation-for="CommissionAmountText" class="text-danger small"></span>
+    </div>
+    <div class="col-12 form-hint mt-0">
+        Oran ve anlaşılan fiyat girilirse tutar otomatik hesaplanır (oran girilmişse elle yazılan tutar yok sayılır). Tutarlar KDV hariç, tam TL; alıcı ve satıcıdan alınan toplam komisyon.
+    </div>
+
+    @if (options.CanChooseAgent)
+    {
+        <div class="col-12 col-md-6">
+            <label asp-for="AgentUserId" class="form-label"></label>
+            <select asp-for="AgentUserId" class="form-select form-select-lg">
+                @foreach (var a in options.Agents)
+                {
+                    <option value="@a.Id">@a.Name</option>
+                }
+            </select>
+        </div>
+    }
+
+    <div class="col-12">
+        <label asp-for="Notes" class="form-label"></label>
+        <textarea asp-for="Notes" rows="3" class="form-control"></textarea>
+        <span asp-validation-for="Notes" class="text-danger small"></span>
+    </div>
+</div>
