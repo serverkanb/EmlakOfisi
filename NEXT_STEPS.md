@@ -10,7 +10,7 @@
   - `AppDbContext(DbContextOptions)`. OnConfiguring yok, kendi tablolarımızdaki tüm FK'lar `Restrict`.
   - `IGenericDal`/`GenericRepository` ve `IGenericService` eklendi.
   - DAL'a EF Core SqlServer ve Tools, WebUI'ye Design paketi eklendi (9.0.22). `dotnet-ef` projeye yerel araç olarak eklendi (`.config/dotnet-tools.json`).
-  - Connection string user-secrets'ta (LocalDB, `EmlakOfisiDev`).
+  - Connection string user-secrets'ta (başta LocalDB; 2026-11-08'den beri yerel SQL Server, `EmlakOfisiDev`).
   - `InitialCreate` migration'ı oluşturuldu, kullanıcı onayıyla LocalDB'ye uygulandı.
   - Model testleriyle birlikte 13/13 test yeşil.
 
@@ -482,6 +482,12 @@
     - Kiracı ya da portföy danışmana gizli olsa bile, sorumlusu olduğu işlemin kontrat dosyasını açabilir (işlemi gören dosyayı görür; görev 18 "fiyat ve not görünür" kabulüyle aynı).
   - `yetki-denetcisi` ve `kod-inceleyici`: engelleyici bulgu yok. Gün sayıları metinde sabitlerden okunuyor, karttaki linkler 44px (`touch-link`).
 
+- 2026-11-08: Ara görev `altyapi: gelistirme veritabani yerel SQL Server'a tasindi` (kullanıcı isteği, kod değişikliği yok)
+  - Geliştirme veritabanı LocalDB'den bilgisayardaki SQL Server 2019 Express'e (varsayılan örnek, `LAPTOP-1IHFPICF`) taşındı. Veritabanı adı yine `EmlakOfisiDev`, Windows girişiyle bağlanılıyor (InstrumentTrade ile aynı biçim). Bağlantı bilgisi user-secrets'ta, kodda değil.
+  - **Kullanıcı kararı:** boş kurulum. 11 migration uygulandı; uygulama açılışta admin, test kullanıcıları ve sahte veriyi yeniden ekledi (4 kullanıcı, 25 kişi, 8 portföy, 7 randevu). Admin şifresi user-secrets'takiyle aynı. Eski denemelerdeki işlemler, talepler ve izinler yeni veritabanında yok.
+  - Denendi: danisman1 18, danisman2 17, mudur1 25 müşteri görüyor; "izmir" ve "İZMİR" aynı sonucu veriyor (`Turkish_CI_AS`).
+  - Eski LocalDB veritabanı (`(localdb)\MSSQLLocalDB`, dosyası `C:\Users\ceren\EmlakOfisiDev.mdf`) silinmedi; artık kullanılmıyor. İstenirse SSMS'ten silinebilir.
+
 ## Sıradaki küçük görev
 - Sıra (kullanıcı onayıyla):
   1. Kontrat ve kira özelliklerinin gerçek Chrome ve telefonda denenmesi (PDF açılışı).
@@ -505,8 +511,8 @@
 - Seed admin şifresini görmek için: `dotnet user-secrets list --project EmlakOfisi.WebUI`. Kullanıcı adı `admin`.
 - Dikkat: seed sadece kullanıcı **yoksa** oluşturur. user-secrets'taki şifreyi değiştirmek var olan admin'i etkilemez. Yeni şifrenin geçerli olması için ya geliştirme veritabanındaki admin silinir (sonraki açılışta yeniden oluşur) ya da şifre değiştirme ekranı kullanılır (görev 6).
 - Bu bilgisayarda sanal bellek çok dolu (2026-11-06: 17,9 GB'ın 0,4 GB'ı boştu). Derleme "Out of memory" verebiliyor. Önce `dotnet build-server shutdown` denenir. Gerekirse Windows sayfa dosyası büyütülür ya da Visual Studio/Chrome kapatılır (bu kararı kullanıcı verir).
-- LocalDB bazen kendiliğinden duruyor. Uygulama "SQL Server process failed to start" hatasıyla açılmazsa önce `sqllocaldb start MSSQLLocalDB` çalıştırılır.
-- Türkçe arama `Turkish_CI_AS` collation'ıyla çözüldü (görev 8). InMemory test veritabanı collation'ı yok saydığı için büyük/küçük harf davranışı otomatik testle değil, LocalDB'de elle doğrulanıyor.
+- Geliştirme veritabanı (2026-11-08'den beri): yerel SQL Server 2019 Express, sunucu `LAPTOP-1IHFPICF` (SSMS'te `localhost` da olur), veritabanı `EmlakOfisiDev`, Windows girişi. Komut satırından: `sqlcmd -S localhost -E -C -d EmlakOfisiDev`. Eski LocalDB notu (`sqllocaldb start MSSQLLocalDB`) artık geçerli değil.
+- Türkçe arama `Turkish_CI_AS` collation'ıyla çözüldü (görev 8). InMemory test veritabanı collation'ı yok saydığı için büyük/küçük harf davranışı otomatik testle değil, SQL Server'da elle doğrulanıyor.
 - **Açık karar: telefonla numara yoklama riski** (yetki denetimi, görev 9). Gizli bir kayıtla aynı telefon girilince çıkan genel mesaj, o numaranın ofiste başka bir danışmanın müşterisi olduğunu evet/hayır olarak belli ediyor. Ad, sahip ve id verilmiyor. Bu, "aynı kişi tekrar kaydedilmesin" kuralının bilinen bir bedeli. Önerilen sınırlamalar (kullanıcı onayıyla, ayrı bir görevde):
   - Create/Edit POST'a kullanıcı başına hız sınırı. ASP.NET Core'un yerleşik `RateLimiting` özelliği yeterli, ek paket gerekmez.
   - Bu çakışmalar için denetim kaydı (kim, ne zaman).
