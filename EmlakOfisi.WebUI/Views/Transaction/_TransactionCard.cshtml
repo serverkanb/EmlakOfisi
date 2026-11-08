@@ -12,6 +12,10 @@
         <div class="d-flex flex-wrap gap-1">
             <span class="badge @TransactionLabels.StatusBadge(Model.Status)">@TransactionLabels.Status(Model.Status)</span>
             <span class="badge bg-blue-lt">@PropertyLabels.Listing(Model.Type)</span>
+            @if (TransactionLabels.LeaseBadge(Model.Type, Model.Status, Model.LeaseEndDate) is { } lease)
+            {
+                <span class="badge @lease.Css">@lease.Text</span>
+            }
         </div>
         <div class="text-secondary small text-end">
             <i class="ti ti-user me-1"></i>@(Model.IsMine ? "Ben" : Model.AgentName)

@@ -464,9 +464,27 @@
     - Silinen işlem olmadığı için kontrat dosyaları sadece "Kaldır" ile siliniyor.
     - Danışman, kapandıktan sonraki gün kontrat yükleyemiyor (aynı gün kuralı); bunu yönetici yapıyor.
 
+- 2026-11-08: Görev 23 `dashboard: biten kira kontratlari`
+  - **Kapsam (kullanıcı onayı):** durumu Tamamlandı olan, kira bitiş tarihi önümüzdeki 60 gün içinde ya da son 30 günde olan kiralama işlemleri. Danışman sadece sorumlusu olduğu işlemleri görür ("Bu ay" kartıyla aynı), yönetici tüm ofisi görür. Aralık tek yerde: `ITransactionService.LeaseEndingDays/LeaseEndedDays`, `TransactionManager.TGetVisibleList` dolduruyor; adres parametresiyle değiştirilemez.
+  - `TransactionScope.LeaseEnding` ve `TransactionFilter.LeaseEndFrom/To`: filtre `EfTransactionDal.Filtered` içinde, görünürlükle aynı sorguda. Sıralama: en yakın bitiş üstte. Aralık verilmezse hiçbir kayıt dönmüyor. Migration yok (`(Type, Status, LeaseEndDate)` indeksi görev 22'de eklendi).
+  - **Ana ekran:** "Biten kira kontratları" kartında sayı ve en yakın 5 kayıt var. Her satırda bitiş tarihi ve rozet ("Kiranın bitmesine X gün", "Kira bugün bitiyor", "Kira bitti (X gün önce)"), portföy, kiracı ve Ara butonu, varsa "Kontrat" butonu, başkasının işlemiyse danışman adı. Kartta komisyon ve prim yok. Gizli portföy ve kiracı için "Gizli kayıt" yazıyor.
+  - **İşlemler listesi:** "Biten kiralar" sekmesi (`?scope=LeaseEnding`). Karttaki "Tüm biten kiralar" linki buraya gidiyor. Rozet işlem kartında da çıkıyor; 30 günden eski bitişlerde rozet gösterilmiyor.
+  - Testler 499/499 yeşil (`LeaseEndingTests`): 60/61. gün ve 30/31 gün önce sınırları, bitiş tarihi olmayan kayıt, sadece tamamlanmış kiralama, danışman/yönetici kuralı ve "sadece benim" filtresi, devreden oluşturanın görmemesi, gizli portföy ve kiracının sızmaması, ana ekran ile sekme sayısının eşitliği, aralıksız filtre, rozet metinleri, dışarıdan verilen geniş aralığın serviste ezilmesi.
+  - Uçtan uca (LocalDB + curl + tarayıcı) denendi:
+    - danisman1'e 20 gün sonra biten, danisman2'ye 5 gün önce bitmiş kira açıldı.
+    - Ana ekran ve sekme: danisman1 1, danisman2 1, mudur1 2 kayıt; rozetler doğru.
+    - Adrese tarih parametresi eklemek sonucu değiştirmedi. Sorgu SQL Server'da çalıştı.
+    - 375px'te yatay kaydırma yok; 4 sekme sığıyor, butonlar en az 44px.
+    - Deneme işlemleri (id 4, 5) iptal edildi; Kadıköy portföyü geliştirme veritabanında SQL ile Aktif'e geri alındı.
+  - Bilinçli kabuller:
+    - Kira yenilendiğinde eski işlem 30 gün daha "Kira bitti" olarak görünür. Yenileme yeni işlem olarak açılır; ayrı bir "yenilendi" işareti yok.
+    - Kartta sadece sorumlu danışman görür; işlemi açıp başkasına devreden kişi görmez.
+    - Kiracı ya da portföy danışmana gizli olsa bile, sorumlusu olduğu işlemin kontrat dosyasını açabilir (işlemi gören dosyayı görür; görev 18 "fiyat ve not görünür" kabulüyle aynı).
+  - `yetki-denetcisi` ve `kod-inceleyici`: engelleyici bulgu yok. Gün sayıları metinde sabitlerden okunuyor, karttaki linkler 44px (`touch-link`).
+
 ## Sıradaki küçük görev
 - Sıra (kullanıcı onayıyla):
-  1. Görev 23 `dashboard: biten kira kontratlari` (60 gün içinde biten kiralar).
+  1. Kontrat ve kira özelliklerinin gerçek Chrome ve telefonda denenmesi (PDF açılışı).
   2. IIS'e yayın kontrol listesi (hosting bilgisi gelince): HTTPS, `Uploads:Root` ve `Documents:Root` yazma izni ve yedeklemesi, connection string ortam değişkeni, `Bootstrap__*` ile ilk admin ve sonra silinmesi.
   3. Faz 3: görev 19–21 (aday arama listesi).
 - Görev 6b (.NET 10 yükseltme) kullanıcı kararıyla ertelendi.

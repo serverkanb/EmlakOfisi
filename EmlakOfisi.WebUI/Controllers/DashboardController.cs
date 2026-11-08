@@ -39,6 +39,8 @@ namespace EmlakOfisi.WebUI.Controllers
             var month = _transactionService.TGetCompletedSummary(userId, canSeeAll, monthStart, monthStart.AddMonths(1));
             var (upcoming, upcomingCount) = _appointmentService.TGetVisibleList(userId, canSeeAll,
                 new AppointmentFilter { Scope = AppointmentScope.Upcoming }, 1, UpcomingShown);
+            var (leases, leaseCount) = _transactionService.TGetVisibleList(userId, canSeeAll,
+                new TransactionFilter { Scope = TransactionScope.LeaseEnding }, 1, UpcomingShown);
 
             return View(new DashboardViewModel
             {
@@ -55,7 +57,9 @@ namespace EmlakOfisi.WebUI.Controllers
                 MonthRentCount = month.RentCount,
                 MonthCommission = month.Commission,
                 MonthAgentShare = canSeeAll ? month.AgentShare : month.MyAgentShare,
-                Upcoming = upcoming.Select(r => AppointmentItemViewModel.From(r, userId, false)).ToList()
+                Upcoming = upcoming.Select(r => AppointmentItemViewModel.From(r, userId, false)).ToList(),
+                LeaseEndingCount = leaseCount,
+                LeaseEnding = leases.Select(r => TransactionItemViewModel.From(r, userId, false, canSeeAll)).ToList()
             });
         }
     }

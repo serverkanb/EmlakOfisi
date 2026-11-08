@@ -5,6 +5,7 @@ namespace EmlakOfisi.EntityLayer.Enums
     {
         Open = 1,        // Teklif, Pazarlık, Anlaşıldı
         Completed = 2,   // Tamamlandı
-        Cancelled = 3    // İptal
+        Cancelled = 3,   // İptal
+        LeaseEnding = 4  // Tamamlanmış kiralama, kira bitişi yakın ya da yeni bitmiş (görev 23; aralık serviste)
     }
 }

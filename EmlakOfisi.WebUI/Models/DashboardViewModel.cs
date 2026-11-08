@@ -22,5 +22,10 @@ namespace EmlakOfisi.WebUI.Models
         public int MonthRentCount { get; set; }
         public decimal MonthCommission { get; set; }
         public decimal MonthAgentShare { get; set; }   // danışman: primim, yönetici: ödenecek primler
+
+        // Biten kira kontratları (görev 23): danışman sorumlusu olduğu işlemleri, yönetici tüm ofisi görür (en yakın 5).
+        // Kartta komisyon/prim gösterilmez.
+        public int LeaseEndingCount { get; set; }
+        public List<TransactionItemViewModel> LeaseEnding { get; set; } = new();
     }
 }

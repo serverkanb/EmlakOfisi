@@ -6,7 +6,8 @@
     {
         (TransactionScope.Open, "Devam eden"),
         (TransactionScope.Completed, "Tamamlanan"),
-        (TransactionScope.Cancelled, "İptal")
+        (TransactionScope.Cancelled, "İptal"),
+        (TransactionScope.LeaseEnding, "Biten kiralar")
     };
 }
 
@@ -31,7 +32,17 @@
     </form>
 }
 
-<div class="text-secondary small mb-2">@Model.TotalCount işlem · Yeni işlem portföy detayından başlatılır.</div>
+@if (Model.Scope == TransactionScope.LeaseEnding)
+{
+    <div class="text-secondary small mb-2">
+        @Model.TotalCount kira · Önümüzdeki @EmlakOfisi.BusinessLayer.Abstract.ITransactionService.LeaseEndingDays gün içinde bitecek ve son @EmlakOfisi.BusinessLayer.Abstract.ITransactionService.LeaseEndedDays günde bitmiş, tamamlanmış kiralamalar
+        @(Model.CanSeeAll && !Model.Mine ? "(tüm ofis)." : "(sorumlusu olduğunuz işlemler).")
+    </div>
+}
+else
+{
+    <div class="text-secondary small mb-2">@Model.TotalCount işlem · Yeni işlem portföy detayından başlatılır.</div>
+}
 
 @if (Model.Items.Count == 0)
 {

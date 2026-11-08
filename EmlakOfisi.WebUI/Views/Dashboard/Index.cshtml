@@ -144,6 +144,81 @@
             </div>
         </div>
     </div>
+    <div class="col-12">
+        @* Biten kira kontratları (görev 23). Görünmeyen portföy/kiracı için ad yazılmaz; komisyon gösterilmez. *@
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Biten kira kontratları</h3>
+                <span class="badge bg-primary-lt ms-auto">@Model.LeaseEndingCount</span>
+            </div>
+            @if (Model.LeaseEnding.Count == 0)
+            {
+                <div class="card-body text-secondary">
+                    <i class="ti ti-calendar-check me-1"></i> Yakında biten kira yok.
+                </div>
+            }
+            else
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var l in Model.LeaseEnding)
+                    {
+                        var badge = TransactionLabels.LeaseBadge(l.Type, l.Status, l.LeaseEndDate);
+                        <div class="list-group-item">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                <span class="fw-bold text-nowrap">@l.LeaseEndDate?.ToString("dd.MM.yyyy")</span>
+                                @if (badge is { } b)
+                                {
+                                    <span class="badge @b.Css">@b.Text</span>
+                                }
+                            </div>
+                            <div class="mt-1">
+                                @if (l.PropertyTitle != null)
+                                {
+                                    <a asp-controller="Property" asp-action="Detail" asp-route-id="@l.PropertyId" class="text-break d-inline-flex align-items-center touch-link">
+                                        <i class="ti ti-building-community me-1"></i>@l.PropertyTitle
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-secondary"><i class="ti ti-lock me-1"></i>Portföy: gizli kayıt</span>
+                                }
+                            </div>
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                @if (l.ContactName != null)
+                                {
+                                    <a asp-controller="Contact" asp-action="Detail" asp-route-id="@l.ContactId" class="d-inline-flex align-items-center touch-link">
+                                        <i class="ti ti-user-circle me-1"></i>@l.ContactName
+                                    </a>
+                                    @if (l.TelLink.Length > 0)
+                                    {
+                                        <a href="@l.TelLink" class="btn btn-outline-primary icon-touch" aria-label="Kiracıyı ara"><i class="ti ti-phone"></i></a>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-secondary"><i class="ti ti-lock me-1"></i>Kiracı: gizli kayıt</span>
+                                }
+                                @if (l.HasContract)
+                                {
+                                    <a asp-controller="Transaction" asp-action="Contract" asp-route-id="@l.TransactionId" target="_blank" rel="noopener"
+                                       class="btn btn-outline-secondary ms-auto"><i class="ti ti-file-text me-1"></i> Kontrat</a>
+                                }
+                            </div>
+                            @if (!l.IsMine)
+                            {
+                                <div class="text-secondary small"><i class="ti ti-user me-1"></i>@l.AgentName</div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            <div class="card-footer">
+                <a asp-controller="Transaction" asp-action="Index" asp-route-scope="@TransactionScope.LeaseEnding" class="btn btn-link px-0">
+                    Tüm biten kiralar <i class="ti ti-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="text-secondary small mt-3">

@@ -23,6 +23,11 @@ namespace EmlakOfisi.BusinessLayer.Abstract
     // - Silme yok: işlem "İptal" yapılır.
     public interface ITransactionService
     {
+        // Biten kiralar (görev 23): önümüzdeki 60 gün içinde bitecek ve son 30 günde bitmiş, tamamlanmış kiralamalar.
+        // Scope = LeaseEnding ile TGetVisibleList'e gelir; danışman sadece sorumlusu olduğu işlemleri görür.
+        const int LeaseEndingDays = 60;
+        const int LeaseEndedDays = 30;
+
         (List<TransactionRow> Items, int TotalCount) TGetVisibleList(int userId, bool canSeeAll,
             TransactionFilter filter, int page, int pageSize);
 

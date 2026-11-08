@@ -10,6 +10,10 @@ namespace EmlakOfisi.DataAccessLayer.Abstract
         public bool OnlyMine { get; set; }             // sadece sorumlusu olduğum
         public int? PropertyId { get; set; }           // portföy detayındaki liste
         public int? ContactId { get; set; }            // müşteri detayındaki liste
+
+        // Scope = LeaseEnding için kira bitiş aralığı (gün olarak, iki uç dahil). TransactionManager doldurur.
+        public DateTime? LeaseEndFrom { get; set; }
+        public DateTime? LeaseEndTo { get; set; }
     }
 
     // Liste/okuma satırı. Contact ve Property sadece GÖRÜNTÜLEYEN kullanıcıya görünüyorsa dolu;

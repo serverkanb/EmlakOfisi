@@ -28,6 +28,15 @@ namespace EmlakOfisi.DataAccessLayer.Concrete
                                                           t.Status == TransactionStatus.Agreed),
                 TransactionScope.Completed => query.Where(t => t.Status == TransactionStatus.Completed),
                 TransactionScope.Cancelled => query.Where(t => t.Status == TransactionStatus.Cancelled),
+                // Biten kiralar (görev 23): danışman sadece sorumlusu olduğu işlemleri görür ("Bu ay" kartıyla aynı);
+                // aralık verilmemişse hiçbir kayıt dönmez
+                TransactionScope.LeaseEnding => f.LeaseEndFrom == null || f.LeaseEndTo == null
+                    ? query.Where(t => false)
+                    : query.Where(t => (canSeeAll || t.AgentUserId == userId) &&
+                                       t.Type == ListingType.Rent &&
+                                       t.Status == TransactionStatus.Completed &&
+                                       t.LeaseEndDate >= f.LeaseEndFrom.Value.Date &&
+                                       t.LeaseEndDate < f.LeaseEndTo.Value.Date.AddDays(1)),
                 _ => query
             };
             if (f.OnlyMine) query = query.Where(t => t.AgentUserId == userId);
@@ -54,9 +63,12 @@ namespace EmlakOfisi.DataAccessLayer.Concrete
 
         public List<TransactionRow> GetVisibleList(int userId, bool canSeeAll, TransactionFilter filter, int skip, int take)
         {
-            var query = Filtered(userId, canSeeAll, filter).AsNoTracking()
-                .OrderByDescending(t => t.CompletedAt ?? t.CreatedAt).ThenByDescending(t => t.TransactionId)
-                .Skip(skip).Take(take);
+            var filtered = Filtered(userId, canSeeAll, filter).AsNoTracking();
+            // Biten kiralarda en yakın bitiş üstte; diğer sekmelerde en yeni üstte
+            var ordered = filter.Scope == TransactionScope.LeaseEnding
+                ? filtered.OrderBy(t => t.LeaseEndDate).ThenBy(t => t.TransactionId)
+                : filtered.OrderByDescending(t => t.CompletedAt ?? t.CreatedAt).ThenByDescending(t => t.TransactionId);
+            var query = ordered.Skip(skip).Take(take);
             return ToRows(query, userId, canSeeAll).ToList();
         }
 

@@ -1,3 +1,4 @@
+using EmlakOfisi.BusinessLayer.Abstract;
 using System.ComponentModel.DataAnnotations;
 using EmlakOfisi.DataAccessLayer.Abstract;
 using EmlakOfisi.EntityLayer.Enums;
@@ -29,6 +30,23 @@ namespace EmlakOfisi.WebUI.Models
             TransactionStatus.Agreed => "bg-primary-lt",
             _ => "bg-orange-lt"
         };
+
+        // Biten kira rozeti (görev 23): tamamlanmış kiralamada bitişe 60 gün ya da daha az kaldıysa / bittiyse
+        public static (string Text, string Css)? LeaseBadge(ListingType type, TransactionStatus status, DateTime? end)
+        {
+            if (type != ListingType.Rent || status != TransactionStatus.Completed || end == null)
+                return null;
+            var days = (end.Value.Date - DateTime.Today).Days;
+            if (days < -ITransactionService.LeaseEndedDays)
+                return null;   // çoktan bitmiş: "Tamamlanan" listesinde rozet kalabalığı olmasın
+            if (days < 0)
+                return ($"Kira bitti ({-days} gün önce)", "bg-red-lt");
+            if (days == 0)
+                return ("Kira bugün bitiyor", "bg-red-lt");
+            if (days <= ITransactionService.LeaseEndingDays)
+                return ($"Kiranın bitmesine {days} gün", "bg-orange-lt");
+            return null;
+        }
 
         public static string Money(decimal? v) => v == null ? "–" : v.Value.ToString("N0", PropertyLabels.Tr) + " ₺";
     }

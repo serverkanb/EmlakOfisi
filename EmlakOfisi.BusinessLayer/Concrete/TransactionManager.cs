@@ -25,6 +25,13 @@ namespace EmlakOfisi.BusinessLayer.Concrete
         {
             page = Math.Clamp(page, 1, 100_000);
             pageSize = Math.Clamp(pageSize, 1, 100);
+            if (filter.Scope == TransactionScope.LeaseEnding)
+            {
+                // Aralık tek yerde: son 30 günde bitenler (kaçırılan yenileme) ve önümüzdeki 60 günde bitecekler.
+                // Bilinçli olarak filtre nesnesinin üzerine yazılır: dışarıdan verilen aralık her zaman ezilir.
+                filter.LeaseEndFrom = DateTime.Today.AddDays(-ITransactionService.LeaseEndedDays);
+                filter.LeaseEndTo = DateTime.Today.AddDays(ITransactionService.LeaseEndingDays);
+            }
             var items = _transactionDal.GetVisibleList(userId, canSeeAll, filter, (page - 1) * pageSize, pageSize);
             var total = _transactionDal.CountVisible(userId, canSeeAll, filter);
             return (items, total);
