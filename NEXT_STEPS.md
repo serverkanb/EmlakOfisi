@@ -417,13 +417,22 @@
   - `kod-inceleyici`: engelleyici bulgu yok; değerlerin silinmemesi ve mobil filtre satırı düzeltildi.
   - Bilinçli kabuller: alanı girilmemiş portföyler m² filtresinde ve "Uygun portföyler"de çıkmaz; konut/iş yerinde de 1.000 m² üstü alanlar dönümle gösterilir; alan kutusunda "5.000" yazılırsa çıkan İngilizce mesaj "form mesajları Türkçe" görevinde düzelecek.
 
+- 2026-11-08: Görev `arayuz: form mesajlari turkce`
+  - `WebUI/Extensions/TurkishValidationMessages` (Program.cs'te `AddControllersWithViews` içinde `Apply`):
+    - Binder'ın 11 mesajı Türkçe, alan adı formdaki Türkçe etiketten: "'abc' değeri Kat alanı için geçerli değil.", "Kat alanına sayı girin." Telefonda anında çıkan "sayı girin" uyarısı da buradan.
+    - Mesajı yazılmamış doğrulama kurallarına Türkçe varsayılan (zorunlu, uzunluk, aralık, e-posta, telefon, web adresi, karşılaştırma, biçim). E-posta gibi kuralların İngilizce varsayılanı da yakalanıyor (`HasDefaultMessage`). Elle yazılmış mesajlara dokunulmuyor.
+    - Boş olamayan değer tiplerinde (enum, int) MVC'nin telefonda anında gösterdiği gizli İngilizce "zorunlu" uyarısının yerine Türkçesi konuyor.
+  - Testler 439/439 yeşil (`TurkishValidationMessagesTests`): 11 binder mesajı, varsayılan mesajlar, elle yazılmış mesajın korunması, değer tipi zorunluluğu, gerçek MVC kurulumunda portföy formu metadata'sı; koruyucu test: formlardaki her kuralın Türkçe karşılığı var.
+  - `kod-inceleyici`: engelleyici bulgu yok. Varsayılan mesaj sadece .NET'in kendi kurallarına uygulanıyor (ileride projede kendi mesajını veren bir kural yazılırsa ezilmesin); gerçek kurulum testi eklendi. Not: boş bırakılan sayı/seçim alanında telefonda "X zorunludur.", JS kapalıyken sunucuda "Bu alan boş bırakılamaz." çıkar (ikisi de Türkçe).
+  - Uçtan uca denendi: portföy formunda kat "abc" ve net alan "5.000" gönderildi, iki mesaj da Türkçe. Giriş, portföy, müşteri, müşteri detayı, randevu, talep, işlem ve şifre değiştirme formlarında (sunucu HTML'i ve telefonda anında çıkan uyarılar) İngilizce mesaj kalmadı.
+  - Kapsam dışı: tarayıcının kendi uyarıları (ör. tarih kutusu) telefonun dilinde çıkar.
+
 ## Sıradaki küçük görev
 - Sıra (kullanıcı onayıyla):
-  1. `arayuz: form mesajlari turkce` – form binder'ının İngilizce mesajları (`ModelBindingMessageProvider`), ör. "The value 'abc' is not valid".
-  2. `kimlik: canli sistemde ilk admin` – uygulama ilk açılışta sunucu ayarındaki kullanıcı adı/şifreyle admin'i bir kez oluşturur; giriş yapıp şifre değiştirildikten sonra ayar silinir.
-  3. Görev 22 `islem: kira tarihleri ve kontrat dosyasi`, ardından görev 23 `dashboard: biten kira kontratlari`.
-  4. IIS'e yayın kontrol listesi (hosting bilgisi gelince): HTTPS, `Uploads:Root` ve `Documents:Root` yazma izni ve yedeklemesi, connection string ortam değişkeni.
-  5. Faz 3: görev 19–21 (aday arama listesi).
+  1. `kimlik: canli sistemde ilk admin` – uygulama ilk açılışta sunucu ayarındaki kullanıcı adı/şifreyle admin'i bir kez oluşturur; giriş yapıp şifre değiştirildikten sonra ayar silinir.
+  2. Görev 22 `islem: kira tarihleri ve kontrat dosyasi`, ardından görev 23 `dashboard: biten kira kontratlari`.
+  3. IIS'e yayın kontrol listesi (hosting bilgisi gelince): HTTPS, `Uploads:Root` ve `Documents:Root` yazma izni ve yedeklemesi, connection string ortam değişkeni.
+  4. Faz 3: görev 19–21 (aday arama listesi).
 - Görev 6b (.NET 10 yükseltme) kullanıcı kararıyla ertelendi.
 
 ## Açık kararlar / notlar
@@ -471,7 +480,6 @@
   - Sorumlu değişince eski sorumlu (oluşturan değilse) "Sadece Ben" bir portföyü artık göremez. İleride portföye bağlı randevu ve görüşme kayıtlarında erişim, kaydın kendi alanlarından değil portföy görünürlüğünden türetilmeli.
   - Bir çalışan pasif yapılınca sorumlusu olduğu portföylerin ne olacağı (yöneticiye devir uyarısı vb.) henüz kararlaştırılmadı.
 - Görüşme silme kuralı bilinçli kabul (görev 10 denetimi): rolü yöneticilikten danışmana düşürülen biri, yönetici iken başkasının müşterisine yazdığı kendi notlarını silebilir ("notu yazan silebilir" kararı). İstenirse silme için müşteriyi düzenleme yetkisi de şart koşulabilir.
-- Form binder'ının İngilizce mesajları (örneğin sayı alanına harf girilince çıkan "The value 'x' is not valid") henüz Türkçe değil. Tüm formlar için `ModelBindingMessageProvider` ayarı ayrı bir küçük görev olabilir.
 - Test kullanıcılarının şifresi (`mudur1`, `danisman1`, `danisman2`): `dotnet user-secrets list --project EmlakOfisi.WebUI` → `Seed:TestUserPassword`.
 - Sahte telefon numaraları için **gerçek operatör önekleri (05xx) kullanılmaz**. Seed `0100` önekini kullanıyor (`TestDataSeeder.FakePhone`).
 - Bellek açıldıktan sonra (2026-11-06, kullanıcı programları kapattı) sanal bellekte 7,8 GB boş yer vardı. Sayfa dosyası hâlâ 2 GB'a sabit; sorun tekrar ederse büyütülmesi önerilir.

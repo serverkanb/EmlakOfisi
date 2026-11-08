@@ -106,6 +106,9 @@ builder.Services.AddControllersWithViews(options =>
 
     options.Filters.Add(new AuthorizeFilter(policy));
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+
+    // Formlardaki İngilizce varsayılan mesajlar Türkçe (binder ve mesajı yazılmamış doğrulama kuralları)
+    TurkishValidationMessages.Apply(options);
 });
 
 // ---------------------------
