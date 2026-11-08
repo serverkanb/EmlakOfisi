@@ -18,6 +18,7 @@ namespace EmlakOfisi.WebUI.Models
         public string? City { get; set; }
         public string? District { get; set; }
         public string? RoomCount { get; set; }
+        public int? MinArea { get; set; }
         public decimal? MinPrice { get; set; }
         public decimal? MaxPrice { get; set; }
         public string? Notes { get; set; }
@@ -48,7 +49,8 @@ namespace EmlakOfisi.WebUI.Models
             PropertyLabels.Listing(ListingType),
             PropertyType == null ? null : PropertyLabels.Type(PropertyType.Value),
             Location.Length == 0 ? null : Location,
-            RoomCount
+            RoomCount,
+            MinArea == null ? null : "en az " + PropertyLabels.Area(MinArea.Value)
         }.Where(s => !string.IsNullOrWhiteSpace(s)));
 
         // "Uygun portföyler": portföy listesini talep ölçütleriyle açar (aktifler; arama ilçe ya da şehir)
@@ -64,6 +66,7 @@ namespace EmlakOfisi.WebUI.Models
                 if (PropertyType != null) route["propertyType"] = PropertyType.Value.ToString();
                 if (MinPrice != null) route["minPrice"] = MinPrice.Value.ToString("0", System.Globalization.CultureInfo.InvariantCulture);
                 if (MaxPrice != null) route["maxPrice"] = MaxPrice.Value.ToString("0", System.Globalization.CultureInfo.InvariantCulture);
+                if (MinArea != null) route["minArea"] = MinArea.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
                 var place = !string.IsNullOrWhiteSpace(District) ? District : City;
                 if (!string.IsNullOrWhiteSpace(place)) route["q"] = place!;
                 return route;
@@ -86,6 +89,7 @@ namespace EmlakOfisi.WebUI.Models
                 City = r.City,
                 District = r.District,
                 RoomCount = r.RoomCount,
+                MinArea = r.MinArea,
                 MinPrice = r.MinPrice,
                 MaxPrice = r.MaxPrice,
                 Notes = r.Notes,
@@ -144,6 +148,11 @@ namespace EmlakOfisi.WebUI.Models
         [StringLength(10, ErrorMessage = "Oda sayısı en fazla 10 karakter olabilir.")]
         [Display(Name = "Oda sayısı")]
         public string? RoomCount { get; set; }
+
+        // Arsada oda sayısı yerine (1 dönüm = 1.000 m²)
+        [Range(1, 100_000_000, ErrorMessage = "Alanı 1 m² ile 100.000.000 m² arasında girin.")]
+        [Display(Name = "En az alan (m²)")]
+        public int? MinArea { get; set; }
 
         [Display(Name = "En az fiyat")]
         public string? MinPriceText { get; set; }

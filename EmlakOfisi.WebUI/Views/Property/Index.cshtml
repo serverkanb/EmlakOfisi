@@ -61,7 +61,11 @@
                 <input type="text" inputmode="numeric" data-digits-only name="maxPrice" value="@Model.MaxPrice?.ToString("0")"
                        class="form-control" placeholder="En çok ₺" aria-label="En yüksek fiyat" />
             </div>
-            <div class="col-12 col-md-6 d-flex gap-2">
+            <div class="col-6 col-md-3">
+                <input type="text" inputmode="numeric" data-digits-only name="minArea" value="@Model.MinArea"
+                       class="form-control" placeholder="En az m²" aria-label="En az alan (m²)" />
+            </div>
+            <div class="col-6 col-md-3 d-flex gap-2">
                 <button type="submit" class="btn btn-outline-primary flex-fill">Filtrele</button>
                 @if (Model.HasFilter)
                 {
@@ -132,7 +136,7 @@ else
             @if (Model.Page > 1)
             {
                 <a asp-action="Index" asp-route-q="@Model.Q" asp-route-listingType="@Model.ListingType" asp-route-propertyType="@Model.PropertyType"
-                   asp-route-status="@Model.Status" asp-route-minPrice="@Model.MinPrice" asp-route-maxPrice="@Model.MaxPrice" asp-route-mine="@(Model.Mine ? true : null)"
+                   asp-route-status="@Model.Status" asp-route-minPrice="@Model.MinPrice" asp-route-maxPrice="@Model.MaxPrice" asp-route-minArea="@Model.MinArea" asp-route-mine="@(Model.Mine ? true : null)"
                    asp-route-page="@(Model.Page - 1)" class="btn btn-outline-secondary"><i class="ti ti-chevron-left me-1"></i> Önceki</a>
             }
             else
@@ -143,7 +147,7 @@ else
             @if (Model.Page < Model.TotalPages)
             {
                 <a asp-action="Index" asp-route-q="@Model.Q" asp-route-listingType="@Model.ListingType" asp-route-propertyType="@Model.PropertyType"
-                   asp-route-status="@Model.Status" asp-route-minPrice="@Model.MinPrice" asp-route-maxPrice="@Model.MaxPrice" asp-route-mine="@(Model.Mine ? true : null)"
+                   asp-route-status="@Model.Status" asp-route-minPrice="@Model.MinPrice" asp-route-maxPrice="@Model.MaxPrice" asp-route-minArea="@Model.MinArea" asp-route-mine="@(Model.Mine ? true : null)"
                    asp-route-page="@(Model.Page + 1)" class="btn btn-outline-secondary">Sonraki <i class="ti ti-chevron-right ms-1"></i></a>
             }
             else

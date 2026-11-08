@@ -40,26 +40,26 @@ namespace EmlakOfisi.WebUI.Controllers
 
         [HttpGet]
         public IActionResult Index(string? q, ListingType? listingType, PropertyType? propertyType, PropertyStatus? status,
-            decimal? minPrice, decimal? maxPrice, bool mine = false, int page = 1)
+            decimal? minPrice, decimal? maxPrice, bool mine = false, int page = 1, int? minArea = null)
         {
             var userId = User.GetUserId();
             var filter = new PropertyFilter
             {
                 Search = q, ListingType = listingType, PropertyType = propertyType, Status = status,
-                MinPrice = minPrice, MaxPrice = maxPrice, OnlyMine = mine
+                MinPrice = minPrice, MaxPrice = maxPrice, MinArea = minArea > 0 ? minArea : null, OnlyMine = mine
             };
 
             var (items, total) = _propertyService.TGetVisibleList(userId, User.CanSeeAll(), filter, page, PageSize);
 
             var lastPage = (int)Math.Ceiling(total / (double)PageSize);
             if (items.Count == 0 && page > 1 && lastPage >= 1)
-                return RedirectToAction(nameof(Index), new { q, listingType, propertyType, status, minPrice, maxPrice, mine, page = lastPage });
+                return RedirectToAction(nameof(Index), new { q, listingType, propertyType, status, minPrice, maxPrice, mine, minArea, page = lastPage });
 
             return View(new PropertyListViewModel
             {
                 Items = items.Select(p => ToListItem(p, userId)).ToList(),
                 Q = q, ListingType = listingType, PropertyType = propertyType, Status = status,
-                MinPrice = minPrice, MaxPrice = maxPrice, Mine = mine,
+                MinPrice = minPrice, MaxPrice = maxPrice, MinArea = minArea > 0 ? minArea : null, Mine = mine,
                 Page = Math.Max(page, 1), PageSize = PageSize, TotalCount = total
             });
         }

@@ -23,7 +23,8 @@
     </div>
     <div class="col-6 col-md-4">
         <label asp-for="PropertyType" class="form-label"></label>
-        <select asp-for="PropertyType" class="form-select form-select-lg">
+        @* Arsa seçilince oda sayısı, kat ve bina yaşı gizlenir (site.js); sunucu da arsada kaydetmez *@
+        <select asp-for="PropertyType" class="form-select form-select-lg" data-property-type>
             @foreach (var t in new[] { PropertyType.Residence, PropertyType.Land, PropertyType.Commercial, PropertyType.Other })
             {
                 <option value="@t">@PropertyLabels.Type(t)</option>
@@ -49,27 +50,29 @@
         <div class="form-hint">Sadece rakam, tam TL (kiralıkta aylık).</div>
         <span asp-validation-for="PriceText" class="text-danger small"></span>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-3" data-hide-for-land>
         <label asp-for="RoomCount" class="form-label"></label>
         <input asp-for="RoomCount" class="form-control form-control-lg" placeholder="3+1" autocomplete="off" />
         <span asp-validation-for="RoomCount" class="text-danger small"></span>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-3" data-hide-for-land>
         <label asp-for="Floor" class="form-label"></label>
         <input asp-for="Floor" type="number" inputmode="numeric" class="form-control form-control-lg" />
         <span asp-validation-for="Floor" class="text-danger small"></span>
     </div>
     <div class="col-6 col-md-4">
         <label asp-for="NetArea" class="form-label"></label>
-        <input asp-for="NetArea" type="number" inputmode="numeric" min="0" class="form-control form-control-lg" />
+        <input asp-for="NetArea" type="number" inputmode="numeric" min="0" class="form-control form-control-lg" data-area-hint />
+        <div class="form-hint" data-area-hint-text>1 dönüm = 1.000 m²</div>
         <span asp-validation-for="NetArea" class="text-danger small"></span>
     </div>
     <div class="col-6 col-md-4">
         <label asp-for="GrossArea" class="form-label"></label>
-        <input asp-for="GrossArea" type="number" inputmode="numeric" min="0" class="form-control form-control-lg" />
+        <input asp-for="GrossArea" type="number" inputmode="numeric" min="0" class="form-control form-control-lg" data-area-hint />
+        <div class="form-hint" data-area-hint-text>1 dönüm = 1.000 m²</div>
         <span asp-validation-for="GrossArea" class="text-danger small"></span>
     </div>
-    <div class="col-12 col-md-4">
+    <div class="col-12 col-md-4" data-hide-for-land>
         <label asp-for="BuildingAge" class="form-label"></label>
         <input asp-for="BuildingAge" type="number" inputmode="numeric" min="0" class="form-control form-control-lg" />
         <span asp-validation-for="BuildingAge" class="text-danger small"></span>

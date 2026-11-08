@@ -85,6 +85,7 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             request.MinPrice = changes.MinPrice;
             request.MaxPrice = changes.MaxPrice;
             request.RoomCount = changes.RoomCount;
+            request.MinArea = changes.MinArea;
             request.Notes = changes.Notes;
 
             _requestDal.Update(request);
@@ -113,6 +114,7 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             (r.MinPrice == null || r.MinPrice >= 0) &&
             (r.MaxPrice == null || r.MaxPrice >= 0) &&
             (r.MinPrice == null || r.MaxPrice == null || r.MinPrice <= r.MaxPrice) &&
+            (r.MinArea == null || r.MinArea > 0) &&
             (r.Notes == null || r.Notes.Length <= ICustomerRequestService.MaxNotesLength);
 
         // Geçersiz enum güvenli varsayılana düşer
@@ -120,6 +122,8 @@ namespace EmlakOfisi.BusinessLayer.Concrete
         {
             if (!Enum.IsDefined(r.ListingType)) r.ListingType = ListingType.Sale;
             if (r.PropertyType != null && !Enum.IsDefined(r.PropertyType.Value)) r.PropertyType = null;
+            // Arsada oda sayısı anlamsız: formdan gelse de kaydedilmez (alan m² kullanılır)
+            if (r.PropertyType == PropertyType.Land) r.RoomCount = null;
         }
     }
 }

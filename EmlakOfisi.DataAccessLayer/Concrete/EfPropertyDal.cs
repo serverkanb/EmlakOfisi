@@ -40,6 +40,7 @@ namespace EmlakOfisi.DataAccessLayer.Concrete
             if (f.Status != null) query = query.Where(p => p.Status == f.Status);
             if (f.MinPrice != null) query = query.Where(p => p.Price >= f.MinPrice);
             if (f.MaxPrice != null) query = query.Where(p => p.Price <= f.MaxPrice);
+            if (f.MinArea != null) query = query.Where(p => (p.NetArea ?? p.GrossArea) >= f.MinArea);
             if (f.OnlyMine) query = query.Where(p => p.CreatedByUserId == userId || p.AgentUserId == userId);
 
             return query;

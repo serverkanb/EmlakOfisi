@@ -14,7 +14,8 @@
     </div>
     <div class="col-6 col-md-4">
         <label asp-for="PropertyType" class="form-label"></label>
-        <select asp-for="PropertyType" class="form-select form-select-lg">
+        @* Arsa seçilince oda sayısı gizlenir (site.js: data-property-type / data-hide-for-land); sunucu da arsada kaydetmez *@
+        <select asp-for="PropertyType" class="form-select form-select-lg" data-property-type>
             <option value="">Farketmez</option>
             @foreach (var t in new[] { PropertyType.Residence, PropertyType.Land, PropertyType.Commercial, PropertyType.Other })
             {
@@ -22,10 +23,19 @@
             }
         </select>
     </div>
-    <div class="col-12 col-md-4">
+    <div class="col-12 col-md-4" data-hide-for-land>
         <label asp-for="RoomCount" class="form-label"></label>
         <input asp-for="RoomCount" class="form-control form-control-lg" placeholder="3+1" autocomplete="off" />
         <span asp-validation-for="RoomCount" class="text-danger small"></span>
+    </div>
+    <div class="col-12 col-md-4">
+        <label asp-for="MinArea" class="form-label"></label>
+        <div class="input-group input-group-lg">
+            <input asp-for="MinArea" type="text" inputmode="numeric" data-digits-only data-area-hint class="form-control" placeholder="ör. 5000" autocomplete="off" />
+            <span class="input-group-text">m²</span>
+        </div>
+        <div class="form-hint" data-area-hint-text>1 dönüm = 1.000 m²</div>
+        <span asp-validation-for="MinArea" class="text-danger small"></span>
     </div>
 
     <div class="col-6">

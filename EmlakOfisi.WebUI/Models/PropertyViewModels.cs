@@ -35,6 +35,7 @@ namespace EmlakOfisi.WebUI.Models
         public PropertyStatus? Status { get; set; }
         public decimal? MinPrice { get; set; }
         public decimal? MaxPrice { get; set; }
+        public int? MinArea { get; set; }
         public bool Mine { get; set; }
 
         public int Page { get; set; }
@@ -42,7 +43,7 @@ namespace EmlakOfisi.WebUI.Models
         public int TotalCount { get; set; }
         public int TotalPages => PageSize == 0 ? 0 : (int)Math.Ceiling(TotalCount / (double)PageSize);
         public bool HasFilter => !string.IsNullOrWhiteSpace(Q) || ListingType != null || PropertyType != null ||
-                                 Status != null || MinPrice != null || MaxPrice != null || Mine;
+                                 Status != null || MinPrice != null || MaxPrice != null || MinArea != null || Mine;
     }
 
     // Ekleme / düzenleme formu. Sahip, tarih, silinme durumu ve id alanları YOK (over-posting kapalı).
@@ -219,6 +220,12 @@ namespace EmlakOfisi.WebUI.Models
         // 5.000.000 ₺  /  kiralıkta "40.000 ₺ / ay"
         public static string Price(decimal price, ListingType listing) =>
             price.ToString("N0", Tr) + " ₺" + (listing == ListingType.Rent ? " / ay" : "");
+
+        // Alan: "850 m²", 1.000 m² ve üstünde dönüm karşılığıyla "5.000 m² (5 dönüm)", "2.500 m² (2,5 dönüm)"
+        public static string Area(int squareMeters) =>
+            squareMeters >= 1000
+                ? $"{squareMeters.ToString("N0", Tr)} m² ({(squareMeters / 1000m).ToString("0.##", Tr)} dönüm)"
+                : $"{squareMeters.ToString("N0", Tr)} m²";
 
         // Yüzde: "2", "2,5" ya da "2.5"; 0–100 arası, en fazla 2 ondalık (decimal(5,2) ile uyumlu)
         public static bool TryParsePercent(string? text, out decimal value)

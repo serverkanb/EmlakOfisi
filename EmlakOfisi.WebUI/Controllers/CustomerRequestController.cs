@@ -112,6 +112,7 @@ namespace EmlakOfisi.WebUI.Controllers
                 City = request.City,
                 District = request.District,
                 RoomCount = request.RoomCount,
+                MinArea = request.MinArea,
                 MinPriceText = request.MinPrice?.ToString("0"),
                 MaxPriceText = request.MaxPrice?.ToString("0"),
                 Notes = request.Notes
@@ -208,7 +209,8 @@ namespace EmlakOfisi.WebUI.Controllers
                 PropertyType = m.PropertyType,
                 City = Clean(m.City),
                 District = Clean(m.District),
-                RoomCount = Clean(m.RoomCount),
+                RoomCount = m.PropertyType == PropertyType.Land ? null : Clean(m.RoomCount),
+                MinArea = m.MinArea,
                 MinPrice = min,
                 MaxPrice = max,
                 Notes = Clean(m.Notes)

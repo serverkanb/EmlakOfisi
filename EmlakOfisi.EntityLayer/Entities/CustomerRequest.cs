@@ -30,6 +30,9 @@ namespace EmlakOfisi.EntityLayer.Entities
         [StringLength(10)]
         public string? RoomCount { get; set; }
 
+        // En az alan (m²). Arsada oda sayısı yerine kullanılır (1 dönüm = 1.000 m²); diğer türlerde isteğe bağlı.
+        public int? MinArea { get; set; }
+
         [StringLength(2000)]
         public string? Notes { get; set; }
 

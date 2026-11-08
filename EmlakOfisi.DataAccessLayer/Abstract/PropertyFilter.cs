@@ -11,6 +11,7 @@ namespace EmlakOfisi.DataAccessLayer.Abstract
         public PropertyStatus? Status { get; set; }      // aktif / pasif / satıldı / kiralandı
         public decimal? MinPrice { get; set; }
         public decimal? MaxPrice { get; set; }
+        public int? MinArea { get; set; }                // en az alan (m²): net, yoksa brüt alan
         public bool OnlyMine { get; set; }               // sadece oluşturduğum veya sorumlusu olduğum
     }
 }

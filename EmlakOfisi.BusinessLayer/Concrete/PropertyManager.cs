@@ -213,6 +213,14 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             if (!Enum.IsDefined(p.ListingType)) p.ListingType = ListingType.Sale;
             if (!Enum.IsDefined(p.PropertyType)) p.PropertyType = PropertyType.Other;
             if (!Enum.IsDefined(p.Status)) p.Status = PropertyStatus.Active;
+
+            // Arsada oda sayısı, kat ve bina yaşı anlamsız: formdan gelse de kaydedilmez (alan m² kullanılır)
+            if (p.PropertyType == PropertyType.Land)
+            {
+                p.RoomCount = null;
+                p.Floor = null;
+                p.BuildingAge = null;
+            }
         }
     }
 }

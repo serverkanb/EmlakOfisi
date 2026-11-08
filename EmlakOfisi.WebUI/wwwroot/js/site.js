@@ -118,3 +118,43 @@ document.addEventListener('input', function (e) {
         document.querySelectorAll('form[data-photo-upload]').forEach(function (form) { setBusy(form, false); });
     });
 })();
+
+// Arsa seçilince arsada anlamsız alanlar (oda sayısı, kat, bina yaşı) gizlenir ve gönderilmez.
+// <select data-property-type> ... <div data-hide-for-land>. Sunucu da arsada bu alanları kaydetmez.
+// Alan girişinde dönüm karşılığı: <input data-area-hint> + <div data-area-hint-text>.
+(function () {
+    'use strict';
+
+    function apply(select) {
+        var form = select.form || document;
+        var isLand = select.value === 'Land';
+        form.querySelectorAll('[data-hide-for-land]').forEach(function (box) {
+            box.hidden = isLand;
+            box.querySelectorAll('input, select, textarea').forEach(function (input) {
+                input.disabled = isLand;          // gizli alan gönderilmez; değer silinmez, yanlışlıkla Arsa seçilip geri dönülürse kaybolmasın
+            });
+        });
+    }
+
+    document.querySelectorAll('select[data-property-type]').forEach(function (select) {
+        apply(select);
+        select.addEventListener('change', function () { apply(select); });
+    });
+
+    function areaText(value) {
+        var m2 = parseInt(value, 10);
+        if (!m2 || m2 <= 0) return '1 dönüm = 1.000 m²';
+        if (m2 < 1000) return m2.toLocaleString('tr-TR') + ' m²';
+        var donum = Math.round(m2 / 10) / 100;
+        return m2.toLocaleString('tr-TR') + ' m² = ' + donum.toLocaleString('tr-TR') + ' dönüm';
+    }
+
+    document.querySelectorAll('input[data-area-hint]').forEach(function (input) {
+        var box = input.closest('[class*="col-"]') || input.parentElement;
+        var hint = box ? box.querySelector('[data-area-hint-text]') : null;
+        if (!hint) return;
+        var update = function () { hint.textContent = areaText(input.value); };
+        update();
+        input.addEventListener('input', update);
+    });
+})();

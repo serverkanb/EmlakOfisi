@@ -407,6 +407,16 @@
     - Liste adı "Aranacaklar" (sadece bugün değil; tarihi geçmiş/bugün olanlar üstte).
     - **.NET 10'a geçiş şimdilik ertelendi.** Not: .NET 9'un desteği 10 Kasım 2026'da bitiyor (güvenlik güncellemesi gelmez); yayına almadan önce yeniden konuşulacak.
 
+- 2026-11-08: Ara görev `portfoy: arsa icin alan, talepte en az alan, m2 filtresi` (kullanıcı isteği, testte fark edildi)
+  - Arsada oda sayısı, kat ve bina yaşı anlamsız: portföy ve talep formunda **Arsa** seçilince bu alanlar gizlenir ve gönderilmez (`site.js`: `data-property-type`, `data-hide-for-land`; değerler silinmez, yanlışlıkla Arsa seçilip geri dönülürse kaybolmaz). Sunucu da arsada kaydetmez (`PropertyManager.NormalizeEnums`, `CustomerRequestManager.Sanitize`).
+  - Talebe **"En az alan (m²)"** (`CustomerRequest.MinArea`, int) eklendi; özette "en az 5.000 m² (5 dönüm)". Alan girerken altında dönüm karşılığı çıkar (`data-area-hint`). `PropertyLabels.Area`: 1.000 m² ve üstünde dönüm de yazılır (portföy detayında da).
+  - Portföy listesine **"En az m²"** filtresi (net alan, yoksa brüt alan). "Uygun portföyler" butonu talepteki alanı da gönderir.
+  - `CustomerRequestMinArea` migration'ı kullanıcı onayıyla uygulandı (tek nullable kolon, veri kaybı yok).
+  - Testler 433/433 yeşil (`LandAreaTests`).
+  - Uçtan uca denendi: danisman1 arsa talebinde "3+1" gönderdi, kaydedilmedi; en az alan 5000 kaydedildi; özet ve "Uygun portföyler" linki (`minArea=5000`) doğru. m² filtresi SQL Server'da doğru (≥100: 3, ≥200: 1 portföy; danisman1'in görebildikleri). Gizleme/gönderilmeme ve dönüm ipucu tarayıcıda sahte formla denendi (panelde oturum kapalıydı). Deneme talebi (id 4) kapatıldı.
+  - `kod-inceleyici`: engelleyici bulgu yok; değerlerin silinmemesi ve mobil filtre satırı düzeltildi.
+  - Bilinçli kabuller: alanı girilmemiş portföyler m² filtresinde ve "Uygun portföyler"de çıkmaz; konut/iş yerinde de 1.000 m² üstü alanlar dönümle gösterilir; alan kutusunda "5.000" yazılırsa çıkan İngilizce mesaj "form mesajları Türkçe" görevinde düzelecek.
+
 ## Sıradaki küçük görev
 - Sıra (kullanıcı onayıyla):
   1. `arayuz: form mesajlari turkce` – form binder'ının İngilizce mesajları (`ModelBindingMessageProvider`), ör. "The value 'abc' is not valid".

@@ -347,6 +347,9 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                     b.Property<decimal?>("MaxPrice")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int?>("MinArea")
+                        .HasColumnType("int");
+
                     b.Property<decimal?>("MinPrice")
                         .HasColumnType("decimal(18,2)");
 

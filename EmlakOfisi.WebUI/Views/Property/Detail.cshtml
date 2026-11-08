@@ -53,9 +53,9 @@
                     {
                         <dt class="col-5 col-md-3">Alan</dt>
                         <dd class="col-7 col-md-9">
-                            @if (Model.Summary.NetArea != null) { <span>@Model.Summary.NetArea m² net</span> }
+                            @if (Model.Summary.NetArea != null) { <span>@PropertyLabels.Area(Model.Summary.NetArea.Value) net</span> }
                             @if (Model.Summary.NetArea != null && Model.GrossArea != null) { <span> · </span> }
-                            @if (Model.GrossArea != null) { <span>@Model.GrossArea m² brüt</span> }
+                            @if (Model.GrossArea != null) { <span>@PropertyLabels.Area(Model.GrossArea.Value) brüt</span> }
                         </dd>
                     }
                     @if (Model.Floor != null)
