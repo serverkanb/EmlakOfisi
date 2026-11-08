@@ -68,7 +68,8 @@ namespace EmlakOfisi.WebUI.Controllers
                 UserName = model.UserName.Trim(),
                 Email = model.Email.Trim(),
                 EmailConfirmed = true,
-                IsActive = true
+                IsActive = true,
+                MustChangePassword = true   // admin şifreyi biliyor: kullanıcı ilk girişte kendi şifresini koyar
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);

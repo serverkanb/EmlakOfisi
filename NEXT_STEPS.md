@@ -427,12 +427,21 @@
   - Uçtan uca denendi: portföy formunda kat "abc" ve net alan "5.000" gönderildi, iki mesaj da Türkçe. Giriş, portföy, müşteri, müşteri detayı, randevu, talep, işlem ve şifre değiştirme formlarında (sunucu HTML'i ve telefonda anında çıkan uyarılar) İngilizce mesaj kalmadı.
   - Kapsam dışı: tarayıcının kendi uyarıları (ör. tarih kutusu) telefonun dilinde çıkar.
 
+- 2026-11-08: Görev `kimlik: canli sistemde ilk admin ve ilk giriste sifre degistirme`
+  - `IdentityInitializer.BootstrapFirstAdminAsync` (her ortam): sistemde **hiç Admin yoksa** sunucu ortam değişkenleriyle (`Bootstrap__AdminUserName`, `Bootstrap__AdminEmail`, `Bootstrap__AdminPassword`; üçü de zorunlu) admin **bir kez** oluşturulur. Admin varsa ayar yok sayılır, mevcut hesaba dokunulmaz, "değişkenleri silin" uyarısı loglanır. Ayar eksik/şifre zayıfsa admin oluşmaz, Türkçe log. Aynı adda Admin olmayan kullanıcı varsa ele geçirilmez. Rol atanamazsa kullanıcı geri alınır. Şifre loga yazılmaz. Geliştirme admini (Seed:*) eskisi gibi.
+  - `AppUser.MustChangePassword`: ilk admin ve **admin'in "Yeni kullanıcı" ekranından açtığı hesaplar** işaretli açılır. `AppClaimsPrincipalFactory` oturuma işaret koyar; global `MustChangePasswordFilter` işaretli kullanıcıyı her sayfadan "Şifre değiştir"e yönlendirir (Login/çıkış, Error, Manifest ve şifre değiştirme hariç). Sayfada Türkçe uyarı.
+  - Şifre değiştirme: yeni şifre mevcut şifreyle aynı olamaz; işaret şifreyle aynı kayıtta kalkar (şifre değişmezse işaret kalır), oturum yenilenir.
+  - `UserMustChangePassword` migration'ı kullanıcı onayıyla uygulandı (bool, varsayılan false; mevcut 6 kullanıcı etkilenmedi).
+  - Testler 462/462 yeşil (`FirstAdminTests`): bootstrap oluşturma, admin varken dokunmama, eksik/zayıf ayar ve eksik e-posta, aynı adlı kullanıcının ele geçirilmemesi, claim işareti, filtre yönlendirme ve muafiyetler, şifre değişince işaretin kalkması, aynı şifre ve yanlış mevcut şifrede işaretin kalması; admin'in açtığı kullanıcı işaretli.
+  - Uçtan uca (LocalDB + curl): danisman1 normal girdi. danisman2 geçici olarak işaretlendi: `/`, `/Contact`, portföy detayı ve fotoğraf adresi şifre değiştirmeye yönlendi; uyarı göründü; aynı şifre reddedildi; çıkış çalıştı. İşaret SQL ile geri kaldırıldı (şifresi değiştirilmedi). Bootstrap gerçek veritabanında denenmedi (admin var); birim testleriyle doğrulandı.
+  - `yetki-denetcisi` ve `kod-inceleyici` bulguları kapatıldı.
+  - **Yayın kontrol listesine:** ilk kurulumda üç `Bootstrap__*` ortam değişkeni tanımlanır → admin girer ve şifresini değiştirir → değişkenler sunucudan **silinir** (silinmezse ve bir gün hiç admin kalmazsa uygulama açılışta yeni admin oluşturur).
+
 ## Sıradaki küçük görev
 - Sıra (kullanıcı onayıyla):
-  1. `kimlik: canli sistemde ilk admin` – uygulama ilk açılışta sunucu ayarındaki kullanıcı adı/şifreyle admin'i bir kez oluşturur; giriş yapıp şifre değiştirildikten sonra ayar silinir.
-  2. Görev 22 `islem: kira tarihleri ve kontrat dosyasi`, ardından görev 23 `dashboard: biten kira kontratlari`.
-  3. IIS'e yayın kontrol listesi (hosting bilgisi gelince): HTTPS, `Uploads:Root` ve `Documents:Root` yazma izni ve yedeklemesi, connection string ortam değişkeni.
-  4. Faz 3: görev 19–21 (aday arama listesi).
+  1. Görev 22 `islem: kira tarihleri ve kontrat dosyasi`, ardından görev 23 `dashboard: biten kira kontratlari`.
+  2. IIS'e yayın kontrol listesi (hosting bilgisi gelince): HTTPS, `Uploads:Root` ve `Documents:Root` yazma izni ve yedeklemesi, connection string ortam değişkeni, `Bootstrap__*` ile ilk admin ve sonra silinmesi.
+  3. Faz 3: görev 19–21 (aday arama listesi).
 - Görev 6b (.NET 10 yükseltme) kullanıcı kararıyla ertelendi.
 
 ## Açık kararlar / notlar
@@ -445,7 +454,7 @@
 - AppUser'da ters yönde koleksiyon navigation'ı yok, bilerek eklenmedi: aynı tabloya birden çok FK olduğunda EF'in ilişkileri karıştırmaması için.
 - Bu bilgisayarda HTTPS geliştirme sertifikası yok. `https` profili sertifika olmadığı için açılmıyor, bu yüzden yerel denemeler `http` profiliyle yapılıyor (`.claude/launch.json`). HTTPS ile çalıştırmak için kullanıcının şu komutu kendisinin çalıştırması gerekiyor: `dotnet dev-certs https --trust`.
 - Cookie `Secure` olarak işaretli. Bu yüzden telefondan LAN IP'si üzerinden http ile girilirse giriş yapılamaz. Telefonda deneme için HTTPS gerekiyor.
-- Production'da ilk admin kullanıcı nasıl oluşturulacak, henüz kararı verilmedi (seed sadece Development'ta çalışıyor). Yayına almadan önce karar verilmeli. Uygulama başka ofislere satılırsa bu her kurulumda gerekecek.
+- **Karar verildi (2026-11-08):** canlı sistemde ilk admin sunucu ortam değişkenlerinden (`Bootstrap__AdminUserName`, `Bootstrap__AdminEmail`, `Bootstrap__AdminPassword`) bir kez oluşturulur ve ilk girişte şifre değiştirmek zorundadır. Her ofis kurulumunda aynı yöntem kullanılır.
 - **Kullanıcı kararı (2026-11-07):** hedef 10–50 kullanıcılı tek ofis. Başka ofislere satılırsa her ofise ayrı kurulum ve ayrı veritabanı (multi-tenant yok). Ofis adı ve logosu artık `appsettings.json` "Office" bölümünden okunuyor (2026-11-07).
 - Giriş akışının otomatik testi yok, şimdilik elle denendi. Uçtan uca HTTP testleri gerekirse `Microsoft.AspNetCore.Mvc.Testing` paketi önerilecek; görünürlük testleri için görev 7'de değerlendirilecek.
 - Seed admin şifresini görmek için: `dotnet user-secrets list --project EmlakOfisi.WebUI`. Kullanıcı adı `admin`.

@@ -17,6 +17,9 @@ namespace EmlakOfisi.EntityLayer.Entities
 
         public bool IsActive { get; set; } = true;
 
+        // İlk girişte şifre değiştirmek zorunda mı (ilk admin ve admin'in açtığı hesaplar). Şifre değişince false olur.
+        public bool MustChangePassword { get; set; }
+
         // Danışman primi (görev 18b): ofisin aldığı komisyondan danışmana düşen yüzde (ör. 40). Sadece Admin yazar.
         // Boşsa prim hesaplanmaz. İşlem tamamlanınca o anki oran işleme kopyalanır.
         [Column(TypeName = "decimal(5,2)")]

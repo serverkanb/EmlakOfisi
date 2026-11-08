@@ -28,6 +28,7 @@ public class AdminUserControllerTests
         var created = await identity.UserManager.FindByNameAsync("ayse.yilmaz");
         Assert.NotNull(created);
         Assert.True(created!.IsActive);
+        Assert.True(created.MustChangePassword);   // admin şifreyi biliyor: ilk girişte kullanıcı kendi şifresini koyar
         Assert.Equal(new[] { RoleNames.Agent }, await identity.UserManager.GetRolesAsync(created));
     }
 

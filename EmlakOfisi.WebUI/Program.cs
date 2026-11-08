@@ -83,7 +83,8 @@ builder.Services.AddIdentity<AppUser, AppRole>(options =>
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders()
-.AddErrorDescriber<TurkishIdentityErrorDescriber>();
+.AddErrorDescriber<TurkishIdentityErrorDescriber>()
+.AddClaimsPrincipalFactory<AppClaimsPrincipalFactory>();   // "şifre değiştirmeli" işareti oturuma
 
 // Pasif yapılan ya da rolü değişen kullanıcının açık oturumu en geç 5 dakikada yenilenir/düşer
 // (AdminUserController ve RoleAssignController security stamp'i yeniliyor).
@@ -106,6 +107,7 @@ builder.Services.AddControllersWithViews(options =>
 
     options.Filters.Add(new AuthorizeFilter(policy));
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+    options.Filters.Add(new MustChangePasswordFilter());   // ilk girişte şifre değiştirme zorunluluğu
 
     // Formlardaki İngilizce varsayılan mesajlar Türkçe (binder ve mesajı yazılmamış doğrulama kuralları)
     TurkishValidationMessages.Apply(options);
