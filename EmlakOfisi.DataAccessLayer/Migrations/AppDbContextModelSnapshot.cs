@@ -606,6 +606,24 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ContractContentType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ContractFileName")
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)");
+
+                    b.Property<string>("ContractOriginalName")
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)");
+
+                    b.Property<DateTime?>("ContractUploadedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ContractUploadedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -614,6 +632,12 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
 
                     b.Property<int>("CustomerContactId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("LeaseEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LeaseStartDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(2000)
@@ -633,6 +657,8 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
 
                     b.HasKey("TransactionId");
 
+                    b.HasIndex("ContractUploadedByUserId");
+
                     b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("CustomerContactId");
@@ -640,6 +666,8 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                     b.HasIndex("PropertyId");
 
                     b.HasIndex("AgentUserId", "Status");
+
+                    b.HasIndex("Type", "Status", "LeaseEndDate");
 
                     b.ToTable("Transactions");
                 });
@@ -916,6 +944,11 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("EmlakOfisi.EntityLayer.Entities.AppUser", "ContractUploadedByUser")
+                        .WithMany()
+                        .HasForeignKey("ContractUploadedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("EmlakOfisi.EntityLayer.Entities.AppUser", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedByUserId")
@@ -935,6 +968,8 @@ namespace EmlakOfisi.DataAccessLayer.Migrations
                         .IsRequired();
 
                     b.Navigation("AgentUser");
+
+                    b.Navigation("ContractUploadedByUser");
 
                     b.Navigation("CreatedByUser");
 

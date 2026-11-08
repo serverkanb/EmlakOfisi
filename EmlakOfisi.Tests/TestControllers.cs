@@ -24,8 +24,12 @@ internal static class TestControllers
     public static TransactionManager Transactions(AppDbContext db, IContactService contacts, IPropertyService properties) =>
         new(new EfTransactionDal(db), contacts, properties);
 
-    public static TransactionController Transaction(AppDbContext db, IContactService contacts, IPropertyService properties) =>
-        new(Transactions(db, contacts, properties), properties, contacts);
+    // Kontrat deposu verilmezse geçici klasör (dosyaya dokunmayan testler için)
+    public static TransactionController Transaction(AppDbContext db, IContactService contacts, IPropertyService properties,
+        EmlakOfisi.WebUI.Helpers.DocumentFileStore? documents = null) =>
+        new(Transactions(db, contacts, properties), properties, contacts,
+            documents ?? new EmlakOfisi.WebUI.Helpers.DocumentFileStore(Path.Combine(Path.GetTempPath(), "emlak-test-docs-" + Guid.NewGuid().ToString("N"))),
+            Microsoft.Extensions.Logging.Abstractions.NullLogger<TransactionController>.Instance);
 
     public static CustomerRequestManager Requests(AppDbContext db, IContactService contacts) =>
         new(new EfCustomerRequestDal(db), contacts);

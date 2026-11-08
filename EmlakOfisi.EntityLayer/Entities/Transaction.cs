@@ -9,6 +9,7 @@ namespace EmlakOfisi.EntityLayer.Entities
     // Görünürlük (görev 18): yönetici, sorumlu danışman ya da işlemi oluşturan (komisyon içerdiği için).
     [Index(nameof(AgentUserId), nameof(Status))]
     [Index(nameof(CreatedByUserId))]
+    [Index(nameof(Type), nameof(Status), nameof(LeaseEndDate))]   // biten kira kontratları (görev 23)
     public class Transaction
     {
         public int TransactionId { get; set; }
@@ -55,6 +56,26 @@ namespace EmlakOfisi.EntityLayer.Entities
 
         [StringLength(2000)]
         public string? Notes { get; set; }
+
+        // Kira tarihleri (görev 22): sadece kiralamada; satışta sunucu boşaltır.
+        public DateTime? LeaseStartDate { get; set; }
+        public DateTime? LeaseEndDate { get; set; }
+
+        // Kontrat dosyası (görev 22): işlem başına tek dosya, wwwroot DIŞINDA ("Documents:Root").
+        // Dosya adı sunucuda üretilir ("{işlemId}/{guid}{uzantı}"); kullanıcının dosya adı sadece gösterim için saklanır.
+        [StringLength(260)]
+        public string? ContractFileName { get; set; }
+
+        [StringLength(260)]
+        public string? ContractOriginalName { get; set; }
+
+        [StringLength(50)]
+        public string? ContractContentType { get; set; }
+
+        public DateTime? ContractUploadedAt { get; set; }
+
+        public int? ContractUploadedByUserId { get; set; }
+        public AppUser? ContractUploadedByUser { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }

@@ -63,6 +63,19 @@ if (string.IsNullOrWhiteSpace(uploadsRoot))
     uploadsRoot = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "uploads");
 builder.Services.AddSingleton(new PhotoFileStore(uploadsRoot));
 
+// Kontrat dosyaları (görev 22): aynı kural, ayrı klasör ("Documents:Root"; varsayılan App_Data/documents)
+var documentsRoot = builder.Configuration["Documents:Root"];
+if (string.IsNullOrWhiteSpace(documentsRoot))
+    documentsRoot = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "documents");
+builder.Services.AddSingleton(new DocumentFileStore(documentsRoot));
+
+// Yanlış ayarla wwwroot altına konan dosyalar statik dosya olarak YETKİSİZ açılabilir: uygulama açılmaz
+foreach (var root in new[] { uploadsRoot, documentsRoot })
+{
+    if (PhotoFileStore.IsInside(root, builder.Environment.WebRootPath))
+        throw new InvalidOperationException($"Dosya klasörü wwwroot altında olamaz: {root}. Uploads:Root / Documents:Root ayarını değiştirin.");
+}
+
 // ---------------------------
 //  Identity Ayarları
 // ---------------------------

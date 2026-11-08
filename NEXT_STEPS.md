@@ -437,9 +437,36 @@
   - `yetki-denetcisi` ve `kod-inceleyici` bulguları kapatıldı.
   - **Yayın kontrol listesine:** ilk kurulumda üç `Bootstrap__*` ortam değişkeni tanımlanır → admin girer ve şifresini değiştirir → değişkenler sunucudan **silinir** (silinmezse ve bir gün hiç admin kalmazsa uygulama açılışta yeni admin oluşturur).
 
+- 2026-11-08: Görev 22 `islem: kira tarihleri ve kontrat dosyasi`
+  - `Transaction`'a kira tarihleri (`LeaseStartDate`, `LeaseEndDate`) ve kontrat alanları (`ContractFileName`, `ContractOriginalName`, `ContractContentType`, `ContractUploadedAt`, `ContractUploadedByUserId`) eklendi. Görev 23 için `(Type, Status, LeaseEndDate)` indeksi var. `TransactionLeaseContract` migration'ı kullanıcı onayıyla uygulandı (7 nullable kolon, 2 indeks, Restrict FK; veri kaybı yok).
+  - **Kira tarihleri:** formda sadece kiralıkta görünüyor. Satışta controller yok sayıyor, serviste `NormalizeLease` boşaltıyor (saat atılıyor). Bitiş başlangıçtan sonra olmalı (form ve servis). Kartta "Kira dönemi".
+  - **Kontrat dosyası:**
+    - İşlem başına tek dosya: PDF, JPG ya da PNG, en fazla 10 MB. Tür içerikten anlaşılıyor (`BusinessLayer/Helpers/ContractFileValidator`; WebP ve sahte ".pdf" reddediliyor).
+    - Saklama: `WebUI/Helpers/DocumentFileStore` (`PhotoFileStore`'dan türüyor, ayrı DI tipi). Varsayılan `App_Data/documents`, `Documents:Root` ile değiştirilebilir, `.gitignore`'da. Dosya adı `{işlemId}/{guid}{uzantı}`.
+    - Açılışta kontrol: `Uploads:Root` ya da `Documents:Root` wwwroot altına ayarlanmışsa uygulama açılmaz (`PhotoFileStore.IsInside`).
+    - Yükleme, değiştirme ve kaldırma işlemin düzenleme sayfasındaki "Kontrat dosyası" bölümünde. İzin işlemi düzenleyebilene (`TCanEdit`, aynı gün kuralı dahil); yetki dosyaya bakılmadan önce kontrol ediliyor (görmeyen 404, düzenleyemeyen 403). Değiştirince eski dosya, kaldırınca dosya diskten siliniyor; kayıt yazılamazsa yeni dosya siliniyor.
+    - İstek gövdesi 10,5 MB ile sınırlı (`RequestSizeLimit`); daha büyüğü action'a gelmeden reddedilir.
+    - Açma: `Transaction/Contract/{id}`, işlemi gören herkese (yönetici, sorumlu, oluşturan). Başlıklar `private, no-cache`, `nosniff`, `inline`; Türkçe ad için `filename*` gönderiliyor. CSP `sandbox` sadece resimde: Chrome ve Firefox'un PDF görüntüleyicisi sandbox'lı belgede açılmıyor.
+    - Kullanıcının dosya adı sadece gösterimde kullanılıyor: yol kısmı atılıyor, **uzantı tespit edilen türe göre yazılıyor** ("kontrat.html" adıyla yüklenen PDF "kontrat.pdf" olur). Kartta "Kontratı aç" butonu var.
+  - Testler 486/486 yeşil (`ContractTests`): tip tespiti, kira tarihleri (kiralık/satış, sıra), yükleme ve değiştirme, sahte PDF, boyut, görmeyen 404 (dosya yazılmadan), kapandıktan sonraki gün danışmana 403 / yöneticiye izin, başlıklar, kaldırma, over-posting, uzantı düzeltmesi, sorumlusu değişen oluşturanın açabilmesi, başka danışmanın açamaması, wwwroot kontrolü; POST-only listesi.
+  - Uçtan uca (LocalDB + curl + tarayıcı) denendi:
+    - danisman1 Kadıköy kiralık portföyünde kira tarihli işlem açtı; ters tarih reddedildi.
+    - Sahte PDF reddedildi; token'sız yükleme 400 verdi.
+    - danisman2 için açma, yükleme ve kaldırma 404; müdür açabiliyor.
+    - Yönetici panelden "Kira Sözleşmesi İğdır.pdf" yükledi; ad doğru kaydedildi, eski dosya silindi.
+    - 375px'te yatay kaydırma yok, butonlar 44–48px.
+    - Deneme kontratı kaldırıldı (diskte dosya kalmadı); deneme işlemi (id 3) iptal edildi, portföy Aktif kaldı.
+  - **Açık not:** tarayıcı paneli PDF'i hiç göstermiyor; PDF'in açılması gerçek Chrome'da ve telefonda bir kez denenmeli.
+  - `yetki-denetcisi` ve `kod-inceleyici` bulguları kapatıldı.
+  - Bilinçli kabuller:
+    - Aynı işleme aynı anda iki yükleme gelirse ilk yeni dosya diskte sahipsiz kalabilir (kimseye görünmez, sadece yer kaplar).
+    - Telefondan çekilen kontrat fotoğrafı küçültülmüyor (10 MB sınırı var).
+    - Silinen işlem olmadığı için kontrat dosyaları sadece "Kaldır" ile siliniyor.
+    - Danışman, kapandıktan sonraki gün kontrat yükleyemiyor (aynı gün kuralı); bunu yönetici yapıyor.
+
 ## Sıradaki küçük görev
 - Sıra (kullanıcı onayıyla):
-  1. Görev 22 `islem: kira tarihleri ve kontrat dosyasi`, ardından görev 23 `dashboard: biten kira kontratlari`.
+  1. Görev 23 `dashboard: biten kira kontratlari` (60 gün içinde biten kiralar).
   2. IIS'e yayın kontrol listesi (hosting bilgisi gelince): HTTPS, `Uploads:Root` ve `Documents:Root` yazma izni ve yedeklemesi, connection string ortam değişkeni, `Bootstrap__*` ile ilk admin ve sonra silinmesi.
   3. Faz 3: görev 19–21 (aday arama listesi).
 - Görev 6b (.NET 10 yükseltme) kullanıcı kararıyla ertelendi.

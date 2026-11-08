@@ -19,6 +19,45 @@
     </div>
 </div>
 
+@* Kontrat dosyası (görev 22): bu sayfa sadece işlemi düzenleyebilene açılır; yükleme/kaldırma ayrı formlar *@
+<div class="card mt-3" id="kontrat" style="max-width: 900px;">
+    <div class="card-header">
+        <h3 class="card-title"><i class="ti ti-file-text me-1"></i> Kontrat dosyası</h3>
+    </div>
+    <div class="card-body">
+        @if (options.HasContract)
+        {
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <a asp-action="Contract" asp-route-id="@options.TransactionId" target="_blank" rel="noopener"
+                   class="btn btn-outline-secondary text-break">
+                    <i class="ti ti-file-text me-1"></i> @options.ContractOriginalName
+                </a>
+                <span class="text-secondary small">@options.ContractUploadedAt?.ToString("dd.MM.yyyy HH:mm")</span>
+                <form method="post" asp-action="RemoveContract" asp-route-id="@options.TransactionId"
+                      onsubmit="return confirm('Kontrat dosyası kaldırılsın mı?');">
+                    <button type="submit" class="btn btn-outline-danger"><i class="ti ti-trash me-1"></i> Kaldır</button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <p class="text-secondary">Henüz kontrat dosyası yok.</p>
+        }
+
+        <form method="post" asp-action="UploadContract" asp-route-id="@options.TransactionId" enctype="multipart/form-data">
+            <label for="contractFile" class="form-label">@(options.HasContract ? "Dosyayı değiştir" : "Dosya seç")</label>
+            <div class="d-flex flex-wrap gap-2">
+                <input id="contractFile" name="file" type="file" accept="application/pdf,image/jpeg,image/png"
+                       class="form-control form-control-lg" style="max-width: 420px;" required />
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="ti ti-upload me-1"></i> @(options.HasContract ? "Değiştir" : "Yükle")
+                </button>
+            </div>
+            <div class="form-hint">PDF, JPG ya da PNG, en fazla 10 MB. İşlem başına tek dosya; yenisi yüklenince eskisi silinir.</div>
+        </form>
+    </div>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }

@@ -76,6 +76,12 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             t.CustomerContact = null;
             t.AgentUser = null;
             t.CreatedByUser = null;
+            NormalizeLease(t);
+            // Kontrat dosyası sadece TSetContract ile eklenir (formdan gelen değer yok sayılır)
+            t.ContractFileName = t.ContractOriginalName = t.ContractContentType = null;
+            t.ContractUploadedAt = null;
+            t.ContractUploadedByUserId = null;
+            t.ContractUploadedByUser = null;
             if (!Enum.IsDefined(t.Status)) t.Status = TransactionStatus.Offer;
             ApplyCommission(t, t.CommissionAmount);
             t.CompletedAt = t.Status == TransactionStatus.Completed ? DateTime.Now : null;
@@ -130,6 +136,9 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             t.AgreedPrice = changes.AgreedPrice;
             t.CommissionRate = changes.CommissionRate;
             t.Notes = changes.Notes;
+            t.LeaseStartDate = changes.LeaseStartDate;
+            t.LeaseEndDate = changes.LeaseEndDate;
+            NormalizeLease(t);
             ApplyCommission(t, changes.CommissionAmount);
             if (Enum.IsDefined(changes.Status)) t.Status = changes.Status;
             UpdateCompletion(t, previous);
@@ -169,9 +178,90 @@ namespace EmlakOfisi.BusinessLayer.Concrete
             return OperationResult.Success;
         }
 
+        // ---------------- Kontrat dosyası ----------------
+
+        public OperationResult TCheckContractEdit(int id, int userId, bool canSeeAll)
+        {
+            var t = _transactionDal.GetVisibleByIdForUpdate(id, userId, canSeeAll);
+            if (t == null)
+                return OperationResult.NotFound;
+            return TCanEdit(t, userId, canSeeAll) ? OperationResult.Success : OperationResult.Forbidden;
+        }
+
+        public OperationResult TSetContract(int id, string fileName, string originalName, string contentType,
+            int userId, bool canSeeAll, out string? replacedFileName)
+        {
+            replacedFileName = null;
+            var t = _transactionDal.GetVisibleByIdForUpdate(id, userId, canSeeAll);
+            if (t == null)
+                return OperationResult.NotFound;
+            if (!TCanEdit(t, userId, canSeeAll))
+                return OperationResult.Forbidden;
+            if (string.IsNullOrWhiteSpace(fileName) || string.IsNullOrWhiteSpace(contentType))
+                return OperationResult.Invalid;
+
+            replacedFileName = t.ContractFileName;
+            t.ContractFileName = fileName;
+            t.ContractOriginalName = CleanOriginalName(originalName, contentType);
+            t.ContractContentType = contentType;
+            t.ContractUploadedAt = DateTime.Now;
+            t.ContractUploadedByUserId = userId;
+            _transactionDal.Update(t);
+            return OperationResult.Success;
+        }
+
+        public OperationResult TRemoveContract(int id, int userId, bool canSeeAll, out string? removedFileName)
+        {
+            removedFileName = null;
+            var t = _transactionDal.GetVisibleByIdForUpdate(id, userId, canSeeAll);
+            if (t == null)
+                return OperationResult.NotFound;
+            if (!TCanEdit(t, userId, canSeeAll))
+                return OperationResult.Forbidden;
+
+            removedFileName = t.ContractFileName;
+            t.ContractFileName = t.ContractOriginalName = t.ContractContentType = null;
+            t.ContractUploadedAt = null;
+            t.ContractUploadedByUserId = null;
+            _transactionDal.Update(t);
+            return OperationResult.Success;
+        }
+
+        // Kullanıcının dosya adı sadece gösterim için: yol kısmı ve kontrol karakterleri atılır, 200 karakterle sınırlanır.
+        // Uzantı içerikten tespit edilen türe göre yazılır ("kontrat.html" adıyla yüklenen PDF indirilince .pdf olur).
+        private static string CleanOriginalName(string? name, string contentType)
+        {
+            var clean = Path.GetFileName((name ?? string.Empty).Replace('\\', '/'));
+            clean = new string(clean.Where(c => !char.IsControl(c)).ToArray()).Trim();
+            clean = Path.GetFileNameWithoutExtension(clean).Trim();
+            if (clean.Length == 0) clean = "kontrat";
+            if (clean.Length > 190) clean = clean[..190];
+            var extension = contentType switch
+            {
+                "application/pdf" => ".pdf",
+                "image/png" => ".png",
+                _ => ".jpg"
+            };
+            return clean + extension;
+        }
+
         // ---------------- Yardımcılar ----------------
 
+        // Kira tarihleri sadece kiralamada anlamlı; satışta boşaltılır
+        private static void NormalizeLease(Transaction t)
+        {
+            if (t.Type != ListingType.Rent)
+            {
+                t.LeaseStartDate = null;
+                t.LeaseEndDate = null;
+                return;
+            }
+            t.LeaseStartDate = t.LeaseStartDate?.Date;
+            t.LeaseEndDate = t.LeaseEndDate?.Date;
+        }
+
         private static bool ValuesValid(Transaction t) =>
+            (t.LeaseStartDate == null || t.LeaseEndDate == null || t.LeaseEndDate.Value.Date > t.LeaseStartDate.Value.Date) &&
             (t.OfferPrice == null || t.OfferPrice >= 0) &&
             (t.AgreedPrice == null || t.AgreedPrice >= 0) &&
             (t.CommissionRate == null || (t.CommissionRate >= 0 && t.CommissionRate <= 100)) &&

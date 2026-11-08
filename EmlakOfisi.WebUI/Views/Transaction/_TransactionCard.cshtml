@@ -92,7 +92,20 @@
         }
         <dt class="col-6 col-md-3 text-secondary fw-normal">@(Model.CompletedAt != null ? "Tamamlandı" : "Başlangıç")</dt>
         <dd class="col-6 col-md-3 mb-1">@((Model.CompletedAt ?? Model.CreatedAt).ToString("dd.MM.yyyy"))</dd>
+        @if (Model.LeaseStartDate != null || Model.LeaseEndDate != null)
+        {
+            <dt class="col-6 col-md-3 text-secondary fw-normal">Kira dönemi</dt>
+            <dd class="col-6 col-md-3 mb-1">@(Model.LeaseStartDate?.ToString("dd.MM.yyyy") ?? "?") – @(Model.LeaseEndDate?.ToString("dd.MM.yyyy") ?? "?")</dd>
+        }
     </dl>
+
+    @if (Model.HasContract)
+    {
+        <a asp-controller="Transaction" asp-action="Contract" asp-route-id="@Model.TransactionId" target="_blank" rel="noopener"
+           class="btn btn-outline-secondary mt-2">
+            <i class="ti ti-file-text me-1"></i> Kontratı aç
+        </a>
+    }
 
     @if (!string.IsNullOrWhiteSpace(Model.Notes))
     {

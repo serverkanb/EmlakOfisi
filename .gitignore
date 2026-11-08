@@ -8,3 +8,4 @@ wwwroot/uploads/
 
 # Yüklenen portföy fotoğrafları (gerçek veri olabilir, depoya girmez)
 **/App_Data/uploads/
+**/App_Data/documents/

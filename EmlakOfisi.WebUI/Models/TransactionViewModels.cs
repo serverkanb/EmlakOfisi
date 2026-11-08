@@ -63,6 +63,10 @@ namespace EmlakOfisi.WebUI.Models
 
         public bool CanEdit { get; set; }
 
+        public DateTime? LeaseStartDate { get; set; }
+        public DateTime? LeaseEndDate { get; set; }
+        public bool HasContract { get; set; }   // dosya adı/yolu view'a gitmez; link işlem id'siyle kurulur
+
         // Prim (tutar ve danışmanın kişisel oranı) sadece yöneticiye ve işlemin sorumlu danışmanına gösterilir;
         // işlemi açıp sorumluyu başkasına devreden kişi o danışmanın primini görmez.
         public static TransactionItemViewModel From(TransactionRow row, int userId, bool canEdit, bool canSeeAll)
@@ -95,7 +99,10 @@ namespace EmlakOfisi.WebUI.Models
                 ContactName = c == null ? null : $"{c.Name} {c.Surname}",
                 ContactHidden = row.ContactHidden,
                 TelLink = phoneOk ? $"tel:+90{c!.PhoneNormalized}" : string.Empty,
-                CanEdit = canEdit
+                CanEdit = canEdit,
+                LeaseStartDate = t.LeaseStartDate,
+                LeaseEndDate = t.LeaseEndDate,
+                HasContract = t.ContractFileName != null
             };
         }
     }
@@ -152,6 +159,13 @@ namespace EmlakOfisi.WebUI.Models
         [StringLength(2000, ErrorMessage = "Not en fazla 2000 karakter olabilir.")]
         [Display(Name = "Not")]
         public string? Notes { get; set; }
+
+        // Sadece kiralamada gösterilir ve kaydedilir
+        [Display(Name = "Kira başlangıcı")]
+        public DateTime? LeaseStartDate { get; set; }
+
+        [Display(Name = "Kira bitişi")]
+        public DateTime? LeaseEndDate { get; set; }
     }
 
     public class TransactionFormOptions
@@ -164,5 +178,10 @@ namespace EmlakOfisi.WebUI.Models
         public bool CustomerHidden { get; set; }                             // mevcut müşteri görünmüyor: değişmez
         public bool CanChooseAgent { get; set; }
         public List<(int Id, string Name)> Agents { get; set; } = new();
+
+        // Düzenleme ekranındaki kontrat bölümü (dosya yoksa null)
+        public string? ContractOriginalName { get; set; }
+        public DateTime? ContractUploadedAt { get; set; }
+        public bool HasContract => ContractOriginalName != null;
     }
 }

@@ -39,5 +39,15 @@ namespace EmlakOfisi.BusinessLayer.Abstract
         OperationResult TUpdate(int id, Transaction changes, int userId, bool canSeeAll, out PropertyStatusUpdate propertyUpdate);
 
         OperationResult TSetStatus(int id, TransactionStatus status, int userId, bool canSeeAll, out PropertyStatusUpdate propertyUpdate);
+
+        // Kontrat dosyası (görev 22): yükleme/kaldırma işlemi düzenleyebilene açık (aynı gün kuralı dahil).
+        // Görmeyen NotFound, düzenleyemeyen Forbidden. Dosya diske yazılmadan önce TCheckContractEdit çağrılır.
+        OperationResult TCheckContractEdit(int id, int userId, bool canSeeAll);
+
+        // Başarılıysa replacedFileName eski dosyanın adıdır (varsa diskten silinmeli)
+        OperationResult TSetContract(int id, string fileName, string originalName, string contentType,
+            int userId, bool canSeeAll, out string? replacedFileName);
+
+        OperationResult TRemoveContract(int id, int userId, bool canSeeAll, out string? removedFileName);
     }
 }

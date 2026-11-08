@@ -1,8 +1,8 @@
 namespace EmlakOfisi.WebUI.Helpers
 {
-    // Fotoğraf dosyalarını wwwroot DIŞINDA saklar (varsayılan: App_Data/uploads). Dosyalar adresle doğrudan
-    // açılamaz; sadece PropertyPhotoController yetki kontrolünden sonra verir.
-    // Dosya adı her zaman sunucuda üretilir: "{portföyId}/{guid}{uzantı}". Kullanıcının dosya adı yol olarak kullanılmaz.
+    // Yüklenen dosyaları wwwroot DIŞINDA saklar (fotoğraflar: App_Data/uploads; kontratlar DocumentFileStore ile
+    // App_Data/documents). Dosyalar adresle doğrudan açılamaz; sadece controller yetki kontrolünden sonra verir.
+    // Dosya adı her zaman sunucuda üretilir: "{kayıtId}/{guid}{uzantı}". Kullanıcının dosya adı yol olarak kullanılmaz.
     public class PhotoFileStore
     {
         private readonly string _root;
@@ -14,11 +14,11 @@ namespace EmlakOfisi.WebUI.Helpers
         }
 
         // Yazılan dosyanın göreli adını döner (veritabanına bu kaydedilir)
-        public async Task<string> SaveAsync(int propertyId, Stream content, string extension)
+        public async Task<string> SaveAsync(int ownerId, Stream content, string extension)
         {
-            var fileName = $"{propertyId}/{Guid.NewGuid():N}{extension}";
+            var fileName = $"{ownerId}/{Guid.NewGuid():N}{extension}";
             var fullPath = Resolve(fileName)
-                ?? throw new InvalidOperationException("Fotoğraf yolu yükleme klasörünün dışında: " + fileName);
+                ?? throw new InvalidOperationException("Dosya yolu kök klasörün dışında: " + fileName);
             Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
 
             try
@@ -47,6 +47,16 @@ namespace EmlakOfisi.WebUI.Helpers
             var fullPath = Resolve(fileName);
             if (fullPath != null && File.Exists(fullPath))
                 File.Delete(fullPath);
+        }
+
+        // Kök klasör web kökünün kendisi ya da altında mı (açılış kontrolü, Program.cs)
+        public static bool IsInside(string root, string? webRoot)
+        {
+            if (string.IsNullOrWhiteSpace(webRoot)) return false;
+            var r = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
+            var w = Path.TrimEndingDirectorySeparator(Path.GetFullPath(webRoot));
+            return r.Equals(w, StringComparison.OrdinalIgnoreCase) ||
+                   r.StartsWith(w + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
         }
 
         // "..\" gibi yollarla kök klasörün dışına çıkılamaz

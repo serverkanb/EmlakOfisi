@@ -104,6 +104,21 @@
         </div>
     }
 
+    @if (options.Type == ListingType.Rent)
+    {
+        @* Kira tarihleri sadece kiralamada (biten kontratlar ana ekranda gösterilecek) *@
+        <div class="col-6">
+            <label asp-for="LeaseStartDate" class="form-label"></label>
+            <input asp-for="LeaseStartDate" type="date" asp-format="{0:yyyy-MM-dd}" class="form-control form-control-lg" />
+            <span asp-validation-for="LeaseStartDate" class="text-danger small"></span>
+        </div>
+        <div class="col-6">
+            <label asp-for="LeaseEndDate" class="form-label"></label>
+            <input asp-for="LeaseEndDate" type="date" asp-format="{0:yyyy-MM-dd}" class="form-control form-control-lg" />
+            <span asp-validation-for="LeaseEndDate" class="text-danger small"></span>
+        </div>
+    }
+
     <div class="col-12">
         <label asp-for="Notes" class="form-label"></label>
         <textarea asp-for="Notes" rows="3" class="form-control"></textarea>
