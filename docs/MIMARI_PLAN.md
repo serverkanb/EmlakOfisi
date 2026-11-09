@@ -76,7 +76,7 @@ EmlakOfisi.sln
 ```
 Bağımlılık yönü InstrumentTrade ile aynı: WebUI → BusinessLayer → DataAccessLayer → EntityLayer. Tests → BusinessLayer + DataAccessLayer.
 
-Teknoloji: **.NET 9 ile başla, .NET 10 LTS'ye yükselt (açık karar 1)**, EF Core (SDK sürümüyle aynı) + SqlServer, Identity.EntityFrameworkCore. Ekstra NuGet paketi yok.
+Teknoloji: **.NET 10 LTS** (.NET 9 ile başlandı, 2026-11-09'da yükseltildi; açık karar 1), EF Core 10 + SqlServer, Identity.EntityFrameworkCore. Ekstra NuGet paketi yok (güvenlik için doğrudan eklenen `System.Security.Cryptography.Pkcs` hariç, bkz. NEXT_STEPS görev 6b).
 
 ---
 
@@ -247,7 +247,7 @@ Danışmanların sahada en çok kullanacağı ekran bu olduğu için ve görün�
 ---
 
 ## Açık kararlar (onayda belirtin)
-1. **.NET sürümü:** Kurulu olan **.NET 9** ile başlanacak, sonra **.NET 10 LTS**'ye geçilecek. Yükseltme küçük bir iş: her `.csproj` dosyasında `net9.0` → `net10.0`, EF Core ve Identity paketlerinde `9.x` → `10.x`, ardından build ve test. Bu aşamadaki kod (MVC, EF Core, Identity) iki sürümde de aynı yazılıyor. Tek dikkat edilmesi gereken: .NET 9'un desteği **10 Kasım 2026**'da bitiyor. Bu yüzden yükseltme, uygulama gerçek kullanıma açılmadan önce yapılmalı. Görev listesinde **görev 6'dan sonra ayrı bir görev** olarak yer alacak (`altyapi: net10 yukseltme`). O zamana kadar .NET 10 SDK'sının kurulmuş olması gerekiyor. Aynı solution'ın sürüm geçişi olduğu için migration'lar etkilenmez.
+1. **.NET sürümü:** Kurulu olan **.NET 9** ile başlanacak, sonra **.NET 10 LTS**'ye geçilecek. Yükseltme küçük bir iş: her `.csproj` dosyasında `net9.0` → `net10.0`, EF Core ve Identity paketlerinde `9.x` → `10.x`, ardından build ve test. Bu aşamadaki kod (MVC, EF Core, Identity) iki sürümde de aynı yazılıyor. Tek dikkat edilmesi gereken: .NET 9'un desteği **10 Kasım 2026**'da bitiyor. Bu yüzden yükseltme, uygulama gerçek kullanıma açılmadan önce yapılmalı. Görev listesinde **görev 6'dan sonra ayrı bir görev** olarak yer alacak (`altyapi: net10 yukseltme`). O zamana kadar .NET 10 SDK'sının kurulmuş olması gerekiyor. Aynı solution'ın sürüm geçişi olduğu için migration'lar etkilenmez. **Yapıldı: 2026-11-09 (görev 6b).**
 2. **UI şablonu:** Öneri **Tabler UI** (CLAUDE.md ile uyumlu). Alternatif: InstrumentTrade'deki Modernize şablonu.
 3. Onaydan sonra bu kararlar NEXT_STEPS.md "Açık kararlar" bölümüne yazılacak ve görev 1 ile başlanacak.
 

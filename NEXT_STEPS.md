@@ -488,16 +488,23 @@
   - Denendi: danisman1 18, danisman2 17, mudur1 25 müşteri görüyor; "izmir" ve "İZMİR" aynı sonucu veriyor (`Turkish_CI_AS`).
   - Eski LocalDB veritabanı (`(localdb)\MSSQLLocalDB`, dosyası `C:\Users\ceren\EmlakOfisiDev.mdf`) silinmedi; artık kullanılmıyor. İstenirse SSMS'ten silinebilir.
 
+- 2026-11-09: Görev 6b `altyapi: net10 yukseltme` (kullanıcı onayıyla, yayından önce)
+  - Kullanıcı .NET 10 SDK'yı kurdu (10.0.403; .NET 9 SDK yanında duruyor, diğer projeler etkilenmiyor).
+  - 5 proje `net10.0`. EF Core (SqlServer, Tools, Design, InMemory) ve `Microsoft.AspNetCore.Identity.EntityFrameworkCore` 9.0.22 → **10.0.14**; `dotnet-ef` yerel aracı 10.0.14 (`.config/dotnet-tools.json`). Kod değişikliği yok.
+  - **Yeni paket (kullanıcı onayıyla):** DAL'a `System.Security.Cryptography.Pkcs 10.0.14` doğrudan eklendi. Sebep: `EF Core SqlServer 10.0.14` → `Microsoft.Data.SqlClient 6.1.7` dolaylı olarak açıklı `Pkcs 9.0.11` getiriyordu (GHSA-2fmv-rv2c-59x7 orta, GHSA-846f-f764-76mx yüksek). EF Core/SqlClient güncel Pkcs'yi kendisi getirdiğinde bu satır kaldırılabilir (`dotnet nuget why EmlakOfisi.WebUI/EmlakOfisi.WebUI.csproj System.Security.Cryptography.Pkcs` ile kontrol edilir).
+  - Derleme 0 hata, 0 uyarı. Testler 499/499 yeşil (net10.0). `migrations has-pending-model-changes`: değişiklik yok, yeni migration gerekmedi.
+  - Uçtan uca (yerel SQL Server + curl) denendi: girişsiz yönlendirme, manifest, ana sayfa, müşteri, portföy (Türkçe arama), randevu, talep, işlem ve biten kiralar sayfaları; fotoğraf yükleme ve gösterme; token'sız POST 400; görünürlük sayıları (18/17/25) aynı. Deneme fotoğrafı uygulamadan silindi.
+  - **Yayın notu:** hostingde **ASP.NET Core 10 Hosting Bundle** kurulu olmalı.
+
 ## Sıradaki küçük görev
 - Sıra (kullanıcı onayıyla):
-  1. Kontrat ve kira özelliklerinin gerçek Chrome ve telefonda denenmesi (PDF açılışı).
-  2. IIS'e yayın kontrol listesi (hosting bilgisi gelince): HTTPS, `Uploads:Root` ve `Documents:Root` yazma izni ve yedeklemesi, connection string ortam değişkeni, `Bootstrap__*` ile ilk admin ve sonra silinmesi.
+  1. Yayına hazırlık (kullanıcı hosting firmasını seçince): `dotnet publish` paketi, canlı ayarlar ve adım adım kurulum belgesi. Pilot: önce sadece admin, kendi bilgisayarı ve telefonundan girecek. Kontrol listesi: Windows hosting + ASP.NET Core 10 + MSSQL + ücretsiz SSL + sunucu Türkiye'de (KVKK) + otomatik yedek; connection string ortam değişkeni; `Bootstrap__*` ile ilk admin ve sonra silinmesi; `App_Data` (uploads, documents) yazma izni ve yedeği.
+  2. Kontrat ve kira özelliklerinin gerçek Chrome ve telefonda denenmesi (PDF açılışı), mikrofonun gerçek cihazda denenmesi (HTTPS ile, yayından sonra).
   3. Faz 3: görev 19–21 (aday arama listesi).
-- Görev 6b (.NET 10 yükseltme) kullanıcı kararıyla ertelendi.
 
 ## Açık kararlar / notlar
 - Mimari, InstrumentTrade projesindeki 4 katmanlı yapıya göre kuruluyor (Generic Dal/Service, EfXDal, XManager). Farkları `docs/MIMARI_PLAN.md` bölüm 0'da anlatılıyor.
-- .NET 9 ile başlandı. **Görev 6b'de .NET 10 LTS'ye yükseltilecek** (.NET 9'un desteği 10 Kasım 2026'da bitiyor), o zamana kadar .NET 10 SDK kurulmalı.
+- .NET 9 ile başlandı; 2026-11-09'da **.NET 10 LTS**'ye yükseltildi (görev 6b). Yeni bilgisayarda .NET 10 SDK gerekir.
 - UI: Tabler UI (görev 5'te `wwwroot/lib/tabler` altına eklenecek, şablonun getirdiği varsayılan Bootstrap/Home sayfaları o zaman temizlenecek).
 - Yeni bir bilgisayarda ilk kurulum için iki komut çalıştırılır: `dotnet tool restore`, ardından `dotnet user-secrets set "ConnectionStrings:DefaultConnection" "<kendi SQL Server'ınız>" --project EmlakOfisi.WebUI`.
 - Migration komutları: `dotnet tool run dotnet-ef migrations add <Ad> -p EmlakOfisi.DataAccessLayer -s EmlakOfisi.WebUI -o Migrations`. Visual Studio'daki Package Manager Console da kullanılabilir (Tools paketi DAL'da).
